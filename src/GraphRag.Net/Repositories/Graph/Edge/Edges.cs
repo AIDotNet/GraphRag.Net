@@ -17,6 +17,6 @@ namespace GraphRag.Net.Repositories
         public string Target { get; set; }
 
         [SugarColumn(ColumnDataType = "TEXT")]
-        public string Properties { get; set; }
+        public string Relationship { get; set; }
     }
 }

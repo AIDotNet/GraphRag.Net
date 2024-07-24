@@ -8,6 +8,13 @@ namespace GraphRag.Net.Api.Controllers
     public class GraphDemoController(IGraphService _graphService) : ControllerBase
     {
 
+        [HttpGet]
+        public async Task<IActionResult> GetAllGraph()
+        {
+            var graphModel= _graphService.GetAllGraph();
+            return Ok(graphModel);
+        }
+
         [HttpPost]
         public async Task<IActionResult> InsertGraph(InputModel model)
         {

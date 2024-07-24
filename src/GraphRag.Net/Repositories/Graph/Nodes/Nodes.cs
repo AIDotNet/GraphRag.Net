@@ -15,10 +15,15 @@ namespace GraphRag.Net.Repositories.Graph.Nodes
         public string Id { get; set; }
 
         /// <summary>
-        /// 实体
+        /// 名称
         /// </summary>
-        [SugarColumn(ColumnDataType = "TEXT")]
+        public string Name { get; set; }
+        /// <summary>
+        /// 类型
+        /// </summary>
+        public string Type { get; set; }
 
-        public string Body { get; set; }
+        [SugarColumn(ColumnDataType = "TEXT")]
+        public  string Desc { get; set; }
     }
 }

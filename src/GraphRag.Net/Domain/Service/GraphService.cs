@@ -46,12 +46,14 @@ namespace GraphRag.Net.Domain.Service
                 Nodes node = new Nodes()
                 {
                     Id = Guid.NewGuid().ToString(),
-                    Body = n.Body
+                    Name = n.Name,
+                    Type = n.Type,
+                    Desc = n.Desc
                 };
                 nodeDic.Add(n.Id, node.Id);
                 _nodes_Repositories.Insert(node);
                 //向量处理节点信息
-                await textMemory.SaveInformationAsync(SystemConstant.NodeIndex, id: node.Id, text: node.Body, cancellationToken: default);
+                await textMemory.SaveInformationAsync(SystemConstant.NodeIndex, id: node.Id, text:$"Name:{node.Name};Type:{node.Type};Desc:{node.Desc}" , cancellationToken: default);
             }
 
             foreach (var e in graph.Edges)
@@ -60,7 +62,7 @@ namespace GraphRag.Net.Domain.Service
                 {
                     Source = nodeDic[e.Source],
                     Target = nodeDic[e.Target],
-                    Properties = e.Properties
+                    Relationship = e.Relationship
                 };
                 _edges_Repositories.Insert(edge);
             }
@@ -86,13 +88,44 @@ namespace GraphRag.Net.Domain.Service
             {
                 var nodes= _nodes_Repositories.GetList(p => textMemModelList.Select(c=>c.Id).Contains(p.Id));
                 //匹配到节点信息
-                var graphModel =  GetGraphAll(nodes);
+                var graphModel =  GetGraphAllRecursion(nodes);
                 answer = await _semanticService.GetGraphAnswerAsync(JsonConvert.SerializeObject(graphModel), input);
             }
             return answer;
         }
 
-        public GraphModel GetGraphAll(List<Nodes> initialNodes)
+
+
+
+        public GraphViewModel GetAllGraph() {
+
+            GraphViewModel graphViewModel = new GraphViewModel();
+            var nodes = _nodes_Repositories.GetList();
+            var edges = _edges_Repositories.GetList();
+            foreach (var n in nodes)
+            {
+                NodesViewModel nodesViewModel = new NodesViewModel()
+                {
+                     id = n.Id,
+                     text= n.Name
+                };
+                graphViewModel.nodes.Add(nodesViewModel);
+            }
+
+            foreach (var e in edges)
+            {
+                LinesViewModel linesViewModel = new LinesViewModel()
+                {
+                    from = e.Source,
+                    to = e.Target,
+                    text = e.Relationship
+                };
+                graphViewModel.lines.Add(linesViewModel);
+            }
+            return graphViewModel;
+        }
+
+        public GraphModel GetGraphAllRecursion(List<Nodes> initialNodes)
         {
             var allNodes = new List<Nodes>(initialNodes);
             var allEdges = new List<Edges>();
