@@ -81,9 +81,38 @@ namespace GraphRag.Net.Domain.Service
             Dictionary<string, string> nodeDic = new Dictionary<string, string>();
             foreach (var n in graph.Nodes)
             {
+                string Id = Guid.NewGuid().ToString();
+                string text2 = $"Name:{n.Name};Type:{n.Type};Desc:{n.Desc}";
+                await foreach (MemoryQueryResult memory in textMemory.SearchAsync(SystemConstant.NodeIndex, text2, limit: 1, minRelevanceScore: 0.9))
+                {
+                    if (graph.Nodes.Select(p => p.Id).Contains(memory.Metadata.Id))
+                    {
+                        //如果本次包含了向量近似的数据，则跳过
+                        break;
+                    }
+                    var node1= _nodes_Repositories.GetFirst(p => p.Id == memory.Metadata.Id);
+                    string text1 = $"Name:{node1.Name};Type:{node1.Type};Desc:{node1.Desc}";
+                    var relationShipJson= await _semanticService.GetRelationship( text1, text2);
+                    var relationShip = JsonConvert.DeserializeObject<RelationShipModel>(relationShipJson);
+                    if (relationShip.IsRelationship)
+                    {
+                        if (relationShip.Edge.Source == "node1")
+                        {
+                            relationShip.Edge.Source = node1.Id;
+                            relationShip.Edge.Target = Id;
+                        }
+                        else 
+                        {
+                            relationShip.Edge.Source = Id;
+                            relationShip.Edge.Target = node1.Id;
+                        }
+                        _edges_Repositories.Insert(relationShip.Edge);
+                    }
+                }
+
                 Nodes node = new Nodes()
                 {
-                    Id = Guid.NewGuid().ToString(),
+                    Id = Id,
                     Name = n.Name,
                     Type = n.Type,
                     Desc = n.Desc
@@ -91,7 +120,7 @@ namespace GraphRag.Net.Domain.Service
                 nodeDic.Add(n.Id, node.Id);
                 _nodes_Repositories.Insert(node);
                 //向量处理节点信息
-                await textMemory.SaveInformationAsync(SystemConstant.NodeIndex, id: node.Id, text:$"Name:{node.Name};Type:{node.Type};Desc:{node.Desc}" , cancellationToken: default);
+                await textMemory.SaveInformationAsync(SystemConstant.NodeIndex, id: node.Id, text: text2, cancellationToken: default);
             }
 
             foreach (var e in graph.Edges)

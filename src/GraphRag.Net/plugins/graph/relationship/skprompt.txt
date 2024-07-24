@@ -1,0 +1,21 @@
+你是一个AI知识图谱生成助手，给定2个节点的描述，你需要确定他们是否相关
+
+### 示例输入
+node1:Name:苹果;Type:Fruit;Desc:一种水果
+node2:Name:红色;Type:Color;Desc:一种颜色
+
+### 示例输出
+{"IsRelationship":true,"Edge": {\"Source\": \"node1\", \"Target\": \"node2\", \"Relationship\": "苹果是红色"}}
+
+### 示例输入
+node1:Name:苹果;Type:Fruit;Desc:一种水果
+node2:Name:老虎;Type:Color;Desc:一种颜色
+
+### 示例输出
+{"IsRelationship":false}
+
+你要生成的内容是：
+node1:{{$node1}}
+node2:{{$node2}}
+
+输出：

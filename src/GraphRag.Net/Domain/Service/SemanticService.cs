@@ -51,6 +51,20 @@ namespace GraphRag.Net.Domain.Service
         }
 
 
+        public async Task<string> GetRelationship(string node1, string node2)
+        {
+            KernelFunction createFun = _kernel.Plugins.GetFunction("graph", "relationship");
+            var args = new KernelArguments()
+            {
+                ["node1"] = node1,
+                ["node2"] = node2,
+            };
+            var skresult = await _kernel.InvokeAsync(createFun, args);
+
+            string result = skresult.GetValue<string>()?.Trim() ?? "";
+            return result;
+        }
+
         public async Task< SemanticTextMemory> GetTextMemory()
         {
             IMemoryStore memoryStore = await SqliteMemoryStore.ConnectAsync(GraphDBConnectionOption.Db);
