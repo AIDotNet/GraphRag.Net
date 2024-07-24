@@ -33,6 +33,44 @@ namespace GraphRag.Net.Domain.Service
         ISemanticService _semanticService
         ) : IGraphService
     {
+        /// <summary>
+        /// 获取Graph数据
+        /// </summary>
+        /// <returns></returns>
+        public GraphViewModel GetAllGraph()
+        {
+
+            GraphViewModel graphViewModel = new GraphViewModel();
+            var nodes = _nodes_Repositories.GetList();
+            var edges = _edges_Repositories.GetList();
+            foreach (var n in nodes)
+            {
+                NodesViewModel nodesViewModel = new NodesViewModel()
+                {
+                    id = n.Id,
+                    text = n.Name
+                };
+                graphViewModel.nodes.Add(nodesViewModel);
+            }
+
+            foreach (var e in edges)
+            {
+                LinesViewModel linesViewModel = new LinesViewModel()
+                {
+                    from = e.Source,
+                    to = e.Target,
+                    text = e.Relationship
+                };
+                graphViewModel.lines.Add(linesViewModel);
+            }
+            return graphViewModel;
+        }
+
+        /// <summary>
+        /// 生成图谱数据
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
         public async Task InsertGraph(string input)
         {
             SemanticTextMemory textMemory = await _semanticService.GetTextMemory();
@@ -68,6 +106,11 @@ namespace GraphRag.Net.Domain.Service
             }
         }
 
+        /// <summary>
+        /// 搜索图谱对话
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
         public async Task<string> SearchGraph(string input)
         {
             string answer = "" ;
@@ -92,39 +135,13 @@ namespace GraphRag.Net.Domain.Service
                 answer = await _semanticService.GetGraphAnswerAsync(JsonConvert.SerializeObject(graphModel), input);
             }
             return answer;
-        }
+        }  
 
-
-
-
-        public GraphViewModel GetAllGraph() {
-
-            GraphViewModel graphViewModel = new GraphViewModel();
-            var nodes = _nodes_Repositories.GetList();
-            var edges = _edges_Repositories.GetList();
-            foreach (var n in nodes)
-            {
-                NodesViewModel nodesViewModel = new NodesViewModel()
-                {
-                     id = n.Id,
-                     text= n.Name
-                };
-                graphViewModel.nodes.Add(nodesViewModel);
-            }
-
-            foreach (var e in edges)
-            {
-                LinesViewModel linesViewModel = new LinesViewModel()
-                {
-                    from = e.Source,
-                    to = e.Target,
-                    text = e.Relationship
-                };
-                graphViewModel.lines.Add(linesViewModel);
-            }
-            return graphViewModel;
-        }
-
+        /// <summary>
+        /// 递归获取节点相关的所有边和节点
+        /// </summary>
+        /// <param name="initialNodes"></param>
+        /// <returns></returns>
         public GraphModel GetGraphAllRecursion(List<Nodes> initialNodes)
         {
             var allNodes = new List<Nodes>(initialNodes);
