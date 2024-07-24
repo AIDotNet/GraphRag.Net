@@ -1,0 +1,19 @@
+{
+  "schema": 1,
+  "description": "实体类型生成的微调提示",
+  "execution_settings": {
+    "default": {
+      "temperature": 0
+    }
+  },
+  "input_variables": [
+    {
+      "name": "task",
+      "description": ""
+    },
+    {
+      "name": "input_text",
+      "description": ""
+    }
+  ]
+}

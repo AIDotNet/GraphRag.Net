@@ -1,0 +1,15 @@
+{
+  "schema": 1,
+  "description": "域生成的微调提示。",
+  "execution_settings": {
+    "default": {
+      "temperature": 0
+    }
+  },
+  "input_variables": [
+    {
+      "name": "input_text",
+      "description": "The domain to generate a persona for"
+    }
+  ]
+}

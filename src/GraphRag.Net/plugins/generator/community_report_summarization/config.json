@@ -1,0 +1,23 @@
+{
+  "schema": 1,
+  "description": "对社区报告摘要的提示进行微调。",
+  "execution_settings": {
+    "default": {
+      "temperature": 0
+    }
+  },
+  "input_variables": [
+    {
+      "name": "persona",
+      "description": "The persona to use for the community summarization prompt"
+    },
+    {
+      "name": "role",
+      "description": "The role to use for the community summarization prompt"
+    },
+    {
+      "name": "language",
+      "description": "The language to use for the community summarization prompt"
+    }
+  ]
+}

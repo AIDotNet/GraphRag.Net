@@ -1,0 +1,1 @@
+Identify the relations and structure of the community of interest, specifically within the {{$domain}} domain.

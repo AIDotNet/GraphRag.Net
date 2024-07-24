@@ -1,0 +1,23 @@
+{
+  "schema": 1,
+  "description": "用于生成一组实体/关系示例",
+  "execution_settings": {
+    "default": {
+      "temperature": 0
+    }
+  },
+  "input_variables": [
+    {
+      "name": "entity_types",
+      "description": "The domain to generate a persona for"
+    },
+    {
+      "name": "language",
+      "description": "The domain to generate a persona for"
+    },
+    {
+      "name": "input_text",
+      "description": "The domain to generate a persona for"
+    }
+  ]
+}

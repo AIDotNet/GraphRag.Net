@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Authors>许泽宇</Authors>
+    <Product>GraphRag.Net</Product>
+    <Company>xuzeyu</Company>
+    <Description>商务需求联系微信xuzeyu91</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AntDesign.Charts" Version="0.5.5" />
+    <PackageReference Include="AntDesign.ProLayout" Version="0.19.4" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\GraphRag.Net\GraphRag.Net.csproj" />
+  </ItemGroup>
+
+</Project>

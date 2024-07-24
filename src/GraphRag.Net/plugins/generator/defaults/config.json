@@ -1,0 +1,15 @@
+{
+  "schema": 1,
+  "description": "确定利益共同体的关系和结构",
+  "execution_settings": {
+    "default": {
+      "temperature": 0
+    }
+  },
+  "input_variables": [
+    {
+      "name": "domain",
+      "description": "The domain to generate a persona for"
+    }
+  ]
+}

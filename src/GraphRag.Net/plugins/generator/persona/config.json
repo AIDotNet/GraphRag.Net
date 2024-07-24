@@ -1,0 +1,15 @@
+{
+  "schema": 1,
+  "description": "角色生成",
+  "execution_settings": {
+    "default": {
+      "temperature": 0
+    }
+  },
+  "input_variables": [
+    {
+      "name": "sample_task",
+      "description": ""
+    }
+  ]
+}

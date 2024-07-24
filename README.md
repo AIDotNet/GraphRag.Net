@@ -1,0 +1,3 @@
+这是一个参考GraphRag的dotnet建议实现
+
+本项目为demo示例，仅用于学习GraphRAG思路。
