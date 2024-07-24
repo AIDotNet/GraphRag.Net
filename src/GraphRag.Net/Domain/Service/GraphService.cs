@@ -22,6 +22,7 @@ using static System.Net.Mime.MediaTypeNames;
 using static Dm.net.buffer.ByteArrayBuffer;
 using GraphRag.Net.Domain.Model.Constant;
 using SqlSugar;
+using Microsoft.SemanticKernel.Text;
 
 namespace GraphRag.Net.Domain.Service
 {
@@ -39,10 +40,11 @@ namespace GraphRag.Net.Domain.Service
         /// <returns></returns>
         public GraphViewModel GetAllGraph()
         {
-
             GraphViewModel graphViewModel = new GraphViewModel();
             var nodes = _nodes_Repositories.GetList();
             var edges = _edges_Repositories.GetList();
+            Dictionary<string, string> TypeColor = new Dictionary<string, string>();
+            Random random = new Random();
             foreach (var n in nodes)
             {
                 NodesViewModel nodesViewModel = new NodesViewModel()
@@ -50,6 +52,17 @@ namespace GraphRag.Net.Domain.Service
                     id = n.Id,
                     text = n.Name
                 };
+                //处理相同的Type用相同的颜色
+                if (TypeColor.ContainsKey(n.Type))
+                {
+                    nodesViewModel.color = TypeColor[n.Type];
+                }
+                else 
+                {
+                    nodesViewModel.color = $"#{random.Next(0x1000000):X6}";
+                    TypeColor.Add(n.Type, nodesViewModel.color);
+                }
+             
                 graphViewModel.nodes.Add(nodesViewModel);
             }
 
@@ -64,6 +77,17 @@ namespace GraphRag.Net.Domain.Service
                 graphViewModel.lines.Add(linesViewModel);
             }
             return graphViewModel;
+        }
+
+        public async Task TextChunkInsertGraph(string input)
+        {
+            var lines = TextChunker.SplitPlainTextLines(input, 100);
+
+            var paragraphs = TextChunker.SplitPlainTextParagraphs(lines, 1000);
+            foreach (var para in paragraphs)
+            {
+                await InsertGraph(para);
+            }
         }
 
         /// <summary>
@@ -106,7 +130,16 @@ namespace GraphRag.Net.Domain.Service
                             relationShip.Edge.Source = Id;
                             relationShip.Edge.Target = node1.Id;
                         }
-                        _edges_Repositories.Insert(relationShip.Edge);
+
+
+                        if (!_edges_Repositories.IsAny(p => p.Target == relationShip.Edge.Target && p.Source == relationShip.Edge.Source))
+                        {
+                            _edges_Repositories.Insert(relationShip.Edge);
+                        }
+                        else 
+                        {
+                            //相同的边进行合并
+                        }
                     }
                 }
 
@@ -145,7 +178,7 @@ namespace GraphRag.Net.Domain.Service
             string answer = "" ;
             SemanticTextMemory textMemory = await _semanticService.GetTextMemory();
             List<TextMemModel> textMemModelList = new List<TextMemModel>() ;
-            await foreach (MemoryQueryResult memory in textMemory.SearchAsync(SystemConstant.NodeIndex, input, limit: 3, minRelevanceScore: 0.7))
+            await foreach (MemoryQueryResult memory in textMemory.SearchAsync(SystemConstant.NodeIndex, input, limit: 3, minRelevanceScore: 0.8))
             {
                 var textMemModel = new TextMemModel()
                 {
@@ -176,8 +209,15 @@ namespace GraphRag.Net.Domain.Service
             var allNodes = new List<Nodes>(initialNodes);
             var allEdges = new List<Edges>();
             var nodesToExplore = new List<Nodes>(initialNodes);
+            int i = 0;
             while (nodesToExplore.Count > 0)
             {
+                //线的深度，暂时先不处理太远距离的关联
+                if (i > 5)
+                {
+                    break;
+                }
+
                 var newEdges = GetEdges(nodesToExplore);
                 if (newEdges.Count() == 0)
                 {
@@ -200,6 +240,8 @@ namespace GraphRag.Net.Domain.Service
 
                 // 将新节点加入到 allNodes 中
                 allNodes.AddRange(nodesToExplore);
+
+                i++;
             }
             return new GraphModel
             {

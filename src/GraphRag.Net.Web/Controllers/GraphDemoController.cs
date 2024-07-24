@@ -28,6 +28,19 @@ namespace GraphRag.Net.Api.Controllers
             var result= await _graphService.SearchGraph(model.Input);
             return Ok(result);
         }
+
+
+        [HttpPost]
+        public async Task<IActionResult> ImportTxt(IFormFile file)
+        {
+            var forms = await Request.ReadFormAsync();
+            using (var stream = new StreamReader(file.OpenReadStream()))
+            {
+                var txt = await stream.ReadToEndAsync();
+                await _graphService.TextChunkInsertGraph(txt);
+                return Ok();
+            }
+        }
     }
 
     public class InputModel
