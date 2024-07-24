@@ -1,0 +1,32 @@
+﻿@namespace GraphRag.Net.Web.Pages.Demo
+@page "/Chat"
+@using GraphRag.Net.Domain.Interface
+
+<GridContent>
+    <Row Gutter="24">
+        <Col Lg="7" Md="24">
+             <Spin Spinning=@loadding>
+        <Input @bind-Value="_input" Style="margin-top:10px;"/>
+        <TextArea @bind-Value="_output" Style="margin-top:10px;" MinRows="8" />
+        <Button Type="@ButtonType.Primary" Style="margin-top:10px;" OnClick="Search">搜索</Button>
+        </Spin>
+        </Col>
+        <Col Lg="17" Md="24">
+
+        </Col>
+    </Row>
+</GridContent>
+@code {
+
+    [Inject] IGraphService _graphService { get; set; }
+    private bool loadding = false;
+    private string _input;
+    private string _output;
+
+    private async Task Search()
+    {
+        loadding = true;
+        _output = await _graphService.SearchGraph(_input);
+        loadding = false;
+    }
+ }
