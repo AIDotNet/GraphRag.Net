@@ -238,6 +238,7 @@ namespace GraphRag.Net.Domain.Service
                 var nodes= _nodes_Repositories.GetList(p => textMemModelList.Select(c=>c.Id).Contains(p.Id));
                 //匹配到节点信息
                 var graphModel =  GetGraphAllRecursion(nodes);
+                //这里数据有点多，要通过语义进行一次过滤
                 answer = await _semanticService.GetGraphAnswerAsync(JsonConvert.SerializeObject(graphModel), input);
             }
             return answer;
@@ -257,7 +258,7 @@ namespace GraphRag.Net.Domain.Service
             while (nodesToExplore.Count > 0)
             {
                 //线的深度，暂时先不处理太远距离的关联
-                if (i > 5)
+                if (i > 2)
                 {
                     break;
                 }
