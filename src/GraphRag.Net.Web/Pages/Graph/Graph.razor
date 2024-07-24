@@ -24,120 +24,25 @@
             showRelationGraph() {
                 console.log('ref:btn:', this.$refs.btn);
                 console.log('ref:', this.$refs.seeksRelationGraph);
-                const __graph_json_data = {
-                    "rootId": null,
-                    "nodes": [
-                        {
-                            "id": "37afa0e6-c4dc-48ec-9bd8-2524b82cb1fa",
-                            "text": "新时代",
-                            "color": "#43a2f1"
-                        },
-                        {
-                            "id": "494d6998-4d96-4a98-87f9-c1df26e92f16",
-                            "text": "全面深化改革",
-                            "color": "#43a2f1"
-                        },
-                        {
-                            "id": "5ccc9e3c-dd67-4fd2-9f0c-367d9d78e927",
-                            "text": "党的二十届三中全会",
-                            "color": "#43a2f1"
-                        },
-                        {
-                            "id": "28d6560d-2f1f-4245-8650-19b45ad009c1",
-                            "text": "体制机制改革",
-                            "color": "#43a2f1"
-                        },
-                        {
-                            "id": "03f9530d-2a33-47df-9231-53ace7580037",
-                            "text": "经济体制改革",
-                            "color": "#43a2f1"
-                        },
-                        {
-                            "id": "9cf8acf6-d8b2-4846-adac-1b2725243b1c",
-                            "text": "习近平",
-                            "color": "#43a2f1"
-                        },
-                        {
-                            "id": "a87fc410-e91e-4f18-b903-b63db293447e",
-                            "text": "高质量发展",
-                            "color": "#43a2f1"
-                        },
-                        {
-                            "id": "60a0c26d-9f9f-40b2-8516-b3b6f03ee217",
-                            "text": "供给侧结构性改革",
-                            "color": "#43a2f1"
-                        },
-                        {
-                            "id": "35a64e9d-11bb-4e37-b44d-ebfe324b1ce2",
-                            "text": "城乡融合发展",
-                            "color": "#43a2f1"
-                        },
-                        {
-                            "id": "ea3bd899-4e9f-4ba3-b09d-47ec8a352d60",
-                            "text": "对外开放",
-                            "color": "#43a2f1"
+
+                fetch('http://localhost:5000/api/GraphDemo/GetAllGraph')
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('网络响应不成功，状态码：' + response.status);
                         }
-                    ],
-                    "lines": [
-                        {
-                            "from": "494d6998-4d96-4a98-87f9-c1df26e92f16",
-                            "to": "37afa0e6-c4dc-48ec-9bd8-2524b82cb1fa",
-                            "text": "实现目标任务的根本动力",
-                            "color": "#000"
-                        },
-                        {
-                            "from": "5ccc9e3c-dd67-4fd2-9f0c-367d9d78e927",
-                            "to": "494d6998-4d96-4a98-87f9-c1df26e92f16",
-                            "text": "审议通过决定",
-                            "color": "#000"
-                        },
-                        {
-                            "from": "28d6560d-2f1f-4245-8650-19b45ad009c1",
-                            "to": "494d6998-4d96-4a98-87f9-c1df26e92f16",
-                            "text": "突出重点",
-                            "color": "#000"
-                        },
-                        {
-                            "from": "03f9530d-2a33-47df-9231-53ace7580037",
-                            "to": "494d6998-4d96-4a98-87f9-c1df26e92f16",
-                            "text": "牵引作用",
-                            "color": "#000"
-                        },
-                        {
-                            "from": "9cf8acf6-d8b2-4846-adac-1b2725243b1c",
-                            "to": "494d6998-4d96-4a98-87f9-c1df26e92f16",
-                            "text": "党中央核心",
-                            "color": "#000"
-                        },
-                        {
-                            "from": "a87fc410-e91e-4f18-b903-b63db293447e",
-                            "to": "494d6998-4d96-4a98-87f9-c1df26e92f16",
-                            "text": "主要任务",
-                            "color": "#000"
-                        },
-                        {
-                            "from": "60a0c26d-9f9f-40b2-8516-b3b6f03ee217",
-                            "to": "a87fc410-e91e-4f18-b903-b63db293447e",
-                            "text": "深化改革",
-                            "color": "#000"
-                        },
-                        {
-                            "from": "35a64e9d-11bb-4e37-b44d-ebfe324b1ce2",
-                            "to": "37afa0e6-c4dc-48ec-9bd8-2524b82cb1fa",
-                            "text": "必然要求",
-                            "color": "#000"
-                        },
-                        {
-                            "from": "ea3bd899-4e9f-4ba3-b09d-47ec8a352d60",
-                            "to": "37afa0e6-c4dc-48ec-9bd8-2524b82cb1fa",
-                            "text": "鲜明标识",
-                            "color": "#000"
-                        }
-                    ]
-                };
-                this.$refs.seeksRelationGraph.setJsonData(__graph_json_data, (seeksRGGraph) => {
-                    // 这些写上当图谱初始化完成后需要执行的代码
-                });
+                        return response.json(); // 或者 response.json() 取决于你的响应内容类型
+                    })
+                    .then(data => {
+                        // 请求成功，处理响应数据
+                        console.log(data);
+                        this.$refs.seeksRelationGraph.setJsonData(data, (seeksRGGraph) => {
+                            // 这些写上当图谱初始化完成后需要执行的代码
+                        });
+                    })
+                    .catch(error => {
+                        // 处理错误
+                        console.error('请求出错：', error);
+                    });
             }
         }
     })

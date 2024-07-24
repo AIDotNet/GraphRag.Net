@@ -1,8 +1,8 @@
 ﻿[
   {
     "path": "/graph",
-    "name": "graph",
+    "name": "Graph",
     "key": "graph",
-    "icon": "aliwangwang"
+    "icon": "deployment-unit"
   }
 ]
