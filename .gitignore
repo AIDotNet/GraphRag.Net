@@ -335,3 +335,4 @@ ASALocalRun/
 /src/GraphRag.Net.Web/graph.db
 
 /src/GraphRag.Net.Web/graphmem.db
+/db
