@@ -1,0 +1,9 @@
+{
+  "schema": 1,
+  "description": "GraphRag问答",
+  "execution_settings": {
+    "default": {
+      "temperature": 0.3
+    }
+  }
+}

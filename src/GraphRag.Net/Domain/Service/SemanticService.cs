@@ -65,6 +65,20 @@ namespace GraphRag.Net.Domain.Service
             return result;
         }
 
+        public async Task<string> MergeDesc(string desc1, string desc2)
+        {
+            KernelFunction createFun = _kernel.Plugins.GetFunction("graph", "mergedesc");
+            var args = new KernelArguments()
+            {
+                ["desc1"] = desc1,
+                ["desc2"] = desc2,
+            };
+            var skresult = await _kernel.InvokeAsync(createFun, args);
+
+            string result = skresult.GetValue<string>()?.Trim() ?? "";
+            return result;
+        }
+
         public async Task< SemanticTextMemory> GetTextMemory()
         {
             IMemoryStore memoryStore = await SqliteMemoryStore.ConnectAsync(GraphDBConnectionOption.Db);

@@ -97,90 +97,118 @@ namespace GraphRag.Net.Domain.Service
         /// <returns></returns>
         public async Task InsertGraph(string input)
         {
-            SemanticTextMemory textMemory = await _semanticService.GetTextMemory();
-
-            var graphJson = await _semanticService.CreateGraphAsync(input);
-
-            var graph = JsonConvert.DeserializeObject<GraphModel>(graphJson);
-            Dictionary<string, string> nodeDic = new Dictionary<string, string>();
-
-            
-            foreach (var n in graph.Nodes)
+            try
             {
-                string Id = Guid.NewGuid().ToString();
-                string text2 = $"Name:{n.Name};Type:{n.Type};Desc:{n.Desc}";
-                bool isContinue=false;
-                await foreach (MemoryQueryResult memory in textMemory.SearchAsync(SystemConstant.NodeIndex, text2, limit: 1, minRelevanceScore: 0.9))
+                SemanticTextMemory textMemory = await _semanticService.GetTextMemory();
+
+                var graphJson = await _semanticService.CreateGraphAsync(input);
+
+                var graph = JsonConvert.DeserializeObject<GraphModel>(graphJson);
+                Dictionary<string, string> nodeDic = new Dictionary<string, string>();
+
+
+                foreach (var n in graph.Nodes)
                 {
-                    if (memory.Relevance == 1)
+
+                    string Id = Guid.NewGuid().ToString();
+                    string text2 = $"Name:{n.Name};Type:{n.Type};Desc:{n.Desc}";
+                    bool isContinue = false;
+
+                    //判断是否存在相同节点
+                    var oldNode = _nodes_Repositories.GetFirst(p => p.Name == n.Name);
+                    if (oldNode.IsNotNull())
                     {
-                        //相同节点进行合并
-                        Console.WriteLine("节点合并");
-                        nodeDic.Add(n.Id, memory.Metadata.Id);
-                        isContinue = true;
-                        break;
+                        var newDesc = await _semanticService.MergeDesc(oldNode.Desc, n.Desc);
+                        oldNode.Desc = newDesc;
+                        //更新描述
+                        _nodes_Repositories.Update(oldNode);
+                        text2 = $"Name:{oldNode.Name};Type:{oldNode.Type};Desc:{oldNode.Desc}";
+                        nodeDic.Add(n.Id, oldNode.Id);
+                        await textMemory.SaveInformationAsync(SystemConstant.NodeIndex, id: oldNode.Id, text: text2, cancellationToken: default);
+                        continue;
                     }
 
-                    if (graph.Nodes.Select(p => p.Id).Contains(memory.Metadata.Id))
+                    //判断是否存在相关节点
+                    await foreach (MemoryQueryResult memory in textMemory.SearchAsync(SystemConstant.NodeIndex, text2, limit: 1, minRelevanceScore: 0.9))
                     {
-                        //如果本次包含了向量近似的数据，则跳过
-                        break;
+                        if (memory.Relevance == 1)
+                        {
+                            //相同节点进行合并
+                            Console.WriteLine("节点合并");
+                            nodeDic.Add(n.Id, memory.Metadata.Id);
+                            isContinue = true;
+                            break;
+                        }
+
+                        if (graph.Nodes.Select(p => p.Id).Contains(memory.Metadata.Id))
+                        {
+                            //如果本次包含了向量近似的数据，则跳过
+                            break;
+                        }
+                        var node1 = _nodes_Repositories.GetFirst(p => p.Id == memory.Metadata.Id);
+                        string text1 = $"Name:{node1.Name};Type:{node1.Type};Desc:{node1.Desc}";
+                        var relationShipJson = await _semanticService.GetRelationship(text1, text2);
+                        var relationShip = JsonConvert.DeserializeObject<RelationShipModel>(relationShipJson);
+                        if (relationShip.IsRelationship)
+                        {
+                            if (relationShip.Edge.Source == "node1")
+                            {
+                                relationShip.Edge.Source = node1.Id;
+                                relationShip.Edge.Target = Id;
+                            }
+                            else
+                            {
+                                relationShip.Edge.Source = Id;
+                                relationShip.Edge.Target = node1.Id;
+                            }
+                            if (!_edges_Repositories.IsAny(p => p.Target == relationShip.Edge.Target && p.Source == relationShip.Edge.Source))
+                            {
+                                _edges_Repositories.Insert(relationShip.Edge);
+                            }
+                            else
+                            {
+                                //相同的边进行合并
+                            }
+                        }
                     }
-                    var node1= _nodes_Repositories.GetFirst(p => p.Id == memory.Metadata.Id);
-                    string text1 = $"Name:{node1.Name};Type:{node1.Type};Desc:{node1.Desc}";
-                    var relationShipJson= await _semanticService.GetRelationship( text1, text2);
-                    var relationShip = JsonConvert.DeserializeObject<RelationShipModel>(relationShipJson);
-                    if (relationShip.IsRelationship)
+
+                    if (isContinue)
                     {
-                        if (relationShip.Edge.Source == "node1")
-                        {
-                            relationShip.Edge.Source = node1.Id;
-                            relationShip.Edge.Target = Id;
-                        }
-                        else 
-                        {
-                            relationShip.Edge.Source = Id;
-                            relationShip.Edge.Target = node1.Id;
-                        }
-                        if (!_edges_Repositories.IsAny(p => p.Target == relationShip.Edge.Target && p.Source == relationShip.Edge.Source))
-                        {
-                            _edges_Repositories.Insert(relationShip.Edge);
-                        }
-                        else 
-                        {
-                            //相同的边进行合并
-                        }
+                        //节点合并，跳出循环
+                        continue;
                     }
+
+                    Nodes node = new Nodes()
+                    {
+                        Id = Id,
+                        Name = n.Name,
+                        Type = n.Type,
+                        Desc = n.Desc
+                    };
+
+                    if (!nodeDic.ContainsKey(n.Id))
+                    {
+                        nodeDic.Add(n.Id, node.Id);
+                    }
+                    _nodes_Repositories.Insert(node);
+                    //向量处理节点信息
+                    await textMemory.SaveInformationAsync(SystemConstant.NodeIndex, id: node.Id, text: text2, cancellationToken: default);
                 }
 
-                if (isContinue)
+                foreach (var e in graph.Edges)
                 {
-                    //节点合并，跳出循环
-                    continue;
+                    Edges edge = new Edges()
+                    {
+                        Source = nodeDic[e.Source],
+                        Target = nodeDic[e.Target],
+                        Relationship = e.Relationship
+                    };
+                    _edges_Repositories.Insert(edge);
                 }
-
-                Nodes node = new Nodes()
-                {
-                    Id = Id,
-                    Name = n.Name,
-                    Type = n.Type,
-                    Desc = n.Desc
-                };
-                nodeDic.Add(n.Id, node.Id);
-                _nodes_Repositories.Insert(node);
-                //向量处理节点信息
-                await textMemory.SaveInformationAsync(SystemConstant.NodeIndex, id: node.Id, text: text2, cancellationToken: default);
             }
-
-            foreach (var e in graph.Edges)
+            catch (Exception ex)
             {
-                Edges edge = new Edges()
-                {
-                    Source = nodeDic[e.Source],
-                    Target = nodeDic[e.Target],
-                    Relationship = e.Relationship
-                };
-                _edges_Repositories.Insert(edge);
+                Console.WriteLine(ex.ToString());
             }
         }
 
