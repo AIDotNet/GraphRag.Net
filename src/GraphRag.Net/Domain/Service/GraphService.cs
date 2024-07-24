@@ -258,7 +258,7 @@ namespace GraphRag.Net.Domain.Service
             while (nodesToExplore.Count > 0)
             {
                 //线的深度，暂时先不处理太远距离的关联
-                if (i > 2)
+                if (i > 3)
                 {
                     break;
                 }
