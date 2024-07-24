@@ -103,12 +103,24 @@ namespace GraphRag.Net.Domain.Service
 
             var graph = JsonConvert.DeserializeObject<GraphModel>(graphJson);
             Dictionary<string, string> nodeDic = new Dictionary<string, string>();
+
+            
             foreach (var n in graph.Nodes)
             {
                 string Id = Guid.NewGuid().ToString();
                 string text2 = $"Name:{n.Name};Type:{n.Type};Desc:{n.Desc}";
+                bool isContinue=false;
                 await foreach (MemoryQueryResult memory in textMemory.SearchAsync(SystemConstant.NodeIndex, text2, limit: 1, minRelevanceScore: 0.9))
                 {
+                    if (memory.Relevance == 1)
+                    {
+                        //相同节点进行合并
+                        Console.WriteLine("节点合并");
+                        nodeDic.Add(n.Id, memory.Metadata.Id);
+                        isContinue = true;
+                        break;
+                    }
+
                     if (graph.Nodes.Select(p => p.Id).Contains(memory.Metadata.Id))
                     {
                         //如果本次包含了向量近似的数据，则跳过
@@ -130,8 +142,6 @@ namespace GraphRag.Net.Domain.Service
                             relationShip.Edge.Source = Id;
                             relationShip.Edge.Target = node1.Id;
                         }
-
-
                         if (!_edges_Repositories.IsAny(p => p.Target == relationShip.Edge.Target && p.Source == relationShip.Edge.Source))
                         {
                             _edges_Repositories.Insert(relationShip.Edge);
@@ -141,6 +151,12 @@ namespace GraphRag.Net.Domain.Service
                             //相同的边进行合并
                         }
                     }
+                }
+
+                if (isContinue)
+                {
+                    //节点合并，跳出循环
+                    continue;
                 }
 
                 Nodes node = new Nodes()
