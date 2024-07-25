@@ -118,8 +118,16 @@ namespace GraphRag.Net.Domain.Service
                     var oldNode = _nodes_Repositories.GetFirst(p => p.Name == n.Name);
                     if (oldNode.IsNotNull())
                     {
-                        var newDesc = await _semanticService.MergeDesc(oldNode.Desc, n.Desc);
-                        oldNode.Desc = newDesc;
+                        var newDesc = await _semanticService.MergeDesc(oldNode.Desc.ConvertToString(), n.Desc.ConvertToString());
+                        if (string.IsNullOrEmpty(newDesc))
+                        {
+                            //可能触发了LLM规则限制，简单粗暴来拼接吧
+                            oldNode.Desc = oldNode.Desc.ConvertToString() + "; " + n.Desc.ConvertToString();
+                        }
+                        else
+                        {
+                            oldNode.Desc = newDesc;
+                        }
                         //更新描述
                         _nodes_Repositories.Update(oldNode);
                         text2 = $"Name:{oldNode.Name};Type:{oldNode.Type};Desc:{oldNode.Desc}";
