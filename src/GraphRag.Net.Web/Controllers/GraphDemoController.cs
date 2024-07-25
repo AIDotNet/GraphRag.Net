@@ -9,21 +9,21 @@ namespace GraphRag.Net.Api.Controllers
     {
 
         [HttpGet]
-        public async Task<IActionResult> GetAllGraph()
+        public async Task<IActionResult> GetAllGraphs()
         {
             var graphModel = _graphService.GetAllGraphs();
             return Ok(graphModel);
         }
 
         [HttpPost]
-        public async Task<IActionResult> InsertGraph(InputModel model)
+        public async Task<IActionResult> InsertGraphData(InputModel model)
         {
             await _graphService.InsertGraphDataAsync(model.Input);
             return Ok();
         }
 
         [HttpPost]
-        public async Task<IActionResult> Search(InputModel model)
+        public async Task<IActionResult> SearchGraph(InputModel model)
         {
             var result = await _graphService.SearchGraphAsync(model.Input);
             return Ok(result);
