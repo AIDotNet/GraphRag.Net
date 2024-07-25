@@ -9,6 +9,13 @@ namespace GraphRag.Net.Api.Controllers
     {
 
         [HttpGet]
+        public async Task<IActionResult> GetAllIndex()
+        {
+            var graphModel = _graphService.GetAllIndex();
+            return Ok(graphModel);
+        }
+
+        [HttpGet]
         public async Task<IActionResult> GetAllGraphs(string index)
         {
             var graphModel = _graphService.GetAllGraphs(index);
