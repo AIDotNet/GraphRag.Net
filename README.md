@@ -7,9 +7,9 @@
 ```
  "OpenAI": {
    "Key": "sk-xxx",
-   "Endpoint": "text-embedding-ada-002",
+   "Endpoint": "https://api.openai.com/",
    "ChatModel": "gpt-4o-mini",
-   "EmbeddingModel": "https://api.openai.com/"
+   "EmbeddingModel": "text-embedding-ada-002"
  }
 ```
 
