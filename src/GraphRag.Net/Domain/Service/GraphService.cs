@@ -25,7 +25,7 @@ namespace GraphRag.Net.Domain.Service
         /// 获取Graph数据
         /// </summary>
         /// <returns></returns>
-        public GraphViewModel GetAllGraph()
+        public GraphViewModel GetAllGraphs()
         {
             GraphViewModel graphViewModel = new GraphViewModel();
             var nodes = _nodes_Repositories.GetList();
@@ -66,14 +66,14 @@ namespace GraphRag.Net.Domain.Service
             return graphViewModel;
         }
 
-        public async Task TextChunkInsertGraph(string input)
+        public async Task InsertTextChunkAsync(string input)
         {
             var lines = TextChunker.SplitPlainTextLines(input, TextChunkerOption.LinesToken);
 
             var paragraphs = TextChunker.SplitPlainTextParagraphs(lines, TextChunkerOption.ParagraphsToken);
             foreach (var para in paragraphs)
             {
-                await InsertGraph(para);
+                await InsertGraphDataAsync(para);
             }
         }
 
@@ -82,7 +82,7 @@ namespace GraphRag.Net.Domain.Service
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        public async Task InsertGraph(string input)
+        public async Task InsertGraphDataAsync(string input)
         {
             try
             {
@@ -213,7 +213,7 @@ namespace GraphRag.Net.Domain.Service
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        public async Task<string> SearchGraph(string input)
+        public async Task<string> SearchGraphAsync(string input)
         {
             string answer = "";
             SemanticTextMemory textMemory = await _semanticService.GetTextMemory();
@@ -245,7 +245,7 @@ namespace GraphRag.Net.Domain.Service
         /// </summary>
         /// <param name="initialNodes"></param>
         /// <returns></returns>
-        public GraphModel GetGraphAllRecursion(List<Nodes> initialNodes)
+        private GraphModel GetGraphAllRecursion(List<Nodes> initialNodes)
         {
             var allNodes = new List<Nodes>(initialNodes);
             var allEdges = new List<Edges>();
@@ -296,7 +296,7 @@ namespace GraphRag.Net.Domain.Service
         /// </summary>
         /// <param name="nodeIds"></param>
         /// <returns></returns>
-        public List<Edges> GetEdges(List<Nodes> nodes)
+        private List<Edges> GetEdges(List<Nodes> nodes)
         {
             var nodeIds = nodes.Select(x => x.Id).ToList();
             var edges = new List<Edges>();
@@ -309,7 +309,7 @@ namespace GraphRag.Net.Domain.Service
         /// </summary>
         /// <param name="edges"></param>
         /// <returns></returns>
-        public List<Nodes> GetNodes(List<Edges> edges)
+        private List<Nodes> GetNodes(List<Edges> edges)
         {
             var targets = edges.Select(p => p.Target).ToList();
             var sources = edges.Select(p => p.Source).ToList();

@@ -11,21 +11,21 @@ namespace GraphRag.Net.Api.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAllGraph()
         {
-            var graphModel = _graphService.GetAllGraph();
+            var graphModel = _graphService.GetAllGraphs();
             return Ok(graphModel);
         }
 
         [HttpPost]
         public async Task<IActionResult> InsertGraph(InputModel model)
         {
-            await _graphService.InsertGraph(model.Input);
+            await _graphService.InsertGraphDataAsync(model.Input);
             return Ok();
         }
 
         [HttpPost]
         public async Task<IActionResult> Search(InputModel model)
         {
-            var result = await _graphService.SearchGraph(model.Input);
+            var result = await _graphService.SearchGraphAsync(model.Input);
             return Ok(result);
         }
 
@@ -37,7 +37,7 @@ namespace GraphRag.Net.Api.Controllers
             using (var stream = new StreamReader(file.OpenReadStream()))
             {
                 var txt = await stream.ReadToEndAsync();
-                await _graphService.TextChunkInsertGraph(txt);
+                await _graphService.InsertTextChunkAsync(txt);
                 return Ok();
             }
         }
