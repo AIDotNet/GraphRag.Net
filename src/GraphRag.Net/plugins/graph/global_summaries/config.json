@@ -1,9 +1,9 @@
 {
   "schema": 1,
-  "description": "社区答案",
+  "description": "全局总结",
   "execution_settings": {
     "default": {
-      "temperature": 0.3
+      "temperature": 0
     }
   }
 }

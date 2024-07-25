@@ -10,7 +10,7 @@ namespace GraphRag.Net.Domain.Interface
         Task<string> GetRelationship(string node1, string node2);
         Task<string> MergeDesc(string desc1, string desc2);
         Task<string> CommunitySummaries(string nodes);
-
+        Task<string> GlobalSummaries(string community);
         Task<SemanticTextMemory> GetTextMemory();
     }
 }
