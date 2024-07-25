@@ -21,6 +21,12 @@ namespace GraphRag.Net.Domain.Service
         ISemanticService _semanticService
         ) : IGraphService
     {
+        public List<string> GetAllIndex()
+        {
+           var indexs= _nodes_Repositories.GetDB().Queryable<Nodes>().GroupBy(p => p.Index).Select(p=>p.Index).ToList();
+            return indexs;
+        }
+
         /// <summary>
         /// 获取Graph数据
         /// </summary>

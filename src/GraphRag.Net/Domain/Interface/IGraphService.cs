@@ -4,6 +4,7 @@ namespace GraphRag.Net.Domain.Interface
 {
     public interface IGraphService
     {
+        List<string> GetAllIndex();
         GraphViewModel GetAllGraphs(string index);
 
         Task InsertTextChunkAsync(string index, string input);
