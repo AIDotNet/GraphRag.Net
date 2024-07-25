@@ -1,4 +1,5 @@
 using GraphRag.Net.Domain.Interface;
+using GraphRag.Net.Domain.Model.Graph;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GraphRag.Net.Api.Controllers
@@ -18,6 +19,10 @@ namespace GraphRag.Net.Api.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAllGraphs(string index)
         {
+            if (string.IsNullOrEmpty(index))
+            {
+                return Ok(new GraphViewModel());
+            }
             var graphModel = _graphService.GetAllGraphs(index);
             return Ok(graphModel);
         }
