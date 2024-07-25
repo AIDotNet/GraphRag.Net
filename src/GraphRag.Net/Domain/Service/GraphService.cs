@@ -81,9 +81,9 @@ namespace GraphRag.Net.Domain.Service
 
         public async Task TextChunkInsertGraph(string input)
         {
-            var lines = TextChunker.SplitPlainTextLines(input, 100);
+            var lines = TextChunker.SplitPlainTextLines(input, TextChunkerOption.LinesToken);
 
-            var paragraphs = TextChunker.SplitPlainTextParagraphs(lines, 1000);
+            var paragraphs = TextChunker.SplitPlainTextParagraphs(lines, TextChunkerOption.ParagraphsToken);
             foreach (var para in paragraphs)
             {
                 await InsertGraph(para);

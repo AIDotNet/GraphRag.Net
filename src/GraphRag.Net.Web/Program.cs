@@ -23,6 +23,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddGraphRagNet();
 
 builder.Configuration.GetSection("OpenAI").Get<OpenAIOption>();
+builder.Configuration.GetSection("TextChunker").Get<TextChunkerOption>();
 
 var app = builder.Build();
 
