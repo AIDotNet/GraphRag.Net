@@ -25,11 +25,11 @@ namespace GraphRag.Net.Domain.Service
         /// 获取Graph数据
         /// </summary>
         /// <returns></returns>
-        public GraphViewModel GetAllGraphs()
+        public GraphViewModel GetAllGraphs(string index)
         {
             GraphViewModel graphViewModel = new GraphViewModel();
-            var nodes = _nodes_Repositories.GetList();
-            var edges = _edges_Repositories.GetList();
+            var nodes = _nodes_Repositories.GetList(p=>p.Index== index);
+            var edges = _edges_Repositories.GetList(p=>p.Index==index);
             Dictionary<string, string> TypeColor = new Dictionary<string, string>();
             Random random = new Random();
             foreach (var n in nodes)
@@ -66,14 +66,14 @@ namespace GraphRag.Net.Domain.Service
             return graphViewModel;
         }
 
-        public async Task InsertTextChunkAsync(string input)
+        public async Task InsertTextChunkAsync(string index,string input)
         {
             var lines = TextChunker.SplitPlainTextLines(input, TextChunkerOption.LinesToken);
 
             var paragraphs = TextChunker.SplitPlainTextParagraphs(lines, TextChunkerOption.ParagraphsToken);
             foreach (var para in paragraphs)
             {
-                await InsertGraphDataAsync(para);
+                await InsertGraphDataAsync(index,para);
             }
         }
 
@@ -82,7 +82,7 @@ namespace GraphRag.Net.Domain.Service
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        public async Task InsertGraphDataAsync(string input)
+        public async Task InsertGraphDataAsync(string index,string input)
         {
             try
             {
@@ -125,7 +125,7 @@ namespace GraphRag.Net.Domain.Service
                     }
 
                     //判断是否存在相关节点
-                    await foreach (MemoryQueryResult memory in textMemory.SearchAsync(SystemConstant.NodeIndex, text2, limit: 1, minRelevanceScore: 0.9))
+                    await foreach (MemoryQueryResult memory in textMemory.SearchAsync(index, text2, limit: 1, minRelevanceScore: 0.9))
                     {
                         if (memory.Relevance == 1)
                         {
@@ -159,6 +159,7 @@ namespace GraphRag.Net.Domain.Service
                             }
                             if (!_edges_Repositories.IsAny(p => p.Target == relationShip.Edge.Target && p.Source == relationShip.Edge.Source))
                             {
+                                relationShip.Edge.Index = index;
                                 _edges_Repositories.Insert(relationShip.Edge);
                             }
                             else
@@ -177,6 +178,7 @@ namespace GraphRag.Net.Domain.Service
                     Nodes node = new Nodes()
                     {
                         Id = Id,
+                        Index=index,
                         Name = n.Name,
                         Type = n.Type,
                         Desc = n.Desc.ConvertToString()
@@ -188,13 +190,14 @@ namespace GraphRag.Net.Domain.Service
                     }
                     _nodes_Repositories.Insert(node);
                     //向量处理节点信息
-                    await textMemory.SaveInformationAsync(SystemConstant.NodeIndex, id: node.Id, text: text2, cancellationToken: default);
+                    await textMemory.SaveInformationAsync(index, id: node.Id, text: text2, cancellationToken: default);
                 }
 
                 foreach (var e in graph.Edges)
                 {
                     Edges edge = new Edges()
                     {
+                        Index=index,
                         Source = nodeDic[e.Source],
                         Target = nodeDic[e.Target],
                         Relationship = e.Relationship
@@ -213,12 +216,12 @@ namespace GraphRag.Net.Domain.Service
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        public async Task<string> SearchGraphAsync(string input)
+        public async Task<string> SearchGraphAsync(string index,string input)
         {
             string answer = "";
             SemanticTextMemory textMemory = await _semanticService.GetTextMemory();
             List<TextMemModel> textMemModelList = new List<TextMemModel>();
-            await foreach (MemoryQueryResult memory in textMemory.SearchAsync(SystemConstant.NodeIndex, input, limit: 3, minRelevanceScore: 0.8))
+            await foreach (MemoryQueryResult memory in textMemory.SearchAsync(index, input, limit: 3, minRelevanceScore: 0.8))
             {
                 var textMemModel = new TextMemModel()
                 {
@@ -231,9 +234,9 @@ namespace GraphRag.Net.Domain.Service
 
             if (textMemModelList.Count() > 0)
             {
-                var nodes = _nodes_Repositories.GetList(p => textMemModelList.Select(c => c.Id).Contains(p.Id));
+                var nodes = _nodes_Repositories.GetList(p =>p.Index== index&& textMemModelList.Select(c => c.Id).Contains(p.Id));
                 //匹配到节点信息
-                var graphModel = GetGraphAllRecursion(nodes);
+                var graphModel = GetGraphAllRecursion(index,nodes);
                 //这里数据有点多，要通过语义进行一次过滤
                 answer = await _semanticService.GetGraphAnswerAsync(JsonConvert.SerializeObject(graphModel), input);
             }
@@ -245,7 +248,7 @@ namespace GraphRag.Net.Domain.Service
         /// </summary>
         /// <param name="initialNodes"></param>
         /// <returns></returns>
-        private GraphModel GetGraphAllRecursion(List<Nodes> initialNodes)
+        private GraphModel GetGraphAllRecursion(string index,List<Nodes> initialNodes)
         {
             var allNodes = new List<Nodes>(initialNodes);
             var allEdges = new List<Edges>();
@@ -259,7 +262,7 @@ namespace GraphRag.Net.Domain.Service
                     break;
                 }
 
-                var newEdges = GetEdges(nodesToExplore);
+                var newEdges = GetEdges(index,nodesToExplore);
                 if (newEdges.Count() == 0)
                 {
                     break; // 没有新的边可以获取，终止递归
@@ -274,7 +277,7 @@ namespace GraphRag.Net.Domain.Service
                 }
 
                 // 获取新的节点
-                var newNodes = GetNodes(newEdges);
+                var newNodes = GetNodes(index,newEdges);
 
                 // 找到新获取的节点，并更新 nodesToExplore
                 nodesToExplore = newNodes.Where(n => !allNodes.Any(existingNode => existingNode.Id == n.Id)).ToList();
@@ -296,11 +299,11 @@ namespace GraphRag.Net.Domain.Service
         /// </summary>
         /// <param name="nodeIds"></param>
         /// <returns></returns>
-        private List<Edges> GetEdges(List<Nodes> nodes)
+        private List<Edges> GetEdges(string index,List<Nodes> nodes)
         {
             var nodeIds = nodes.Select(x => x.Id).ToList();
             var edges = new List<Edges>();
-            edges = _edges_Repositories.GetList(x => nodeIds.Contains(x.Source) || nodeIds.Contains(x.Target));
+            edges = _edges_Repositories.GetList(x => x.Index==index&& nodeIds.Contains(x.Source) || nodeIds.Contains(x.Target));
             return edges;
         }
 
@@ -309,7 +312,7 @@ namespace GraphRag.Net.Domain.Service
         /// </summary>
         /// <param name="edges"></param>
         /// <returns></returns>
-        private List<Nodes> GetNodes(List<Edges> edges)
+        private List<Nodes> GetNodes(string index, List<Edges> edges)
         {
             var targets = edges.Select(p => p.Target).ToList();
             var sources = edges.Select(p => p.Source).ToList();
@@ -317,7 +320,7 @@ namespace GraphRag.Net.Domain.Service
             nodeIds.AddRange(targets);
             nodeIds.AddRange(sources);
 
-            var nodes = _nodes_Repositories.GetList(p => nodeIds.Contains(p.Id));
+            var nodes = _nodes_Repositories.GetList(p =>p.Index==index&& nodeIds.Contains(p.Id));
             return nodes;
         }
     }
