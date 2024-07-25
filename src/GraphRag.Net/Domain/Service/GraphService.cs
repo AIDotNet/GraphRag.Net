@@ -118,6 +118,7 @@ namespace GraphRag.Net.Domain.Service
                     var oldNode = _nodes_Repositories.GetFirst(p => p.Name == n.Name);
                     if (oldNode.IsNotNull())
                     {
+                        //相同节点关联edge关系
                         var newDesc = await _semanticService.MergeDesc(oldNode.Desc.ConvertToString(), n.Desc.ConvertToString());
                         if (string.IsNullOrEmpty(newDesc))
                         {
