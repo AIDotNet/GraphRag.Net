@@ -9,7 +9,7 @@ node2:Name:红色;Type:Color;Desc:一种颜色
 
 ### 示例输入
 node1:Name:苹果;Type:Fruit;Desc:一种水果
-node2:Name:老虎;Type:Color;Desc:一种颜色
+node2:Name:老虎;Type:Animal;Desc:一种动物
 
 ### 示例输出
 {"IsRelationship":false}
