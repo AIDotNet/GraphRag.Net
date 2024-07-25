@@ -11,7 +11,7 @@ namespace GraphRag.Net.Api.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAllGraph()
         {
-            var graphModel= _graphService.GetAllGraph();
+            var graphModel = _graphService.GetAllGraph();
             return Ok(graphModel);
         }
 
@@ -25,7 +25,7 @@ namespace GraphRag.Net.Api.Controllers
         [HttpPost]
         public async Task<IActionResult> Search(InputModel model)
         {
-            var result= await _graphService.SearchGraph(model.Input);
+            var result = await _graphService.SearchGraph(model.Input);
             return Ok(result);
         }
 
@@ -44,7 +44,7 @@ namespace GraphRag.Net.Api.Controllers
     }
 
     public class InputModel
-    { 
-    public string Input { get; set; }
+    {
+        public string Input { get; set; }
     }
 }

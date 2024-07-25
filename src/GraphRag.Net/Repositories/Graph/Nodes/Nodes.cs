@@ -24,6 +24,6 @@ namespace GraphRag.Net.Repositories.Graph.Nodes
         public string Type { get; set; }
 
         [SugarColumn(ColumnDataType = "TEXT")]
-        public  string? Desc { get; set; }
+        public string? Desc { get; set; }
     }
 }

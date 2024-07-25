@@ -3,7 +3,7 @@
     public class GraphViewModel
     {
         public string rootId { get; set; }
-        public List<NodesViewModel> nodes { get; set; }=new List<NodesViewModel>();
+        public List<NodesViewModel> nodes { get; set; } = new List<NodesViewModel>();
         public List<LinesViewModel> lines { get; set; } = new List<LinesViewModel>();
     }
     public class NodesViewModel

@@ -1,6 +1,4 @@
-﻿using GraphRag.Net;
-using GraphRag.Net.Base;
-using GraphRag.Net.Repositories.Graph.Nodes;
+﻿using GraphRag.Net.Base;
 
 namespace GraphRag.Net.Repositories
 {

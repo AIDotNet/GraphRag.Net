@@ -1,6 +1,5 @@
-using System;
-using System.Text.Json.Serialization;
 using GraphRag.Net.Web.Utils;
+using System.Text.Json.Serialization;
 
 namespace GraphRag.Net.Web.Models
 {

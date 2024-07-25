@@ -1,7 +1,7 @@
+using AntDesign.ProLayout;
 using GraphRag.Net;
 using GraphRag.Net.Common.Options;
 using Microsoft.AspNetCore.Components;
-using AntDesign.ProLayout;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -33,7 +33,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-else 
+else
 {
     app.UseExceptionHandler("/Error");
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.

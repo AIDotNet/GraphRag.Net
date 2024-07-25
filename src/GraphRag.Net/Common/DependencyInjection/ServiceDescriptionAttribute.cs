@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace GraphRag.Net
+﻿namespace GraphRag.Net
 {
     public class ServiceDescriptionAttribute : Attribute
     {
@@ -17,7 +13,8 @@ namespace GraphRag.Net
         public ServiceLifetime Lifetime { get; set; }
     }
 
-    public enum ServiceLifetime {
+    public enum ServiceLifetime
+    {
         /// <summary>
         /// 作用域
         /// </summary>

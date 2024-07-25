@@ -1,10 +1,7 @@
-﻿using GraphRag.Net.Web.Models;
+﻿using AntDesign;
 using AntDesign.ProLayout;
+using GraphRag.Net.Web.Models;
 using Microsoft.AspNetCore.Components;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using AntDesign;
 
 namespace GraphRag.Net.Web.Components
 {
@@ -51,7 +48,7 @@ namespace GraphRag.Net.Web.Components
         {
             await base.OnInitializedAsync();
             SetClassMap();
-          
+
         }
 
         protected void SetClassMap()

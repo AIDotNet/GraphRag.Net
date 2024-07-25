@@ -1,5 +1,4 @@
-﻿using System;
-using System.Buffers.Text;
+﻿using System.Buffers.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -18,7 +17,7 @@ namespace GraphRag.Net.Web.Utils
         public override void Write(Utf8JsonWriter writer, DateTime value, JsonSerializerOptions options)
         {
             writer.WriteStringValue(
-                JsonEncodedText.Encode(((long) (value - DateTime.UnixEpoch).TotalMilliseconds).ToString()));
+                JsonEncodedText.Encode(((long)(value - DateTime.UnixEpoch).TotalMilliseconds).ToString()));
         }
     }
 }

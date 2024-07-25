@@ -1,5 +1,3 @@
-using System;
-
 namespace GraphRag.Net.Web.Models
 {
     public class ActivitiesType

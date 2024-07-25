@@ -1,28 +1,15 @@
-﻿using GraphRag.Net.Domain.Interface;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.Design;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using GraphRag.Net;
-using Microsoft.SemanticKernel;
-using Microsoft.SemanticKernel.Connectors.OpenAI;
-using Azure.AI.OpenAI;
-using Newtonsoft.Json;
-using GraphRag.Net.Domain.Model.Graph;
-using GraphRag.Net.Repositories.Graph.Nodes;
-using GraphRag.Net.Repositories;
-using GraphRag.Net.Common.Options;
-using Microsoft.SemanticKernel.Connectors.Sqlite;
-using Microsoft.SemanticKernel.Memory;
-using GraphRag.Net.Options;
-using GraphRag.Net.Utils;
-using static System.Net.Mime.MediaTypeNames;
-using static Dm.net.buffer.ByteArrayBuffer;
+﻿using GraphRag.Net.Common.Options;
+using GraphRag.Net.Domain.Interface;
 using GraphRag.Net.Domain.Model.Constant;
-using SqlSugar;
+using GraphRag.Net.Domain.Model.Graph;
+using GraphRag.Net.Repositories;
+using GraphRag.Net.Repositories.Graph.Nodes;
+using GraphRag.Net.Utils;
+using Microsoft.SemanticKernel;
+using Microsoft.SemanticKernel.Memory;
 using Microsoft.SemanticKernel.Text;
+using Newtonsoft.Json;
+using SqlSugar;
 
 namespace GraphRag.Net.Domain.Service
 {
@@ -57,12 +44,12 @@ namespace GraphRag.Net.Domain.Service
                 {
                     nodesViewModel.color = TypeColor[n.Type];
                 }
-                else 
+                else
                 {
                     nodesViewModel.color = $"#{random.Next(0x1000000):X6}";
                     TypeColor.Add(n.Type, nodesViewModel.color);
                 }
-             
+
                 graphViewModel.nodes.Add(nodesViewModel);
             }
 
@@ -228,9 +215,9 @@ namespace GraphRag.Net.Domain.Service
         /// <returns></returns>
         public async Task<string> SearchGraph(string input)
         {
-            string answer = "" ;
+            string answer = "";
             SemanticTextMemory textMemory = await _semanticService.GetTextMemory();
-            List<TextMemModel> textMemModelList = new List<TextMemModel>() ;
+            List<TextMemModel> textMemModelList = new List<TextMemModel>();
             await foreach (MemoryQueryResult memory in textMemory.SearchAsync(SystemConstant.NodeIndex, input, limit: 3, minRelevanceScore: 0.8))
             {
                 var textMemModel = new TextMemModel()
@@ -242,16 +229,16 @@ namespace GraphRag.Net.Domain.Service
                 textMemModelList.Add(textMemModel);
             }
 
-            if (textMemModelList.Count()>0)
+            if (textMemModelList.Count() > 0)
             {
-                var nodes= _nodes_Repositories.GetList(p => textMemModelList.Select(c=>c.Id).Contains(p.Id));
+                var nodes = _nodes_Repositories.GetList(p => textMemModelList.Select(c => c.Id).Contains(p.Id));
                 //匹配到节点信息
-                var graphModel =  GetGraphAllRecursion(nodes);
+                var graphModel = GetGraphAllRecursion(nodes);
                 //这里数据有点多，要通过语义进行一次过滤
                 answer = await _semanticService.GetGraphAnswerAsync(JsonConvert.SerializeObject(graphModel), input);
             }
             return answer;
-        }  
+        }
 
         /// <summary>
         /// 递归获取节点相关的所有边和节点
@@ -311,7 +298,7 @@ namespace GraphRag.Net.Domain.Service
         /// <returns></returns>
         public List<Edges> GetEdges(List<Nodes> nodes)
         {
-            var nodeIds=nodes.Select(x => x.Id).ToList();
+            var nodeIds = nodes.Select(x => x.Id).ToList();
             var edges = new List<Edges>();
             edges = _edges_Repositories.GetList(x => nodeIds.Contains(x.Source) || nodeIds.Contains(x.Target));
             return edges;
@@ -326,11 +313,11 @@ namespace GraphRag.Net.Domain.Service
         {
             var targets = edges.Select(p => p.Target).ToList();
             var sources = edges.Select(p => p.Source).ToList();
-            List<string> nodeIds= new List<string>();
+            List<string> nodeIds = new List<string>();
             nodeIds.AddRange(targets);
             nodeIds.AddRange(sources);
 
-            var nodes=_nodes_Repositories.GetList(p=> nodeIds.Contains(p.Id));
+            var nodes = _nodes_Repositories.GetList(p => nodeIds.Contains(p.Id));
             return nodes;
         }
     }

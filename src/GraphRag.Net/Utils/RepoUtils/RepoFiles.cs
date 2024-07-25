@@ -1,6 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
-using System.IO;
 using System.Reflection;
 
 namespace GraphRag.Net.Utils;

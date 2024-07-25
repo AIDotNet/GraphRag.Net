@@ -1,17 +1,12 @@
 ﻿using Azure.AI.OpenAI;
-using GraphRag.Net.Domain.Interface;
-using Microsoft.SemanticKernel.Connectors.OpenAI;
-using Microsoft.SemanticKernel;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.SemanticKernel.Memory;
 using GraphRag.Net.Common.Options;
+using GraphRag.Net.Domain.Interface;
 using GraphRag.Net.Options;
 using GraphRag.Net.Utils;
+using Microsoft.SemanticKernel;
+using Microsoft.SemanticKernel.Connectors.OpenAI;
 using Microsoft.SemanticKernel.Connectors.Sqlite;
+using Microsoft.SemanticKernel.Memory;
 
 namespace GraphRag.Net.Domain.Service
 {
@@ -35,7 +30,7 @@ namespace GraphRag.Net.Domain.Service
             string result = skresult.GetValue<string>()?.Trim() ?? "";
             return result;
         }
-        public async Task<string> GetGraphAnswerAsync(string graph,string input)
+        public async Task<string> GetGraphAnswerAsync(string graph, string input)
         {
 
             KernelFunction createFun = _kernel.Plugins.GetFunction("graph", "search");
@@ -79,7 +74,7 @@ namespace GraphRag.Net.Domain.Service
             return result;
         }
 
-        public async Task< SemanticTextMemory> GetTextMemory()
+        public async Task<SemanticTextMemory> GetTextMemory()
         {
             IMemoryStore memoryStore = await SqliteMemoryStore.ConnectAsync(GraphDBConnectionOption.Db);
             var handler = new OpenAIHttpClientHandler();
