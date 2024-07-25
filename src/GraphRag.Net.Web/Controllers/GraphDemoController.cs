@@ -50,7 +50,7 @@ namespace GraphRag.Net.Api.Controllers
         }
 
         /// <summary>
-        /// 查询对话
+        /// 搜索递归获取节点相关的所有边和节点进行图谱对话
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
@@ -58,6 +58,18 @@ namespace GraphRag.Net.Api.Controllers
         public async Task<IActionResult> SearchGraph(InputModel model)
         {
             var result = await _graphService.SearchGraphAsync(model.Index, model.Input);
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// 通过社区算法检索社区节点进行对话
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        [HttpPost]
+        public async Task<IActionResult> SearchGraphCommunity(InputModel model)
+        {
+            var result = await _graphService.SearchGraphCommunityAsync(model.Index, model.Input);
             return Ok(result);
         }
 
@@ -80,7 +92,7 @@ namespace GraphRag.Net.Api.Controllers
         }
 
         /// <summary>
-        /// 社区检测
+        /// 通过社区检测生成社区和摘要
         /// </summary>
         /// <param name="index"></param>
         /// <returns></returns>
@@ -88,6 +100,18 @@ namespace GraphRag.Net.Api.Controllers
         public async Task<IActionResult> GraphCommunities(string index)
         {
             await _graphService.GraphCommunitiesAsync(index);
+            return Ok();
+        }      
+        
+        /// <summary>
+        /// 通过社区摘要生成全局摘要
+        /// </summary>
+        /// <param name="index"></param>
+        /// <returns></returns>
+        [HttpGet]
+        public async Task<IActionResult> GraphGlobal(string index)
+        {
+            await _graphService.GraphGlobalAsync(index);
             return Ok();
         }
     }

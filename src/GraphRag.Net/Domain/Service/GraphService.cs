@@ -25,6 +25,10 @@ namespace GraphRag.Net.Domain.Service
         IGlobals_Repositories _globals_Repositories
         ) : IGraphService
     {
+        /// <summary>
+        /// 获取所有索引信息
+        /// </summary>
+        /// <returns></returns>
         public List<string> GetAllIndex()
         {
             var indexs = _nodes_Repositories.GetDB().Queryable<Nodes>().GroupBy(p => p.Index).Select(p => p.Index).ToList();
@@ -76,6 +80,12 @@ namespace GraphRag.Net.Domain.Service
             return graphViewModel;
         }
 
+        /// <summary>
+        /// 切片导入文本数据
+        /// </summary>
+        /// <param name="index"></param>
+        /// <param name="input"></param>
+        /// <returns></returns>
         public async Task InsertTextChunkAsync(string index, string input)
         {
             var lines = TextChunker.SplitPlainTextLines(input, TextChunkerOption.LinesToken);
@@ -222,7 +232,7 @@ namespace GraphRag.Net.Domain.Service
         }
 
         /// <summary>
-        /// 搜索图谱对话
+        /// 搜索递归获取节点相关的所有边和节点进行图谱对话
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
@@ -249,6 +259,42 @@ namespace GraphRag.Net.Domain.Service
                 var graphModel = GetGraphAllRecursion(index, nodes);
                 //这里数据有点多，要通过语义进行一次过滤
                 answer = await _semanticService.GetGraphAnswerAsync(JsonConvert.SerializeObject(graphModel), input);
+            }
+            return answer;
+        }
+
+        /// <summary>
+        /// 通过社区算法检索社区节点进行对话
+        /// </summary>
+        /// <param name="index"></param>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        public async Task<string> SearchGraphCommunityAsync(string index, string input)
+        {
+            string answer = "";
+            SemanticTextMemory textMemory = await _semanticService.GetTextMemory();
+            List<TextMemModel> textMemModelList = new List<TextMemModel>();
+            await foreach (MemoryQueryResult memory in textMemory.SearchAsync(index, input, limit: 3, minRelevanceScore: 0.8))
+            {
+                var textMemModel = new TextMemModel()
+                {
+                    Id = memory.Metadata.Id,
+                    Text = memory.Metadata.Text,
+                    Relevance = memory.Relevance
+                };
+                textMemModelList.Add(textMemModel);
+            }
+
+            if (textMemModelList.Count() > 0)
+            {
+                var nodes = _nodes_Repositories.GetList(p => p.Index == index && textMemModelList.Select(c => c.Id).Contains(p.Id));
+                //匹配到节点信息
+                var graphModel = GetGraphAllCommunitiesRecursion(index, nodes);
+
+               var community=string.Join(Environment.NewLine, _communities_Repositories.GetDB().Queryable<Communities>().Where(p=>p.Index==index).Select(p => p.Summaries).ToList());
+                var global = _globals_Repositories.GetFirst(p => p.Index == index)?.Summaries;
+                //这里数据有点多，要通过语义进行一次过滤
+                answer = await _semanticService.GetGraphCommunityAnswerAsync(JsonConvert.SerializeObject(graphModel), community, global, input);
             }
             return answer;
         }
@@ -321,6 +367,7 @@ namespace GraphRag.Net.Domain.Service
         /// <returns></returns>
         public async Task GraphGlobalAsync(string index)
         {
+            _globals_Repositories.Delete(p => p.Index == index);
             var communitieSummariesList = _communities_Repositories.GetDB().Queryable<Communities>().Where(p => p.Index == index).Select(p=>p.Summaries).ToList();
             var communitieSummaries =string.Join(Environment.NewLine, communitieSummariesList);
             var globalSummaries = await _semanticService.GlobalSummaries(communitieSummaries);
@@ -332,6 +379,9 @@ namespace GraphRag.Net.Domain.Service
             };
             _globals_Repositories.Insert(globals);
         }
+
+
+        #region 内部方法
 
 
         /// <summary>
@@ -386,6 +436,41 @@ namespace GraphRag.Net.Domain.Service
         }
 
         /// <summary>
+        /// 通过社区算法检索社区节点
+        /// </summary>
+        /// <param name="index"></param>
+        /// <param name="initialNodes"></param>
+        /// <returns></returns>
+        private GraphModel GetGraphAllCommunitiesRecursion(string index, List<Nodes> initialNodes)
+        {
+            var allNodes = new List<Nodes>();
+            var allEdges = new List<Edges>();
+
+
+            var nodeIds = initialNodes.Select(x => x.Id).ToList();
+
+            var communitiesNodes = _communities_Repositories.GetDB().Queryable<Communities>().
+                 LeftJoin<CommunitieNodes>((c, cn) => c.CommunitieId == cn.CommunitieId).
+                 LeftJoin<Nodes>((c, cn, n) => cn.NodeId == n.Id)
+                 .Where((c, cn, n) => nodeIds.Contains(n.Id)).Select((c, cn, n) => new Nodes() { Index = n.Index, Id = n.Id, Name = n.Name, Type = n.Type, Desc = n.Desc }).ToList();
+            allNodes.AddRange(communitiesNodes);
+            var newEdges = GetEdges(index, allNodes);
+
+            foreach (var edge in newEdges)
+            {
+                if (!allEdges.Any(e => e.Source == edge.Source && e.Target == edge.Target))
+                {
+                    allEdges.Add(edge);
+                }
+            }
+            return new GraphModel
+            {
+                Nodes = allNodes,
+                Edges = allEdges
+            };
+        }
+
+        /// <summary>
         /// 获取边信息
         /// </summary>
         /// <param name="nodeIds"></param>
@@ -414,5 +499,7 @@ namespace GraphRag.Net.Domain.Service
             var nodes = _nodes_Repositories.GetList(p => p.Index == index && nodeIds.Contains(p.Id));
             return nodes;
         }
+
+        #endregion
     }
 }
