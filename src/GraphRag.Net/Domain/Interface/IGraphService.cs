@@ -4,11 +4,12 @@ namespace GraphRag.Net.Domain.Interface
 {
     public interface IGraphService
     {
-        GraphViewModel GetAllGraphs();
+        List<string> GetAllIndex();
+        GraphViewModel GetAllGraphs(string index);
 
-        Task InsertTextChunkAsync(string input);
-        Task InsertGraphDataAsync(string input);
+        Task InsertTextChunkAsync(string index, string input);
+        Task InsertGraphDataAsync(string index, string input);
 
-        Task<string> SearchGraphAsync(string input);
+        Task<string> SearchGraphAsync(string index, string input);
     }
 }

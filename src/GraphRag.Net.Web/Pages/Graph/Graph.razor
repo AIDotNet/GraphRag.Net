@@ -22,10 +22,21 @@
         },
         methods: {
             showRelationGraph() {
+
+                debugger;
                 console.log('ref:btn:', this.$refs.btn);
                 console.log('ref:', this.$refs.seeksRelationGraph);
+                const url = new URL(window.location.href);
 
-                fetch('http://localhost:5000/api/GraphDemo/GetAllGraph')
+                // 获取查询字符串部分
+                const queryString = url.search;
+
+                // 解析查询字符串为一个 URLSearchParams 对象
+                const urlParams = new URLSearchParams(queryString);
+
+                // 获取参数的值，例如 'index'
+                const index = urlParams.get('index');
+                fetch('http://localhost:5000/api/GraphDemo/GetAllGraphs?index=' + index)
                     .then(response => {
                         if (!response.ok) {
                             throw new Error('网络响应不成功，状态码：' + response.status);

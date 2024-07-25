@@ -4,11 +4,5 @@
     "name": "导入与对话",
     "key": "chat",
     "icon": "wechat"
-  },
-  {
-    "path": "/graph",
-    "name": "Graph",
-    "key": "graph",
-    "icon": "deployment-unit"
   }
 ]

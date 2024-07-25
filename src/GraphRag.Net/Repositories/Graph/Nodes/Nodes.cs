@@ -6,6 +6,7 @@ namespace GraphRag.Net.Repositories.Graph.Nodes
     /// 节点
     /// </summary>
     [SugarTable("Nodes")]
+    [SugarIndex("i_nodes_index", nameof(Nodes.Index), OrderByType.Asc)]
     public class Nodes
     {
         /// <summary>
@@ -13,7 +14,10 @@ namespace GraphRag.Net.Repositories.Graph.Nodes
         /// </summary>
         [SugarColumn(IsPrimaryKey = true)]
         public string Id { get; set; }
-
+        /// <summary>
+        /// 索引
+        /// </summary>
+        public string Index { get; set; }
         /// <summary>
         /// 名称
         /// </summary>
@@ -23,7 +27,10 @@ namespace GraphRag.Net.Repositories.Graph.Nodes
         /// </summary>
         public string Type { get; set; }
 
-        [SugarColumn(ColumnDataType = "TEXT")]
+        /// <summary>
+        /// 节点描述
+        /// </summary>
+        [SugarColumn(ColumnDataType = "varchar(2000)")]
         public string? Desc { get; set; }
     }
 }
