@@ -8,7 +8,10 @@ namespace GraphRag.Net.Api.Controllers
     [ApiController]
     public class GraphDemoController(IGraphService _graphService) : ControllerBase
     {
-
+        /// <summary>
+        /// 获取所有的索引数据
+        /// </summary>
+        /// <returns></returns>
         [HttpGet]
         public async Task<IActionResult> GetAllIndex()
         {
@@ -16,6 +19,12 @@ namespace GraphRag.Net.Api.Controllers
             return Ok(graphModel);
         }
 
+
+        /// <summary>
+        /// 获取所有的图谱数据
+        /// </summary>
+        /// <param name="index"></param>
+        /// <returns></returns>
         [HttpGet]
         public async Task<IActionResult> GetAllGraphs(string index)
         {
@@ -27,6 +36,12 @@ namespace GraphRag.Net.Api.Controllers
             return Ok(graphModel);
         }
 
+
+        /// <summary>
+        /// 插入文本数据
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
         [HttpPost]
         public async Task<IActionResult> InsertGraphData(InputModel model)
         {
@@ -34,6 +49,11 @@ namespace GraphRag.Net.Api.Controllers
             return Ok();
         }
 
+        /// <summary>
+        /// 查询对话
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
         [HttpPost]
         public async Task<IActionResult> SearchGraph(InputModel model)
         {
@@ -41,7 +61,12 @@ namespace GraphRag.Net.Api.Controllers
             return Ok(result);
         }
 
-
+        /// <summary>
+        /// 导入txt文档
+        /// </summary>
+        /// <param name="index"></param>
+        /// <param name="file"></param>
+        /// <returns></returns>
         [HttpPost]
         public async Task<IActionResult> ImportTxt(string index,IFormFile file)
         {
@@ -52,6 +77,18 @@ namespace GraphRag.Net.Api.Controllers
                 await _graphService.InsertTextChunkAsync(index,txt);
                 return Ok();
             }
+        }
+
+        /// <summary>
+        /// 社区检测
+        /// </summary>
+        /// <param name="index"></param>
+        /// <returns></returns>
+        [HttpGet]
+        public async Task<IActionResult> GraphCommunities(string index)
+        {
+            await _graphService.GraphCommunitiesAsync(index);
+            return Ok();
         }
     }
 

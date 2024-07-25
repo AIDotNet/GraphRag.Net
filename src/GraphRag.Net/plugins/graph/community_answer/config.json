@@ -1,0 +1,9 @@
+{
+  "schema": 1,
+  "description": "社区答案",
+  "execution_settings": {
+    "default": {
+      "temperature": 0.3
+    }
+  }
+}

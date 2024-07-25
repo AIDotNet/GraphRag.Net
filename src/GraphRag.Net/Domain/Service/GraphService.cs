@@ -3,6 +3,7 @@ using GraphRag.Net.Domain.Interface;
 using GraphRag.Net.Domain.Model.Constant;
 using GraphRag.Net.Domain.Model.Graph;
 using GraphRag.Net.Repositories;
+using GraphRag.Net.Repositories.Graph.Edges;
 using GraphRag.Net.Repositories.Graph.Nodes;
 using GraphRag.Net.Utils;
 using Microsoft.SemanticKernel;
@@ -18,7 +19,9 @@ namespace GraphRag.Net.Domain.Service
         Kernel _kernel,
         INodes_Repositories _nodes_Repositories,
         IEdges_Repositories _edges_Repositories,
-        ISemanticService _semanticService
+        ISemanticService _semanticService,
+        ICommunities_Repositories _communities_Repositories ,
+        ICommunitieNodes_Repositories _communitieNodes_Repositories
         ) : IGraphService
     {
         public List<string> GetAllIndex()
@@ -248,6 +251,68 @@ namespace GraphRag.Net.Domain.Service
             }
             return answer;
         }
+
+
+        /// <summary>
+        /// 社区检测
+        /// </summary>
+        /// <param name="index"></param>
+        /// <returns></returns>
+        public async Task GraphCommunitiesAsync(string index)
+        {
+            var nodes = _nodes_Repositories.GetList(p => p.Index == index);
+            var edges = _edges_Repositories.GetList(p => p.Index == index);
+
+            //删除社区数据
+            _communitieNodes_Repositories.Delete(p => p.Index == index);
+            _communities_Repositories.Delete(p => p.Index == index);
+
+            var graph = new Graph();
+            foreach (var edge in edges)
+            {
+                graph.AddEdge(edge.Source, edge.Target);
+            }
+
+            //重新计算社区
+            var communityDetection = new CommunityDetection();
+            var result = communityDetection.LabelPropagation(graph);
+ 
+            Console.WriteLine("开始社区总结");
+            foreach (var kvp in result)
+            {
+                //插入社区节点数据
+                CommunitieNodes  communitieNodes = new CommunitieNodes();
+                communitieNodes.Index = index;
+                communitieNodes.CommunitieId = kvp.Value;
+                communitieNodes.NodeId = kvp.Key;
+                _communitieNodes_Repositories.Insert(communitieNodes);
+            }
+            //获取所有社区ID
+            var communitieIds = _communitieNodes_Repositories.GetDB().Queryable<CommunitieNodes>().Where(p=>p.Index==index).GroupBy(p => p.CommunitieId).Select(p => p.CommunitieId).ToList();
+
+            foreach (var communitieId in communitieIds)
+            {
+                var nodeList = _communitieNodes_Repositories.GetDB().Queryable<CommunitieNodes>()
+                    .LeftJoin<Nodes>((c, n) => c.NodeId == n.Id)
+                    .Where(c => c.CommunitieId == communitieId)
+                    .Select((c, n) => $"Name:{n.Name}; Type:{n.Type}; Desc:{n.Desc}")
+                    .ToList();
+
+                var nodeDescs= string.Join(Environment.NewLine, nodeList);
+                var summaries= await _semanticService.CommunitySummaries(nodeDescs);
+
+                Communities communities = new Communities() {
+                     CommunitieId=communitieId,
+                     Index=index,
+                     Summaries=summaries
+                };
+                //插入社区总结数据
+                _communities_Repositories.Insert(communities);
+            }
+
+        }
+
+
 
         /// <summary>
         /// 递归获取节点相关的所有边和节点

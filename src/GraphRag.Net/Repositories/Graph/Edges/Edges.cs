@@ -1,6 +1,6 @@
 ﻿using SqlSugar;
 
-namespace GraphRag.Net.Repositories
+namespace GraphRag.Net.Repositories.Graph.Edges
 {
     /// <summary>
     /// 边

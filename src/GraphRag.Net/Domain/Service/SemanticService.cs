@@ -72,7 +72,20 @@ namespace GraphRag.Net.Domain.Service
 
             string result = skresult.GetValue<string>()?.Trim() ?? "";
             return result;
-        }
+        }  
+        public async Task<string> CommunitySummaries(string nodes)
+        {
+            KernelFunction createFun = _kernel.Plugins.GetFunction("graph", "community_summaries");
+            var args = new KernelArguments()
+            {
+                ["nodes"] = nodes
+            };
+            var skresult = await _kernel.InvokeAsync(createFun, args);
+
+            string result = skresult.GetValue<string>()?.Trim() ?? "";
+            return result;
+        }    
+
 
         public async Task<SemanticTextMemory> GetTextMemory()
         {

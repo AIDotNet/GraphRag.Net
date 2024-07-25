@@ -11,5 +11,7 @@ namespace GraphRag.Net.Domain.Interface
         Task InsertGraphDataAsync(string index, string input);
 
         Task<string> SearchGraphAsync(string index, string input);
+
+        Task GraphCommunitiesAsync(string index);
     }
 }
