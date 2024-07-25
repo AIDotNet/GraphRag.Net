@@ -183,7 +183,7 @@ namespace GraphRag.Net.Domain.Service
                         Id = Id,
                         Name = n.Name,
                         Type = n.Type,
-                        Desc = n.Desc
+                        Desc = n.Desc.ConvertToString()
                     };
 
                     if (!nodeDic.ContainsKey(n.Id))
