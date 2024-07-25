@@ -1,4 +1,4 @@
-﻿using GraphRag.Net.Repositories;
+﻿using GraphRag.Net.Repositories.Graph.Edges;
 using GraphRag.Net.Repositories.Graph.Nodes;
 
 namespace GraphRag.Net.Domain.Model.Graph

@@ -8,7 +8,10 @@ namespace GraphRag.Net.Api.Controllers
     [ApiController]
     public class GraphDemoController(IGraphService _graphService) : ControllerBase
     {
-
+        /// <summary>
+        /// 获取所有的索引数据
+        /// </summary>
+        /// <returns></returns>
         [HttpGet]
         public async Task<IActionResult> GetAllIndex()
         {
@@ -16,6 +19,12 @@ namespace GraphRag.Net.Api.Controllers
             return Ok(graphModel);
         }
 
+
+        /// <summary>
+        /// 获取所有的图谱数据
+        /// </summary>
+        /// <param name="index"></param>
+        /// <returns></returns>
         [HttpGet]
         public async Task<IActionResult> GetAllGraphs(string index)
         {
@@ -27,6 +36,12 @@ namespace GraphRag.Net.Api.Controllers
             return Ok(graphModel);
         }
 
+
+        /// <summary>
+        /// 插入文本数据
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
         [HttpPost]
         public async Task<IActionResult> InsertGraphData(InputModel model)
         {
@@ -34,6 +49,11 @@ namespace GraphRag.Net.Api.Controllers
             return Ok();
         }
 
+        /// <summary>
+        /// 搜索递归获取节点相关的所有边和节点进行图谱对话
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
         [HttpPost]
         public async Task<IActionResult> SearchGraph(InputModel model)
         {
@@ -41,7 +61,24 @@ namespace GraphRag.Net.Api.Controllers
             return Ok(result);
         }
 
+        /// <summary>
+        /// 通过社区算法检索社区节点进行对话
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        [HttpPost]
+        public async Task<IActionResult> SearchGraphCommunity(InputModel model)
+        {
+            var result = await _graphService.SearchGraphCommunityAsync(model.Index, model.Input);
+            return Ok(result);
+        }
 
+        /// <summary>
+        /// 导入txt文档
+        /// </summary>
+        /// <param name="index"></param>
+        /// <param name="file"></param>
+        /// <returns></returns>
         [HttpPost]
         public async Task<IActionResult> ImportTxt(string index,IFormFile file)
         {
@@ -52,6 +89,30 @@ namespace GraphRag.Net.Api.Controllers
                 await _graphService.InsertTextChunkAsync(index,txt);
                 return Ok();
             }
+        }
+
+        /// <summary>
+        /// 通过社区检测生成社区和摘要
+        /// </summary>
+        /// <param name="index"></param>
+        /// <returns></returns>
+        [HttpGet]
+        public async Task<IActionResult> GraphCommunities(string index)
+        {
+            await _graphService.GraphCommunitiesAsync(index);
+            return Ok();
+        }      
+        
+        /// <summary>
+        /// 通过社区摘要生成全局摘要
+        /// </summary>
+        /// <param name="index"></param>
+        /// <returns></returns>
+        [HttpGet]
+        public async Task<IActionResult> GraphGlobal(string index)
+        {
+            await _graphService.GraphGlobalAsync(index);
+            return Ok();
         }
     }
 

@@ -1,0 +1,9 @@
+{
+  "schema": 1,
+  "description": "全局总结",
+  "execution_settings": {
+    "default": {
+      "temperature": 0
+    }
+  }
+}
