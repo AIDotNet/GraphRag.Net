@@ -33,3 +33,5 @@ http://localhost:5000/
 ```
 
 打开blazor的UI界面，页面提供了文本导入、文件导入，和问答对话，查看知识图谱等功能
+
+![Graoh](https://github.com/xuzeyu91/GraphRag.Net/blob/main/doc/graph1.png)
