@@ -27,6 +27,8 @@ http://localhost:5000/swagger
 ```
 打开swagger查看接口
 
+![Graoh](https://github.com/xuzeyu91/GraphRag.Net/blob/main/doc/api.png)
+
 也可以使用
 ```
 http://localhost:5000/
