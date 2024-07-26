@@ -25,12 +25,8 @@
     <PackageReference Include="Microsoft.SemanticKernel" Version="$(SKVersion)" />
     <PackageReference Include="Microsoft.SemanticKernel.Core" Version="$(SKVersion)" />
     <PackageReference Include="Microsoft.SemanticKernel.Plugins.Core" Version="$(SKVersion)-alpha" />
-    <PackageReference Include="Microsoft.SemanticKernel.Connectors.Postgres" Version="$(SKVersion)-alpha" />
     <PackageReference Include="Microsoft.SemanticKernel.Connectors.Sqlite" Version="$(SKVersion)-alpha" />
-    <PackageReference Include="Microsoft.SemanticKernel.Planners.Handlebars" Version="$(SKVersion)-preview" />
-    <PackageReference Include="Microsoft.SemanticKernel.Planners.OpenAI" Version="$(SKVersion)-preview" />
     <PackageReference Include="Microsoft.SemanticKernel.Plugins.Memory" Version="$(SKVersion)-alpha" />
-    <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftVersion)" />
     <PackageReference Include="SqlSugarCore" Version="5.1.4.166" />
   </ItemGroup>
   <ItemGroup>
