@@ -281,18 +281,7 @@ namespace GraphRag.Net.Domain.Service
         public async Task<string> SearchGraphCommunityAsync(string index, string input)
         {
             string answer = "";
-            SemanticTextMemory textMemory = await _semanticService.GetTextMemory();
-            List<TextMemModel> textMemModelList = new List<TextMemModel>();
-            await foreach (MemoryQueryResult memory in textMemory.SearchAsync(index, input, limit: 3, minRelevanceScore: 0.8))
-            {
-                var textMemModel = new TextMemModel()
-                {
-                    Id = memory.Metadata.Id,
-                    Text = memory.Metadata.Text,
-                    Relevance = memory.Relevance
-                };
-                textMemModelList.Add(textMemModel);
-            }
+            var textMemModelList = await RetrieveTextMemModelList(index, input);
 
             if (textMemModelList.Count() > 0)
             {
@@ -306,6 +295,32 @@ namespace GraphRag.Net.Domain.Service
                 answer = await _semanticService.GetGraphCommunityAnswerAsync(JsonConvert.SerializeObject(graphModel), community, global, input);
             }
             return answer;
+        }
+        /// <summary>
+        /// 通过社区算法检索社区节点进行对话,流式返回
+        /// </summary>
+        /// <param name="index"></param>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        public async IAsyncEnumerable<StreamingKernelContent> SearchGraphCommunityStreamAsync(string index, string input)
+        {
+            var textMemModelList = await RetrieveTextMemModelList(index, input);
+
+            if (textMemModelList.Count() > 0)
+            {
+                var nodes = _nodes_Repositories.GetList(p => p.Index == index && textMemModelList.Select(c => c.Id).Contains(p.Id));
+                //匹配到节点信息
+                var graphModel = GetGraphAllCommunitiesRecursion(index, nodes);
+
+               var community=string.Join(Environment.NewLine, _communities_Repositories.GetDB().Queryable<Communities>().Where(p=>p.Index==index).Select(p => p.Summaries).ToList());
+                var global = _globals_Repositories.GetFirst(p => p.Index == index)?.Summaries;
+                //这里数据有点多，要通过语义进行一次过滤
+                var answer =  _semanticService.GetGraphCommunityAnswerStreamAsync(JsonConvert.SerializeObject(graphModel), community, global, input);
+                await foreach (var content in answer)
+                {
+                    yield return content;
+                }
+            }
         }
 
 

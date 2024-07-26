@@ -10,6 +10,8 @@ namespace GraphRag.Net.Domain.Interface
         Task<string> GetGraphAnswerAsync(string graph, string input);
         IAsyncEnumerable<StreamingKernelContent> GetGraphAnswerStreamAsync(string graph, string input);
         Task<string> GetGraphCommunityAnswerAsync(string graph, string community, string global, string input);
+
+        IAsyncEnumerable<StreamingKernelContent> GetGraphCommunityAnswerStreamAsync(string graph, string community, string global, string input);
         Task<string> GetRelationship(string node1, string node2);
         Task<string> MergeDesc(string desc1, string desc2);
         Task<string> CommunitySummaries(string nodes);
