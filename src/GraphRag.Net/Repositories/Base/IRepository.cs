@@ -15,13 +15,11 @@ namespace GraphRag.Net.Base
         int Count(Expression<Func<T, bool>> whereExpression);
         Task<int> CountAsync(Expression<Func<T, bool>> whereExpression);
         PageList<T> GetPageList(Expression<Func<T, bool>> whereExpression, PageModel page);
-        PageList<P> GetPageList<P>(Expression<Func<T, bool>> whereExpression, PageModel page);
         Task<PageList<T>> GetPageListAsync(Expression<Func<T, bool>> whereExpression, PageModel page);
-        Task<PageList<P>> GetPageListAsync<P>(Expression<Func<T, bool>> whereExpression, PageModel page);
+
         PageList<T> GetPageList(Expression<Func<T, bool>> whereExpression, PageModel page, Expression<Func<T, object>> orderByExpression = null, OrderByType orderByType = OrderByType.Asc);
         Task<PageList<T>> GetPageListAsync(Expression<Func<T, bool>> whereExpression, PageModel page, Expression<Func<T, object>> orderByExpression = null, OrderByType orderByType = OrderByType.Asc);
-        PageList<P> GetPageList<P>(Expression<Func<T, bool>> whereExpression, PageModel page, Expression<Func<T, object>> orderByExpression = null, OrderByType orderByType = OrderByType.Asc);
-        Task<PageList<P>> GetPageListAsync<P>(Expression<Func<T, bool>> whereExpression, PageModel page, Expression<Func<T, object>> orderByExpression = null, OrderByType orderByType = OrderByType.Asc);
+    
         PageList<T> GetPageList(List<IConditionalModel> conditionalList, PageModel page);
         Task<PageList<T>> GetPageListAsync(List<IConditionalModel> conditionalList, PageModel page);
         PageList<T> GetPageList(List<IConditionalModel> conditionalList, PageModel page, Expression<Func<T, object>> orderByExpression = null, OrderByType orderByType = OrderByType.Asc);

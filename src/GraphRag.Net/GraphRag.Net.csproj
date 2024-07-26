@@ -32,7 +32,6 @@
     <PackageReference Include="Microsoft.SemanticKernel.Plugins.Memory" Version="$(SKVersion)-alpha" />
     <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftVersion)" />
     <PackageReference Include="SqlSugarCore" Version="5.1.4.166" />
-    <PackageReference Include="AutoMapper" Version="8.1.0" />
   </ItemGroup>
   <ItemGroup>
     <None Update="plugins\**">

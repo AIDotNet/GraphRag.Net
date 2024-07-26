@@ -1,7 +1,4 @@
-﻿
-
-using GraphRag.Net.Common.Map;
-using GraphRag.Net.Model;
+﻿using GraphRag.Net.Model;
 using SqlSugar;
 using System.Linq.Expressions;
 
@@ -107,19 +104,6 @@ namespace GraphRag.Net.Base
             return list;
         }
 
-        public virtual PageList<P> GetPageList<P>(Expression<Func<T, bool>> whereExpression, PageModel page)
-        {
-            var result = CurrentDb.GetPageList(whereExpression, page);
-            var pageData = new PageList<P>
-            {
-                TotalCount = page.TotalCount,
-                PageIndex = page.PageIndex,
-                PageSize = page.PageSize,
-                List = result.ToDTOList<P>()
-            };
-            return pageData;
-        }
-
         /// <summary>
         /// 获取分页-异步
         /// </summary>
@@ -134,19 +118,6 @@ namespace GraphRag.Net.Base
             list.PageSize = page.PageSize;
             list.TotalCount = page.TotalCount;
             return list;
-        }
-
-        public virtual async Task<PageList<P>> GetPageListAsync<P>(Expression<Func<T, bool>> whereExpression, PageModel page)
-        {
-            var result = await CurrentDb.GetPageListAsync(whereExpression, page);
-            var pageData = new PageList<P>
-            {
-                TotalCount = page.TotalCount,
-                PageIndex = page.PageIndex,
-                PageSize = page.PageSize,
-                List = result.ToDTOList<P>()
-            };
-            return pageData;
         }
 
         public virtual PageList<T> GetPageList(Expression<Func<T, bool>> whereExpression, PageModel page, Expression<Func<T, object>> orderByExpression = null, OrderByType orderByType = OrderByType.Asc)
@@ -167,32 +138,6 @@ namespace GraphRag.Net.Base
             list.PageSize = page.PageSize;
             list.TotalCount = page.TotalCount;
             return list;
-        }
-
-        public virtual PageList<P> GetPageList<P>(Expression<Func<T, bool>> whereExpression, PageModel page, Expression<Func<T, object>> orderByExpression = null, OrderByType orderByType = OrderByType.Asc)
-        {
-            var result = CurrentDb.GetPageList(whereExpression, page, orderByExpression, orderByType);
-            var pageData = new PageList<P>
-            {
-                TotalCount = page.TotalCount,
-                PageIndex = page.PageIndex,
-                PageSize = page.PageSize,
-                List = result.ToDTOList<P>()
-            };
-            return pageData;
-        }
-
-        public virtual async Task<PageList<P>> GetPageListAsync<P>(Expression<Func<T, bool>> whereExpression, PageModel page, Expression<Func<T, object>> orderByExpression = null, OrderByType orderByType = OrderByType.Asc)
-        {
-            var result = await CurrentDb.GetPageListAsync(whereExpression, page, orderByExpression, orderByType);
-            var pageData = new PageList<P>
-            {
-                TotalCount = page.TotalCount,
-                PageIndex = page.PageIndex,
-                PageSize = page.PageSize,
-                List = result.ToDTOList<P>()
-            };
-            return pageData;
         }
 
         public virtual PageList<T> GetPageList(List<IConditionalModel> conditionalList, PageModel page)
