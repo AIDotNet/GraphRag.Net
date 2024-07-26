@@ -42,6 +42,10 @@ namespace GraphRag.Net.Domain.Service
         /// <returns></returns>
         public GraphViewModel GetAllGraphs(string index)
         {
+            if (string.IsNullOrWhiteSpace(index))
+            {
+                throw new ArgumentException("Index required value cannot be null.");
+            }
             GraphViewModel graphViewModel = new GraphViewModel();
             var nodes = _nodes_Repositories.GetList(p => p.Index == index);
             var edges = _edges_Repositories.GetList(p => p.Index == index);
@@ -89,6 +93,11 @@ namespace GraphRag.Net.Domain.Service
         /// <returns></returns>
         public async Task InsertTextChunkAsync(string index, string input)
         {
+            if (string.IsNullOrWhiteSpace(index)|| string.IsNullOrWhiteSpace(input))
+            {
+                throw new ArgumentException("Values required for index and input cannot be null.");
+            }
+
             var lines = TextChunker.SplitPlainTextLines(input, TextChunkerOption.LinesToken);
 
             var paragraphs = TextChunker.SplitPlainTextParagraphs(lines, TextChunkerOption.ParagraphsToken);
@@ -101,10 +110,15 @@ namespace GraphRag.Net.Domain.Service
         /// <summary>
         /// 生成图谱数据
         /// </summary>
+        /// <param name="index"></param>
         /// <param name="input"></param>
         /// <returns></returns>
         public async Task InsertGraphDataAsync(string index, string input)
         {
+            if (string.IsNullOrWhiteSpace(index) || string.IsNullOrWhiteSpace(input))
+            {
+                throw new ArgumentException("Values required for index and input cannot be null.");
+            }
             try
             {
                 SemanticTextMemory textMemory = await _semanticService.GetTextMemory();
@@ -235,10 +249,15 @@ namespace GraphRag.Net.Domain.Service
         /// <summary>
         /// 搜索递归获取节点相关的所有边和节点进行图谱对话
         /// </summary>
+        /// <param name="index"></param>
         /// <param name="input"></param>
         /// <returns></returns>
         public async Task<string> SearchGraphAsync(string index, string input)
         {
+            if (string.IsNullOrWhiteSpace(index) || string.IsNullOrWhiteSpace(input))
+            {
+                throw new ArgumentException("Values required for index and input cannot be null.");
+            }
             string answer = "";
             var textMemModelList = await RetrieveTextMemModelList(index, input);
 
@@ -259,6 +278,10 @@ namespace GraphRag.Net.Domain.Service
         /// <returns></returns>
         public async IAsyncEnumerable<StreamingKernelContent> SearchGraphStreamAsync(string index, string input)
         {
+            if (string.IsNullOrWhiteSpace(index) || string.IsNullOrWhiteSpace(input))
+            {
+                throw new ArgumentException("Values required for index and input cannot be null.");
+            }
             var textMemModelList = await RetrieveTextMemModelList(index, input);
 
             if (textMemModelList.Any())
@@ -280,6 +303,10 @@ namespace GraphRag.Net.Domain.Service
         /// <returns></returns>
         public async Task<string> SearchGraphCommunityAsync(string index, string input)
         {
+            if (string.IsNullOrWhiteSpace(index) || string.IsNullOrWhiteSpace(input))
+            {
+                throw new ArgumentException("Values required for index and input cannot be null.");
+            }
             string answer = "";
             var textMemModelList = await RetrieveTextMemModelList(index, input);
 
@@ -304,6 +331,10 @@ namespace GraphRag.Net.Domain.Service
         /// <returns></returns>
         public async IAsyncEnumerable<StreamingKernelContent> SearchGraphCommunityStreamAsync(string index, string input)
         {
+            if (string.IsNullOrWhiteSpace(index) || string.IsNullOrWhiteSpace(input))
+            {
+                throw new ArgumentException("Values required for index and input cannot be null.");
+            }
             var textMemModelList = await RetrieveTextMemModelList(index, input);
 
             if (textMemModelList.Count() > 0)
