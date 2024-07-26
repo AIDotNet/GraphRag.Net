@@ -172,6 +172,14 @@
             <param name="input"></param>
             <returns></returns>
         </member>
+        <member name="M:GraphRag.Net.Domain.Service.GraphService.SearchGraphStreamAsync(System.String,System.String)">
+            <summary>
+            搜索递归获取节点相关的所有边和节点进行图谱对话,流式返回
+            </summary>
+            <param name="index"></param>
+            <param name="input"></param>
+            <returns></returns>
+        </member>
         <member name="M:GraphRag.Net.Domain.Service.GraphService.SearchGraphCommunityAsync(System.String,System.String)">
             <summary>
             通过社区算法检索社区节点进行对话
@@ -192,6 +200,32 @@
             全局摘要
             </summary>
             <param name="index"></param>
+            <returns></returns>
+        </member>
+        <member name="M:GraphRag.Net.Domain.Service.GraphService.RetrieveTextMemModelList(System.String,System.String)">
+            <summary>
+            基于搜索条件检索TextMemModel的列表。
+            </summary>
+            <param name="index"></param>
+            <param name="input"></param>
+            <returns></returns>
+        </member>
+        <member name="M:GraphRag.Net.Domain.Service.GraphService.GetFilteredGraphModel(System.String,System.String,System.Collections.Generic.List{GraphRag.Net.Repositories.Graph.Nodes.Nodes})">
+            <summary>
+            使用基于输入条件的语义过滤来过滤图模型。
+            </summary>
+            <param name="index"></param>
+            <param name="input"></param>
+            <param name="nodes"></param>
+            <returns></returns>
+        </member>
+        <member name="M:GraphRag.Net.Domain.Service.GraphService.GetFilteredGraphModelStream(System.String,System.String,System.Collections.Generic.List{GraphRag.Net.Repositories.Graph.Nodes.Nodes})">
+            <summary>
+            使用基于输入条件的语义过滤来过滤图模型。流式返回
+            </summary>
+            <param name="index"></param>
+            <param name="input"></param>
+            <param name="nodes"></param>
             <returns></returns>
         </member>
         <member name="M:GraphRag.Net.Domain.Service.GraphService.GetGraphAllRecursion(System.String,System.Collections.Generic.List{GraphRag.Net.Repositories.Graph.Nodes.Nodes})">

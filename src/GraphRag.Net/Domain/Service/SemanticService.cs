@@ -44,6 +44,21 @@ namespace GraphRag.Net.Domain.Service
             string result = skresult.GetValue<string>()?.Trim() ?? "";
             return result;
         }
+        public async IAsyncEnumerable<StreamingKernelContent> GetGraphAnswerStreamAsync(string graph, string input)
+        {
+            KernelFunction createFun = _kernel.Plugins.GetFunction("graph", "search");
+            var args = new KernelArguments()
+            {
+                ["graph"] = graph,
+                ["input"] = input,
+            };
+            var skresult = _kernel.InvokeStreamingAsync(createFun, args);
+            await foreach (var content in skresult)
+            {
+                yield return content;
+            }
+        }
+
 
         public async Task<string> GetGraphCommunityAnswerAsync(string graph,string community,string global,string input)
         {
