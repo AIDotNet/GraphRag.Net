@@ -9,7 +9,6 @@
     <Company>xuzeyu</Company>
     <Description>商务需求联系微信xuzeyu91</Description>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
-    <DocumentationFile>GraphRag.Net.Web.xml</DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>

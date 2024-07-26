@@ -2,6 +2,7 @@ using AntDesign.ProLayout;
 using GraphRag.Net;
 using GraphRag.Net.Common.Options;
 using Microsoft.AspNetCore.Components;
+using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,7 +20,13 @@ builder.Services.Configure<ProSettings>(builder.Configuration.GetSection("ProSet
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c => {
+    c.SwaggerDoc("v1", new() { Title = "GraphRag.Net.Api", Version = "v1" });
+    //添加Api层注释（true表示显示控制器注释）
+    var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+    c.IncludeXmlComments(xmlPath, true);
+});
 builder.Services.AddGraphRagNet();
 
 builder.Configuration.GetSection("OpenAI").Get<OpenAIOption>();
