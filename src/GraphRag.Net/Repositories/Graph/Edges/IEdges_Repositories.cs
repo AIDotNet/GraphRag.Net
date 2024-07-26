@@ -1,8 +1,6 @@
-﻿
+﻿using GraphRag.Net.Base;
 
-using GraphRag.Net.Base;
-
-namespace GraphRag.Net.Repositories
+namespace GraphRag.Net.Repositories.Graph.Edges
 {
     public interface IEdges_Repositories : IRepository<Edges>
     {

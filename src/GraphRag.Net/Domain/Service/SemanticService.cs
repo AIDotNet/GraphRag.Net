@@ -45,6 +45,23 @@ namespace GraphRag.Net.Domain.Service
             return result;
         }
 
+        public async Task<string> GetGraphCommunityAnswerAsync(string graph,string community,string global,string input)
+        {
+
+            KernelFunction createFun = _kernel.Plugins.GetFunction("graph", "community_search");
+            var args = new KernelArguments()
+            {
+                ["graph"] = graph,
+                ["community"] = community,
+                ["global"] = global,
+                ["input"] = input,
+            };
+            var skresult = await _kernel.InvokeAsync(createFun, args);
+
+            string result = skresult.GetValue<string>()?.Trim() ?? "";
+            return result;
+        }
+
 
         public async Task<string> GetRelationship(string node1, string node2)
         {
@@ -72,7 +89,32 @@ namespace GraphRag.Net.Domain.Service
 
             string result = skresult.GetValue<string>()?.Trim() ?? "";
             return result;
-        }
+        }  
+        public async Task<string> CommunitySummaries(string nodes)
+        {
+            KernelFunction createFun = _kernel.Plugins.GetFunction("graph", "community_summaries");
+            var args = new KernelArguments()
+            {
+                ["nodes"] = nodes
+            };
+            var skresult = await _kernel.InvokeAsync(createFun, args);
+
+            string result = skresult.GetValue<string>()?.Trim() ?? "";
+            return result;
+        }    
+        public async Task<string> GlobalSummaries(string community)
+        {
+            KernelFunction createFun = _kernel.Plugins.GetFunction("graph", "global_summaries");
+            var args = new KernelArguments()
+            {
+                ["community"] = community
+            };
+            var skresult = await _kernel.InvokeAsync(createFun, args);
+
+            string result = skresult.GetValue<string>()?.Trim() ?? "";
+            return result;
+        }    
+
 
         public async Task<SemanticTextMemory> GetTextMemory()
         {
