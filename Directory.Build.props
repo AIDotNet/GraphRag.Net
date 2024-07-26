@@ -1,6 +1,7 @@
 <Project>
   <!-- See https://aka.ms/dotnet/msbuild/customize for more details on customizing your build -->
   <PropertyGroup>
+    <Version>0.1.0</Version>
     <SKVersion>1.16.0</SKVersion>
     <NewtonsoftVersion>13.0.3</NewtonsoftVersion>
   </PropertyGroup>
