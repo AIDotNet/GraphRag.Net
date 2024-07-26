@@ -5,7 +5,7 @@ using System.Text.RegularExpressions;
 
 namespace GraphRag.Net.Utils
 {
-    public class OpenAIHttpClientHandler : HttpClientHandler
+    internal class OpenAIHttpClientHandler : HttpClientHandler
     {
 
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)

@@ -4,7 +4,7 @@ using System.Reflection;
 
 namespace GraphRag.Net.Utils;
 
-public static class RepoFiles
+internal static class RepoFiles
 {
     /// <summary>
     /// Scan the local folders from the repo, looking for "samples/plugins" folder.

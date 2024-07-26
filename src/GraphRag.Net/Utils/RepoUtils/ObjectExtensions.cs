@@ -2,7 +2,7 @@
 
 namespace GraphRag.Net.Utils
 {
-    public static class ObjectExtensions
+    internal static class ObjectExtensions
     {
         private static readonly JsonSerializerOptions s_jsonOptionsCache = new() { WriteIndented = true };
 

@@ -6,7 +6,7 @@ using System.Web;
 
 namespace GraphRag.Net.Utils
 {
-    public static class ConvertUtils
+    internal static class ConvertUtils
     {
         /// <summary>
         /// 判断是否为空，为空返回true

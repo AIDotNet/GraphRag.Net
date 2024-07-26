@@ -2,7 +2,7 @@
 
 namespace GraphRag.Net.Utils;
 
-public class AppException : Exception
+internal class AppException : Exception
 {
     public AppException() : base()
     {
