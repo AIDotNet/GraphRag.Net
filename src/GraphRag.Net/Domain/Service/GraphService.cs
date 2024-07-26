@@ -561,13 +561,12 @@ namespace GraphRag.Net.Domain.Service
             var allNodes = new List<Nodes>();
             var allEdges = new List<Edges>();
 
-
             var nodeIds = initialNodes.Select(x => x.Id).ToList();
 
-            var communitiesNodes = _communities_Repositories.GetDB().Queryable<Communities>().
-                 LeftJoin<CommunitieNodes>((c, cn) => c.CommunitieId == cn.CommunitieId).
-                 LeftJoin<Nodes>((c, cn, n) => cn.NodeId == n.Id)
-                 .Where((c, cn, n) => nodeIds.Contains(n.Id)).Select((c, cn, n) => new Nodes() { Index = n.Index, Id = n.Id, Name = n.Name, Type = n.Type, Desc = n.Desc }).ToList();
+            var communitiesNodes = _communities_Repositories.GetDB().Queryable<Communities>()
+                .LeftJoin<CommunitieNodes>((c, cn) => c.CommunitieId == cn.CommunitieId)
+                .LeftJoin<Nodes>((c, cn, n) => cn.NodeId == n.Id)
+                .Where((c, cn, n) => nodeIds.Contains(n.Id)).Select((c, cn, n) => new Nodes() { Index = n.Index, Id = n.Id, Name = n.Name, Type = n.Type, Desc = n.Desc }).ToList();
             allNodes.AddRange(communitiesNodes);
             var newEdges = GetEdges(index, allNodes);
 

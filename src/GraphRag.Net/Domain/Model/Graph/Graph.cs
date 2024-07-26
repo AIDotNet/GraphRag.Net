@@ -32,6 +32,11 @@ namespace GraphRag.Net.Domain.Model.Graph
 
     public class CommunityDetection
     {
+        /// <summary>
+        /// 标签传播算法
+        /// </summary>
+        /// <param name="graph"></param>
+        /// <returns></returns>
         public Dictionary<string, string> LabelPropagation(Graph graph)
         {
             // Initialize labels
