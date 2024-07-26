@@ -20,6 +20,10 @@
    "EmbeddingModel": "text-embedding-ada-002"
  }
 ```
+启动项目
+```
+dotnet run --project GraphRag.Net.Web.csproj
+```
 
 启动项目后可以通过
 ```
