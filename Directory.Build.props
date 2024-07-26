@@ -3,6 +3,5 @@
   <PropertyGroup>
     <Version>0.1.1</Version>
     <SKVersion>1.16.0</SKVersion>
-    <NewtonsoftVersion>13.0.3</NewtonsoftVersion> 
   </PropertyGroup>
 </Project>
