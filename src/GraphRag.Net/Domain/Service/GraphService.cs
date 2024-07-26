@@ -11,6 +11,7 @@ using Microsoft.SemanticKernel.Memory;
 using Microsoft.SemanticKernel.Text;
 using Newtonsoft.Json;
 using SqlSugar;
+using static Dm.net.buffer.ByteArrayBuffer;
 
 namespace GraphRag.Net.Domain.Service
 {
@@ -239,28 +240,36 @@ namespace GraphRag.Net.Domain.Service
         public async Task<string> SearchGraphAsync(string index, string input)
         {
             string answer = "";
-            SemanticTextMemory textMemory = await _semanticService.GetTextMemory();
-            List<TextMemModel> textMemModelList = new List<TextMemModel>();
-            await foreach (MemoryQueryResult memory in textMemory.SearchAsync(index, input, limit: 3, minRelevanceScore: 0.8))
-            {
-                var textMemModel = new TextMemModel()
-                {
-                    Id = memory.Metadata.Id,
-                    Text = memory.Metadata.Text,
-                    Relevance = memory.Relevance
-                };
-                textMemModelList.Add(textMemModel);
-            }
+            var textMemModelList = await RetrieveTextMemModelList(index, input);
 
-            if (textMemModelList.Count() > 0)
+            if (textMemModelList.Any())
             {
                 var nodes = _nodes_Repositories.GetList(p => p.Index == index && textMemModelList.Select(c => c.Id).Contains(p.Id));
-                //匹配到节点信息
-                var graphModel = GetGraphAllRecursion(index, nodes);
-                //这里数据有点多，要通过语义进行一次过滤
+                var graphModel = await GetFilteredGraphModel(index, input, nodes);
                 answer = await _semanticService.GetGraphAnswerAsync(JsonConvert.SerializeObject(graphModel), input);
             }
             return answer;
+        }
+
+        /// <summary>
+        /// 搜索递归获取节点相关的所有边和节点进行图谱对话,流式返回
+        /// </summary>
+        /// <param name="index"></param>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        public async IAsyncEnumerable<StreamingKernelContent> SearchGraphStreamAsync(string index, string input)
+        {
+            var textMemModelList = await RetrieveTextMemModelList(index, input);
+
+            if (textMemModelList.Any())
+            {
+                var nodes = _nodes_Repositories.GetList(p => p.Index == index && textMemModelList.Select(c => c.Id).Contains(p.Id));
+                var answerStream = GetFilteredGraphModelStream(index, input, nodes);
+                await foreach (var content in answerStream)
+                {
+                    yield return content;
+                }
+            }
         }
 
         /// <summary>
@@ -272,18 +281,7 @@ namespace GraphRag.Net.Domain.Service
         public async Task<string> SearchGraphCommunityAsync(string index, string input)
         {
             string answer = "";
-            SemanticTextMemory textMemory = await _semanticService.GetTextMemory();
-            List<TextMemModel> textMemModelList = new List<TextMemModel>();
-            await foreach (MemoryQueryResult memory in textMemory.SearchAsync(index, input, limit: 3, minRelevanceScore: 0.8))
-            {
-                var textMemModel = new TextMemModel()
-                {
-                    Id = memory.Metadata.Id,
-                    Text = memory.Metadata.Text,
-                    Relevance = memory.Relevance
-                };
-                textMemModelList.Add(textMemModel);
-            }
+            var textMemModelList = await RetrieveTextMemModelList(index, input);
 
             if (textMemModelList.Count() > 0)
             {
@@ -297,6 +295,32 @@ namespace GraphRag.Net.Domain.Service
                 answer = await _semanticService.GetGraphCommunityAnswerAsync(JsonConvert.SerializeObject(graphModel), community, global, input);
             }
             return answer;
+        }
+        /// <summary>
+        /// 通过社区算法检索社区节点进行对话,流式返回
+        /// </summary>
+        /// <param name="index"></param>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        public async IAsyncEnumerable<StreamingKernelContent> SearchGraphCommunityStreamAsync(string index, string input)
+        {
+            var textMemModelList = await RetrieveTextMemModelList(index, input);
+
+            if (textMemModelList.Count() > 0)
+            {
+                var nodes = _nodes_Repositories.GetList(p => p.Index == index && textMemModelList.Select(c => c.Id).Contains(p.Id));
+                //匹配到节点信息
+                var graphModel = GetGraphAllCommunitiesRecursion(index, nodes);
+
+               var community=string.Join(Environment.NewLine, _communities_Repositories.GetDB().Queryable<Communities>().Where(p=>p.Index==index).Select(p => p.Summaries).ToList());
+                var global = _globals_Repositories.GetFirst(p => p.Index == index)?.Summaries;
+                //这里数据有点多，要通过语义进行一次过滤
+                var answer =  _semanticService.GetGraphCommunityAnswerStreamAsync(JsonConvert.SerializeObject(graphModel), community, global, input);
+                await foreach (var content in answer)
+                {
+                    yield return content;
+                }
+            }
         }
 
 
@@ -382,7 +406,56 @@ namespace GraphRag.Net.Domain.Service
 
 
         #region 内部方法
+        /// <summary>
+        /// 基于搜索条件检索TextMemModel的列表。
+        /// </summary>
+        /// <param name="index"></param>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        private async Task<List<TextMemModel>> RetrieveTextMemModelList(string index, string input)
+        {
+            SemanticTextMemory textMemory = await _semanticService.GetTextMemory();
+            List<TextMemModel> textMemModelList = new List<TextMemModel>();
+            await foreach (MemoryQueryResult memory in textMemory.SearchAsync(index, input, limit: 3, minRelevanceScore: 0.8))
+            {
+                var textMemModel = new TextMemModel()
+                {
+                    Id = memory.Metadata.Id,
+                    Text = memory.Metadata.Text,
+                    Relevance = memory.Relevance
+                };
+                textMemModelList.Add(textMemModel);
+            }
+            return textMemModelList;
+        }
 
+        /// <summary>
+        /// 使用基于输入条件的语义过滤来过滤图模型。
+        /// </summary>
+        /// <param name="index"></param>
+        /// <param name="input"></param>
+        /// <param name="nodes"></param>
+        /// <returns></returns>
+        private async Task<GraphModel> GetFilteredGraphModel(string index, string input, List<Nodes> nodes)
+        {
+            var graphModel = GetGraphAllRecursion(index, nodes);
+            var answer = await _semanticService.GetGraphAnswerAsync(JsonConvert.SerializeObject(graphModel), input);
+            return graphModel; // or return the answer depending on your use case
+        }
+
+        /// <summary>
+        /// 使用基于输入条件的语义过滤来过滤图模型。流式返回
+        /// </summary>
+        /// <param name="index"></param>
+        /// <param name="input"></param>
+        /// <param name="nodes"></param>
+        /// <returns></returns>
+        private IAsyncEnumerable<StreamingKernelContent> GetFilteredGraphModelStream(string index, string input, List<Nodes> nodes)
+        {
+            var graphModel = GetGraphAllRecursion(index, nodes);
+            var answerStream = _semanticService.GetGraphAnswerStreamAsync(JsonConvert.SerializeObject(graphModel), input);
+            return answerStream;
+        }
 
         /// <summary>
         /// 递归获取节点相关的所有边和节点
