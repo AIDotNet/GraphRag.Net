@@ -20,20 +20,20 @@
    "EmbeddingModel": "text-embedding-ada-002"
  }
 ```
-启动项目
+## 启动项目
 ```
 dotnet run --project GraphRag.Net.Web.csproj
 ```
 
-启动项目后可以通过
+## 启动项目后可以通过
 ```
 http://localhost:5000/swagger
 ```
-打开swagger查看接口
+## 打开swagger查看接口
 
 ![Graoh](https://github.com/xuzeyu91/GraphRag.Net/blob/main/doc/api.png)
 
-也可以使用
+### 也可以使用界面
 ```
 http://localhost:5000/
 ```
@@ -41,3 +41,19 @@ http://localhost:5000/
 打开blazor的UI界面，页面提供了文本导入、文件导入，和问答对话，查看知识图谱等功能
 
 ![Graoh](https://github.com/xuzeyu91/GraphRag.Net/blob/main/doc/graph1.png)
+
+
+## Nuget包使用
+```
+dotnet add package GraphRag.Net --version 0.1.0
+```
+
+添加包以后，需要进行配置文件的设置以及依赖注入
+```
+//注入AddGraphRagNet
+builder.Services.AddGraphRagNet();
+//OpenAI配置
+builder.Configuration.GetSection("OpenAI").Get<OpenAIOption>();
+//文档切片配置
+builder.Configuration.GetSection("TextChunker").Get<TextChunkerOption>();
+```
