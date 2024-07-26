@@ -11,6 +11,7 @@ using Microsoft.SemanticKernel.Memory;
 using Microsoft.SemanticKernel.Text;
 using Newtonsoft.Json;
 using SqlSugar;
+using System.Collections.Generic;
 using static Dm.net.buffer.ByteArrayBuffer;
 
 namespace GraphRag.Net.Domain.Service
@@ -93,7 +94,7 @@ namespace GraphRag.Net.Domain.Service
         /// <returns></returns>
         public async Task InsertTextChunkAsync(string index, string input)
         {
-            if (string.IsNullOrWhiteSpace(index)|| string.IsNullOrWhiteSpace(input))
+            if (string.IsNullOrWhiteSpace(index) || string.IsNullOrWhiteSpace(input))
             {
                 throw new ArgumentException("Values required for index and input cannot be null.");
             }
@@ -309,20 +310,26 @@ namespace GraphRag.Net.Domain.Service
             }
             string answer = "";
             var textMemModelList = await RetrieveTextMemModelList(index, input);
-
+            var global = _globals_Repositories.GetFirst(p => p.Index == index)?.Summaries;
             if (textMemModelList.Count() > 0)
             {
                 var nodes = _nodes_Repositories.GetList(p => p.Index == index && textMemModelList.Select(c => c.Id).Contains(p.Id));
                 //匹配到节点信息
                 var graphModel = GetGraphAllCommunitiesRecursion(index, nodes);
 
-               var community=string.Join(Environment.NewLine, _communities_Repositories.GetDB().Queryable<Communities>().Where(p=>p.Index==index).Select(p => p.Summaries).ToList());
-                var global = _globals_Repositories.GetFirst(p => p.Index == index)?.Summaries;
+                var community = string.Join(Environment.NewLine, _communities_Repositories.GetDB().Queryable<Communities>().Where(p => p.Index == index).Select(p => p.Summaries).ToList());
+
                 //这里数据有点多，要通过语义进行一次过滤
                 answer = await _semanticService.GetGraphCommunityAnswerAsync(JsonConvert.SerializeObject(graphModel), community, global, input);
             }
+            else
+            {
+                //如果没有匹配到节点信息，使用全局信息
+                answer = await _semanticService.GetGraphCommunityAnswerAsync("NoSearch", "NoSearch", global, input);
+            }
             return answer;
         }
+
         /// <summary>
         /// 通过社区算法检索社区节点进行对话,流式返回
         /// </summary>
@@ -337,23 +344,27 @@ namespace GraphRag.Net.Domain.Service
             }
             var textMemModelList = await RetrieveTextMemModelList(index, input);
 
+            var global = _globals_Repositories.GetFirst(p => p.Index == index)?.Summaries;
+            IAsyncEnumerable<StreamingKernelContent> answer;
             if (textMemModelList.Count() > 0)
             {
                 var nodes = _nodes_Repositories.GetList(p => p.Index == index && textMemModelList.Select(c => c.Id).Contains(p.Id));
                 //匹配到节点信息
                 var graphModel = GetGraphAllCommunitiesRecursion(index, nodes);
-
-               var community=string.Join(Environment.NewLine, _communities_Repositories.GetDB().Queryable<Communities>().Where(p=>p.Index==index).Select(p => p.Summaries).ToList());
-                var global = _globals_Repositories.GetFirst(p => p.Index == index)?.Summaries;
+                var community = string.Join(Environment.NewLine, _communities_Repositories.GetDB().Queryable<Communities>().Where(p => p.Index == index).Select(p => p.Summaries).ToList());
                 //这里数据有点多，要通过语义进行一次过滤
-                var answer =  _semanticService.GetGraphCommunityAnswerStreamAsync(JsonConvert.SerializeObject(graphModel), community, global, input);
-                await foreach (var content in answer)
-                {
-                    yield return content;
-                }
+                answer = _semanticService.GetGraphCommunityAnswerStreamAsync(JsonConvert.SerializeObject(graphModel), community, global, input);
+            }
+            else
+            {
+                //如果没有匹配到节点信息，使用全局信息
+                answer = _semanticService.GetGraphCommunityAnswerStreamAsync("NoSearch", "NoSearch", global, input);
+            }
+            await foreach (var content in answer)
+            {
+                yield return content;
             }
         }
-
 
         /// <summary>
         /// 社区摘要
