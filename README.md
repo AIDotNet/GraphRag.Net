@@ -45,7 +45,7 @@ http://localhost:5000/
 
 ## Nuget包使用
 ```
-dotnet add package GraphRag.Net --version 0.1.0
+dotnet add package GraphRag.Net
 ```
 
 添加包以后，需要进行配置文件的设置以及依赖注入
