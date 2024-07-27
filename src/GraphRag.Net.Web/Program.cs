@@ -28,11 +28,12 @@ builder.Services.AddSwaggerGen(c => {
     var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
     c.IncludeXmlComments(xmlPath, true);
 });
-builder.Services.AddGraphRagNet();
 
 builder.Configuration.GetSection("OpenAI").Get<OpenAIOption>();
 builder.Configuration.GetSection("TextChunker").Get<TextChunkerOption>();
 builder.Configuration.GetSection("GraphDBConnection").Get<GraphDBConnectionOption>();
+
+builder.Services.AddGraphRagNet();
 
 var app = builder.Build();
 

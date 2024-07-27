@@ -162,13 +162,13 @@ namespace GraphRag.Net.Domain.Service
             switch (GraphDBConnectionOption.DbType)
             {
                 case "Sqlite":
-                    memoryStore = await SqliteMemoryStore.ConnectAsync(GraphDBConnectionOption.GraphDBConnection);
+                    memoryStore = await SqliteMemoryStore.ConnectAsync(GraphDBConnectionOption.VectorConnection);
                     break;
                 case "PostgreSQL":
-                    NpgsqlDataSourceBuilder dataSourceBuilder = new(GraphDBConnectionOption.GraphDBConnection);
+                    NpgsqlDataSourceBuilder dataSourceBuilder = new(GraphDBConnectionOption.VectorConnection);
                     dataSourceBuilder.UseVector();
                     NpgsqlDataSource dataSource = dataSourceBuilder.Build();
-                    IMemoryStore store = new PostgresMemoryStore(dataSource, vectorSize: 1536, schema: "public");
+                    memoryStore = new PostgresMemoryStore(dataSource, vectorSize: 1536, schema: "public");
                     break;
             }
             if (memoryStore == null)

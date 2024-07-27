@@ -60,14 +60,15 @@ dotnet add package GraphRag.Net --version 0.1.0
 
 添加包以后，需要进行配置文件的设置以及依赖注入
 ```
-//注入AddGraphRagNet
-builder.Services.AddGraphRagNet();
 //OpenAI配置
 builder.Configuration.GetSection("OpenAI").Get<OpenAIOption>();
 //文档切片配置
 builder.Configuration.GetSection("TextChunker").Get<TextChunkerOption>();
 //配置数据库链接
 builder.Configuration.GetSection("GraphDBConnection").Get<GraphDBConnectionOption>();
+
+//注入AddGraphRagNet,注意，需要先注入配置文件，然后再注入GraphRagNet
+builder.Services.AddGraphRagNet();
 ```
 
 使用时注入 IGraphService  服务,以下为参考示例代码
