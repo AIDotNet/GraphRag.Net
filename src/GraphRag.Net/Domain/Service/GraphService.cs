@@ -389,7 +389,7 @@ namespace GraphRag.Net.Domain.Service
             }
 
             //重新计算社区
-            var result = _communityDetectionService.LabelPropagation(graph);
+            var result = _communityDetectionService.FastLabelPropagationAlgorithm(graph);
 
             Console.WriteLine("开始社区总结");
             foreach (var kvp in result)

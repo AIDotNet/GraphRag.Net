@@ -9,6 +9,6 @@ namespace GraphRag.Net.Domain.Interface
 {
     public interface ICommunityDetectionService
     {
-        Dictionary<string, string> LabelPropagation(Graph graph);
+        Dictionary<string, string> FastLabelPropagationAlgorithm(Graph graph, int iterations = 10);
     }
 }
