@@ -5,8 +5,10 @@ using GraphRag.Net.Options;
 using GraphRag.Net.Utils;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.Connectors.OpenAI;
+using Microsoft.SemanticKernel.Connectors.Postgres;
 using Microsoft.SemanticKernel.Connectors.Sqlite;
 using Microsoft.SemanticKernel.Memory;
+using Npgsql;
 
 namespace GraphRag.Net.Domain.Service
 {
@@ -147,12 +149,33 @@ namespace GraphRag.Net.Domain.Service
 
             string result = skresult.GetValue<string>()?.Trim() ?? "";
             return result;
-        }    
+        }
 
-
+        /// <summary>
+        /// 获取SemanticTextMemory
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="InvalidOperationException"></exception>
         public async Task<SemanticTextMemory> GetTextMemory()
         {
-            IMemoryStore memoryStore = await SqliteMemoryStore.ConnectAsync(GraphDBConnectionOption.Db);
+            IMemoryStore memoryStore=null ;
+            switch (GraphDBConnectionOption.DbType)
+            {
+                case "Sqlite":
+                    memoryStore = await SqliteMemoryStore.ConnectAsync(GraphDBConnectionOption.VectorConnection);
+                    break;
+                case "PostgreSQL":
+                    NpgsqlDataSourceBuilder dataSourceBuilder = new(GraphDBConnectionOption.VectorConnection);
+                    dataSourceBuilder.UseVector();
+                    NpgsqlDataSource dataSource = dataSourceBuilder.Build();
+                    memoryStore = new PostgresMemoryStore(dataSource, vectorSize: 1536, schema: "public");
+                    break;
+            }
+            if (memoryStore == null)
+            {
+                throw new InvalidOperationException("GraphDBConnection error failed to initialize memory store.");
+            }
+
             var handler = new OpenAIHttpClientHandler();
             var httpClient = new HttpClient(handler);
             httpClient.Timeout = TimeSpan.FromMinutes(10);

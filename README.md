@@ -15,10 +15,20 @@
 ```
  "OpenAI": {
    "Key": "sk-xxx",
-   "Endpoint": "https://api.openai.com/",
+   "Endpoint": "https://api.antsk.cn/",
    "ChatModel": "gpt-4o-mini",
    "EmbeddingModel": "text-embedding-ada-002"
- }
+ },
+"TextChunker": {
+    "LinesToken": 100,
+    "ParagraphsToken": 1000
+},
+"GraphDBConnection": {
+    "DbType": "Sqlite", //PostgreSQL
+    "DBConnection": "Data Source=graph.db",
+    "GraphDBConnection": "graphmem.db",
+    "VectorSize": 1536 //DbType=PostgreSQL时需要设置，sqlite可以不设置
+}
 ```
 ## 启动项目
 ```
@@ -50,12 +60,15 @@ dotnet add package GraphRag.Net
 
 添加包以后，需要进行配置文件的设置以及依赖注入
 ```
-//注入AddGraphRagNet
-builder.Services.AddGraphRagNet();
 //OpenAI配置
 builder.Configuration.GetSection("OpenAI").Get<OpenAIOption>();
 //文档切片配置
 builder.Configuration.GetSection("TextChunker").Get<TextChunkerOption>();
+//配置数据库链接
+builder.Configuration.GetSection("GraphDBConnection").Get<GraphDBConnectionOption>();
+
+//注入AddGraphRagNet,注意，需要先注入配置文件，然后再注入GraphRagNet
+builder.Services.AddGraphRagNet();
 ```
 
 使用时注入 IGraphService  服务,以下为参考示例代码
