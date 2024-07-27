@@ -25,7 +25,8 @@ namespace GraphRag.Net.Domain.Service
         ISemanticService _semanticService,
         ICommunities_Repositories _communities_Repositories,
         ICommunitieNodes_Repositories _communitieNodes_Repositories,
-        IGlobals_Repositories _globals_Repositories
+        IGlobals_Repositories _globals_Repositories,
+        ICommunityDetectionService _communityDetectionService
         ) : IGraphService
     {
         /// <summary>
@@ -388,8 +389,7 @@ namespace GraphRag.Net.Domain.Service
             }
 
             //重新计算社区
-            var communityDetection = new CommunityDetection();
-            var result = communityDetection.LabelPropagation(graph);
+            var result = _communityDetectionService.LabelPropagation(graph);
 
             Console.WriteLine("开始社区总结");
             foreach (var kvp in result)
