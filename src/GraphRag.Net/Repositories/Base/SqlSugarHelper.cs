@@ -14,7 +14,7 @@ namespace GraphRag.Net.Base
         {
 
             string DBType = GraphDBConnectionOption.DbType;
-            string ConnectionString = GraphDBConnectionOption.ConnectionStrings;
+            string ConnectionString = GraphDBConnectionOption.DBConnection;
 
             var config = new ConnectionConfig()
             {

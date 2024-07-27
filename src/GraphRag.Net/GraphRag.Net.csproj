@@ -30,6 +30,7 @@
     <PackageReference Include="Microsoft.SemanticKernel" Version="$(SKVersion)" />
     <PackageReference Include="Microsoft.SemanticKernel.Core" Version="$(SKVersion)" />
     <PackageReference Include="Microsoft.SemanticKernel.Plugins.Core" Version="$(SKVersion)-alpha" />
+    <PackageReference Include="Microsoft.SemanticKernel.Connectors.Postgres" Version="$(SKVersion)-alpha" />
     <PackageReference Include="Microsoft.SemanticKernel.Connectors.Sqlite" Version="$(SKVersion)-alpha" />
     <PackageReference Include="Microsoft.SemanticKernel.Plugins.Memory" Version="$(SKVersion)-alpha" />
     <PackageReference Include="SqlSugarCore" Version="5.1.4.166" />

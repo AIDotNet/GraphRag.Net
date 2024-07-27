@@ -1,6 +1,7 @@
 using AntDesign.ProLayout;
 using GraphRag.Net;
 using GraphRag.Net.Common.Options;
+using GraphRag.Net.Options;
 using Microsoft.AspNetCore.Components;
 using System.Reflection;
 
@@ -31,6 +32,7 @@ builder.Services.AddGraphRagNet();
 
 builder.Configuration.GetSection("OpenAI").Get<OpenAIOption>();
 builder.Configuration.GetSection("TextChunker").Get<TextChunkerOption>();
+builder.Configuration.GetSection("GraphDBConnection").Get<GraphDBConnectionOption>();
 
 var app = builder.Build();
 
