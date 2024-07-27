@@ -12,6 +12,7 @@ using Microsoft.SemanticKernel.Text;
 using Newtonsoft.Json;
 using SqlSugar;
 using System.Collections.Generic;
+using Microsoft.Extensions.DependencyInjection;
 using static Dm.net.buffer.ByteArrayBuffer;
 
 namespace GraphRag.Net.Domain.Service

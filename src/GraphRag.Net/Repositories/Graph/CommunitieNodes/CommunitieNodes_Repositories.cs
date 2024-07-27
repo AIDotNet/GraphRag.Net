@@ -1,5 +1,6 @@
 ﻿using GraphRag.Net.Base;
 using GraphRag.Net.Repositories.Graph.Edges;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace GraphRag.Net.Repositories
 {

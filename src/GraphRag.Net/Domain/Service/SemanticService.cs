@@ -3,6 +3,7 @@ using GraphRag.Net.Common.Options;
 using GraphRag.Net.Domain.Interface;
 using GraphRag.Net.Options;
 using GraphRag.Net.Utils;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.Connectors.OpenAI;
 using Microsoft.SemanticKernel.Connectors.Postgres;

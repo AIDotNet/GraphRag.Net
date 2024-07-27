@@ -1,12 +1,12 @@
-﻿using GraphRag.Net.Common.Options;
+﻿using System.Reflection;
+using GraphRag.Net;
+using GraphRag.Net.Common.Options;
 using GraphRag.Net.Repositories.Graph.Nodes;
 using GraphRag.Net.Utils;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.SemanticKernel;
 using SqlSugar;
-using System.Reflection;
 
-namespace GraphRag.Net
+namespace Microsoft.Extensions.DependencyInjection
 {
     /// <summary>
     /// 容器扩展
@@ -17,7 +17,6 @@ namespace GraphRag.Net
         /// 从程序集中加载类型并添加到容器中
         /// </summary>
         /// <param name="services">容器</param>
-        /// <param name="assemblies">程序集集合</param>
         /// <returns></returns>
         public static IServiceCollection AddGraphRagNet(this IServiceCollection services)
         {
