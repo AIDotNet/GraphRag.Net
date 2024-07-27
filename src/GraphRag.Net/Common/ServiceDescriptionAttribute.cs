@@ -1,4 +1,6 @@
-﻿namespace GraphRag.Net
+﻿using Microsoft.Extensions.DependencyInjection;
+
+namespace GraphRag.Net
 {
     public class ServiceDescriptionAttribute : Attribute
     {
@@ -13,19 +15,4 @@
         public ServiceLifetime Lifetime { get; set; }
     }
 
-    public enum ServiceLifetime
-    {
-        /// <summary>
-        /// 作用域
-        /// </summary>
-        Scoped,
-        /// <summary>
-        /// 单例
-        /// </summary>
-        Singleton,
-        /// <summary>
-        /// 瞬时
-        /// </summary>
-        Transient
-    }
 }
