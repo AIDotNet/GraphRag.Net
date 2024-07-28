@@ -39,18 +39,24 @@ namespace GraphRag.Net.Web.Pages.Graph
 
         private bool BeforeUpload(UploadFileItem file)
         {
-
+            if (string.IsNullOrEmpty(_importIndex))
+            {
+                _message.Error("请先填写index");
+                return false;
+            }
             if (file.Type != "text/plain")
             {
                 _message.Error("文件格式错误,请重新选择!");
+                return false;
             }
             var IsLt500K = file.Size < 1024 * 1024 * 100;
             if (!IsLt500K)
             {
                 _message.Error("文件需不大于100MB!");
+                return false;
             }
 
-            return IsLt500K;
+            return true;
         }
 
         private void OnSingleCompleted(UploadInfo fileinfo)
@@ -61,6 +67,10 @@ namespace GraphRag.Net.Web.Pages.Graph
 
         private async Task InputText()
         {
+            if (string.IsNullOrEmpty(_importIndex))
+            { 
+                _message.Error("请先填写index");
+            }
             await _graphService.InsertGraphDataAsync(_importIndex, _importText);
             _indexList = _graphService.GetAllIndex();
             _message.Info("导入完成");
