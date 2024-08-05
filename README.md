@@ -12,6 +12,8 @@
 
 出于方便，LLM接口目前只兼容了openai的规范，其他大模型可以考虑使用one-api类的集成产品
 
+在appsettings.json配置
+
 ```
  "OpenAI": {
    "Key": "sk-xxx",
