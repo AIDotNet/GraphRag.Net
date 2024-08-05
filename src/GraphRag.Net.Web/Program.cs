@@ -2,7 +2,13 @@ using AntDesign.ProLayout;
 using GraphRag.Net;
 using GraphRag.Net.Common.Options;
 using GraphRag.Net.Options;
+using GraphRag.Net.Web.Mock;
 using Microsoft.AspNetCore.Components;
+using Microsoft.Extensions.Options;
+using Microsoft.SemanticKernel;
+using Microsoft.SemanticKernel.ChatCompletion;
+using Microsoft.SemanticKernel.Embeddings;
+using Microsoft.SemanticKernel.TextGeneration;
 using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -34,6 +40,16 @@ builder.Configuration.GetSection("TextChunker").Get<TextChunkerOption>();
 builder.Configuration.GetSection("GraphDBConnection").Get<GraphDBConnectionOption>();
 
 builder.Services.AddGraphRagNet();
+
+////自定义Kernel 可以实现其他模型的对接实现
+//var kernelBuild = Kernel.CreateBuilder();
+//kernelBuild.Services.AddKeyedSingleton<ITextGenerationService>("mock-text", new MockTextCompletion());
+//kernelBuild.Services.AddKeyedSingleton<IChatCompletionService>("mock-chat", new MockChatCompletion());
+//kernelBuild.Services.AddSingleton((ITextEmbeddingGenerationService)new MockTextEmbeddingGeneratorService());
+//kernelBuild.Services.AddKeyedSingleton("mock-embedding", new MockTextEmbeddingGeneratorService());
+
+//builder.Services.AddGraphRagNet(kernelBuild.Build());
+
 
 var app = builder.Build();
 

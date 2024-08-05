@@ -18,7 +18,7 @@ namespace Microsoft.Extensions.DependencyInjection
         /// </summary>
         /// <param name="services">容器</param>
         /// <returns></returns>
-        public static IServiceCollection AddGraphRagNet(this IServiceCollection services)
+        public static IServiceCollection AddGraphRagNet(this IServiceCollection services, Kernel _kernel = null)
         {
             Type attributeType = typeof(ServiceDescriptionAttribute);
             //var refAssembyNames = Assembly.GetExecutingAssembly().GetReferencedAssemblies();
@@ -50,7 +50,7 @@ namespace Microsoft.Extensions.DependencyInjection
             }
 
             CodeFirst();
-            InitSK(services);
+            InitSK(services, _kernel);
 
             return services;
         }
