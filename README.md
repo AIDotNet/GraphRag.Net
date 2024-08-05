@@ -1,4 +1,4 @@
-这是一个参考GraphRag的dotnet简易实现
+## 这是一个参考GraphRag的dotnet简易实现
 
 基于微软在论文中提到的实现思路，执行过程GraphRAG主要实现了如下功能：
 - Source Documents → Text Chunks：将源文档分割成文本块。
@@ -10,7 +10,7 @@
 
 本项目为demo示例，仅用于学习GraphRAG思路。
 
-您可以直接在项目中引用NuGet包，或者直接使用本项目提供API服务。
+## 您可以直接在项目中引用NuGet包，或者直接使用本项目提供API服务。
 
 出于方便，LLM接口目前只兼容了openai的规范，其他大模型可以考虑使用one-api类的集成产品
 
@@ -211,3 +211,5 @@ namespace GraphRag.Net.Api.Controllers
 }
 
 ```
+
+也欢迎大家加入我们的微信交流群，可以添加我的微信：**xuzeyu91** 发送进群
