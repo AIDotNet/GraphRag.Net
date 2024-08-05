@@ -62,6 +62,7 @@ http://localhost:5000/
 dotnet add package GraphRag.Net
 ```
 
+### 默认配置，使用OpenAI标准接口，在配置了OpenAI的appsettings后可以使用下面代码进行注入
 添加包以后，需要进行配置文件的设置以及依赖注入
 ```
 //OpenAI配置
@@ -75,7 +76,7 @@ builder.Configuration.GetSection("GraphDBConnection").Get<GraphDBConnectionOptio
 builder.Services.AddGraphRagNet();
 ```
 
-## 如果你想接入其他模型，可以参考以下代码,这里抽象了Kernel的实现，你可以自定义实现
+### 如果你想接入其他模型，可以参考以下代码,这里抽象了Kernel的实现，你可以自定义实现
 ```
 var kernelBuild = Kernel.CreateBuilder();
 kernelBuild.Services.AddKeyedSingleton<ITextGenerationService>("mock-text", new MockTextCompletion());
