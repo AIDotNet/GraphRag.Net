@@ -60,5 +60,12 @@
             <param name="index"></param>
             <returns></returns>
         </member>
+        <member name="M:GraphRag.Net.Api.Controllers.GraphDemoController.DeleteGraph(System.String)">
+            <summary>
+            删除图谱数据
+            </summary>
+            <param name="index"></param>
+            <returns></returns>
+        </member>
     </members>
 </doc>
