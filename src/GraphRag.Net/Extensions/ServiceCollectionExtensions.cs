@@ -59,18 +59,22 @@ namespace Microsoft.Extensions.DependencyInjection
         /// 初始化SK
         /// </summary>
         /// <param name="services"></param>
-        static void InitSK(IServiceCollection services)
+        /// <param name="_kernel">可以提供自定义Kernel</param>
+        static void InitSK(IServiceCollection services,Kernel _kernel = null)
         {
             var handler = new OpenAIHttpClientHandler();
             services.AddTransient<Kernel>((serviceProvider) =>
             {
-                var _kernel = Kernel.CreateBuilder()
-                .AddOpenAIChatCompletion(
-                  modelId: OpenAIOption.ChatModel,
-                  apiKey: OpenAIOption.Key,
-                  httpClient: new HttpClient(handler)
-                     )
-                .Build();
+                if (_kernel == null)
+                {
+                    _kernel = Kernel.CreateBuilder()
+                    .AddOpenAIChatCompletion(
+                      modelId: OpenAIOption.ChatModel,
+                      apiKey: OpenAIOption.Key,
+                      httpClient: new HttpClient(handler)
+                         )
+                    .Build();
+                }
                 //导入插件
                 _kernel.ImportPluginFromPromptDirectory(Path.Combine(RepoFiles.SamplePluginsPath(), "graph"));
                 return _kernel;
