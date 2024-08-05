@@ -75,6 +75,18 @@ builder.Configuration.GetSection("GraphDBConnection").Get<GraphDBConnectionOptio
 builder.Services.AddGraphRagNet();
 ```
 
+## 如果你想接入其他模型，可以参考以下代码,这里抽象了Kernel的实现，你可以自定义实现
+```
+var kernelBuild = Kernel.CreateBuilder();
+kernelBuild.Services.AddKeyedSingleton<ITextGenerationService>("mock-text", new MockTextCompletion());
+kernelBuild.Services.AddKeyedSingleton<IChatCompletionService>("mock-chat", new MockChatCompletion());
+kernelBuild.Services.AddSingleton((ITextEmbeddingGenerationService)new MockTextEmbeddingGeneratorService());
+kernelBuild.Services.AddKeyedSingleton("mock-embedding", new MockTextEmbeddingGeneratorService());
+
+builder.Services.AddGraphRagNet(kernelBuild.Build());
+```
+
+
 使用时注入 IGraphService  服务,以下为参考示例代码
 ```
 namespace GraphRag.Net.Api.Controllers
