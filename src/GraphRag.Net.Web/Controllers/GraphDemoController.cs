@@ -9,7 +9,7 @@ namespace GraphRag.Net.Api.Controllers
     public class GraphDemoController(IGraphService _graphService) : ControllerBase
     {
         /// <summary>
-        /// »ñÈ¡ËùÓĞµÄË÷ÒıÊı¾İ
+        /// è·å–æ‰€æœ‰çš„ç´¢å¼•æ•°æ®
         /// </summary>
         /// <returns></returns>
         [HttpGet]
@@ -21,7 +21,7 @@ namespace GraphRag.Net.Api.Controllers
 
 
         /// <summary>
-        /// »ñÈ¡ËùÓĞµÄÍ¼Æ×Êı¾İ
+        /// è·å–æ‰€æœ‰çš„å›¾è°±æ•°æ®
         /// </summary>
         /// <param name="index"></param>
         /// <returns></returns>
@@ -38,7 +38,7 @@ namespace GraphRag.Net.Api.Controllers
 
 
         /// <summary>
-        /// ²åÈëÎÄ±¾Êı¾İ
+        /// æ’å…¥æ–‡æœ¬æ•°æ®
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
@@ -50,7 +50,7 @@ namespace GraphRag.Net.Api.Controllers
         }
 
         /// <summary>
-        /// ËÑË÷µİ¹é»ñÈ¡½ÚµãÏà¹ØµÄËùÓĞ±ßºÍ½Úµã½øĞĞÍ¼Æ×¶Ô»°
+        /// æœç´¢é€’å½’è·å–èŠ‚ç‚¹ç›¸å…³çš„æ‰€æœ‰è¾¹å’ŒèŠ‚ç‚¹è¿›è¡Œå›¾è°±å¯¹è¯
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
@@ -62,7 +62,7 @@ namespace GraphRag.Net.Api.Controllers
         }
 
         /// <summary>
-        /// Í¨¹ıÉçÇøËã·¨¼ìË÷ÉçÇø½Úµã½øĞĞ¶Ô»°
+        /// é€šè¿‡ç¤¾åŒºç®—æ³•æ£€ç´¢ç¤¾åŒºèŠ‚ç‚¹è¿›è¡Œå¯¹è¯
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
@@ -74,7 +74,7 @@ namespace GraphRag.Net.Api.Controllers
         }
 
         /// <summary>
-        /// µ¼ÈëtxtÎÄµµ
+        /// å¯¼å…¥txtæ–‡æ¡£
         /// </summary>
         /// <param name="index"></param>
         /// <param name="file"></param>
@@ -92,7 +92,7 @@ namespace GraphRag.Net.Api.Controllers
         }
 
         /// <summary>
-        /// Í¨¹ıÉçÇø¼ì²âÉú³ÉÉçÇøºÍÕªÒª
+        /// é€šè¿‡ç¤¾åŒºæ£€æµ‹ç”Ÿæˆç¤¾åŒºå’Œæ‘˜è¦
         /// </summary>
         /// <param name="index"></param>
         /// <returns></returns>
@@ -104,7 +104,7 @@ namespace GraphRag.Net.Api.Controllers
         }      
         
         /// <summary>
-        /// Í¨¹ıÉçÇøÕªÒªÉú³ÉÈ«¾ÖÕªÒª
+        /// é€šè¿‡ç¤¾åŒºæ‘˜è¦ç”Ÿæˆå…¨å±€æ‘˜è¦
         /// </summary>
         /// <param name="index"></param>
         /// <returns></returns>
@@ -112,6 +112,18 @@ namespace GraphRag.Net.Api.Controllers
         public async Task<IActionResult> GraphGlobal(string index)
         {
             await _graphService.GraphGlobalAsync(index);
+            return Ok();
+        }
+
+        /// <summary>
+        /// åˆ é™¤å›¾è°±æ•°æ®
+        /// </summary>
+        /// <param name="index"></param>
+        /// <returns></returns>
+        [HttpGet]
+        public async Task<IActionResult> DeleteGraph(string index)
+        {
+            await _graphService.DeleteGraph(index);
             return Ok();
         }
     }

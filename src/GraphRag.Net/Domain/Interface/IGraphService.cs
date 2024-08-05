@@ -55,5 +55,12 @@ namespace GraphRag.Net.Domain.Interface
         /// <param name="index"></param>
         /// <returns></returns>
         Task GraphGlobalAsync(string index);
+
+        /// <summary>
+        /// 删除图谱数据
+        /// </summary>
+        /// <param name="index"></param>
+        /// <returns></returns>
+        Task DeleteGraph(string index);
     }
 }

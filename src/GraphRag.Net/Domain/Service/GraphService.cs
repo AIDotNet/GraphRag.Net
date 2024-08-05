@@ -447,6 +447,23 @@ namespace GraphRag.Net.Domain.Service
             _globals_Repositories.Insert(globals);
         }
 
+        public async Task DeleteGraph(string index)
+        {
+            SemanticTextMemory textMemory = await _semanticService.GetTextMemory();
+            var nodes = await _nodes_Repositories.GetListAsync(p => p.Index == index);
+            foreach (var node in nodes)
+            {
+                //删除向量数据
+                await textMemory.RemoveAsync(index, node.Id);
+            }
+            //删除索引数据
+            await _nodes_Repositories.DeleteAsync(p => p.Index == index);
+            await _edges_Repositories.DeleteAsync(p => p.Index == index);
+            await _communities_Repositories.DeleteAsync(p => p.Index == index);
+            await _communitieNodes_Repositories.DeleteAsync(p => p.Index == index);
+            await _globals_Repositories.DeleteAsync(p => p.Index == index);
+        }
+
 
         #region 内部方法
         /// <summary>
@@ -614,6 +631,8 @@ namespace GraphRag.Net.Domain.Service
             var nodes = _nodes_Repositories.GetList(p => p.Index == index && nodeIds.Contains(p.Id));
             return nodes;
         }
+
+
 
         #endregion
     }

@@ -185,6 +185,18 @@ namespace GraphRag.Net.Api.Controllers
             await _graphService.GraphGlobalAsync(index);
             return Ok();
         }
+
+        /// <summary>
+        /// 删除图谱数据
+        /// </summary>
+        /// <param name="index"></param>
+        /// <returns></returns>
+        [HttpGet]
+        public async Task<IActionResult> DeleteGraph(string index)
+        {
+            await _graphService.DeleteGraph(index);
+            return Ok();
+        }
     }
 
     public class InputModel
