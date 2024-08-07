@@ -36,7 +36,7 @@ builder.Services.AddSwaggerGen(c => {
 
 builder.Configuration.GetSection("OpenAI").Get<OpenAIOption>();
 builder.Configuration.GetSection("TextChunker").Get<TextChunkerOption>();
-builder.Configuration.GetSection("GraphDBConnection").Get<GraphDBConnectionOption>();
+//builder.Configuration.GetSection("GraphDBConnection").Get<GraphDBConnectionOption>();
 
 builder.Services.AddGraphRagNet();
 

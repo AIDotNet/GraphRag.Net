@@ -76,7 +76,10 @@ namespace Microsoft.Extensions.DependencyInjection
                     .Build();
                 }
                 //导入插件
-                _kernel.ImportPluginFromPromptDirectory(Path.Combine(RepoFiles.SamplePluginsPath(), "graph"));
+                if (!_kernel.Plugins.Any(p => p.Name == "graph"))
+                {
+                    _kernel.ImportPluginFromPromptDirectory(Path.Combine(RepoFiles.SamplePluginsPath(), "graph"));
+                }
                 return _kernel;
             });
         }
