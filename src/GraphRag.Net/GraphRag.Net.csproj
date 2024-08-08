@@ -37,7 +37,7 @@
     <PackageReference Include="SqlSugarCore" Version="5.1.4.166" />
   </ItemGroup>
   <ItemGroup>
-    <None Update="plugins\**">
+    <None Update="graphPlugins\**">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

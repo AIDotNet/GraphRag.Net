@@ -13,7 +13,7 @@ internal static class RepoFiles
     public static string SamplePluginsPath()
     {
         string Parent = System.IO.Directory.GetCurrentDirectory();
-        string Folder = "plugins";
+        string Folder = "graphPlugins";
 
         bool SearchPath(string pathToFind, out string result, int maxAttempts = 10)
         {

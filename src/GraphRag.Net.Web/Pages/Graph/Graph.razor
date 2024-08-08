@@ -36,7 +36,7 @@
 
                 // 获取参数的值，例如 'index'
                 const index = urlParams.get('index');
-                fetch('http://localhost:5000/api/GraphDemo/GetAllGraphs?index=' + index)
+                fetch('/api/GraphDemo/GetAllGraphs?index=' + index)
                     .then(response => {
                         if (!response.ok) {
                             throw new Error('网络响应不成功，状态码：' + response.status);
