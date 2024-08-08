@@ -38,7 +38,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Update="graphPlugins\**">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
 </Project>
