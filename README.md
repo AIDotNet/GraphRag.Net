@@ -87,6 +87,13 @@ kernelBuild.Services.AddKeyedSingleton("mock-embedding", new MockTextEmbeddingGe
 builder.Services.AddGraphRagNet(kernelBuild.Build());
 ```
 
+#### 此处需要注意，由于导入可能分多次导入，没有在导入时自动调用生成社区和全局信息，需要自己根据实际情况调用生成社区和全局信息
+
+```
+    await _graphService.GraphCommunitiesAsync(index);
+    await _graphService.GraphGlobalAsync(index);
+```
+
 
 使用时注入 IGraphService  服务,以下为参考示例代码
 ```
