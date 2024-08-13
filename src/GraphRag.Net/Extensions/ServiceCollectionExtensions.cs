@@ -1,7 +1,7 @@
 ﻿using System.Reflection;
 using GraphRag.Net;
 using GraphRag.Net.Common.Options;
-using GraphRag.Net.Repositories.Graph.Nodes;
+using GraphRag.Net.Repositories;
 using GraphRag.Net.Utils;
 using Microsoft.SemanticKernel;
 using SqlSugar;

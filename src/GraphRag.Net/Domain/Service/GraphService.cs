@@ -3,8 +3,6 @@ using GraphRag.Net.Domain.Interface;
 using GraphRag.Net.Domain.Model.Constant;
 using GraphRag.Net.Domain.Model.Graph;
 using GraphRag.Net.Repositories;
-using GraphRag.Net.Repositories.Graph.Edges;
-using GraphRag.Net.Repositories.Graph.Nodes;
 using GraphRag.Net.Utils;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.Memory;
