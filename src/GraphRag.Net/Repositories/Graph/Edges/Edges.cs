@@ -12,6 +12,11 @@ namespace GraphRag.Net.Repositories
     public class Edges
     {
         /// <summary>
+        /// 主键
+        /// </summary>
+        [SugarColumn(IsPrimaryKey = true)]
+        public string Id { get; set; }
+        /// <summary>
         /// 索引
         /// </summary>
         public string Index { get; set; }
