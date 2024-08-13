@@ -1,7 +1,6 @@
 ﻿using Azure.AI.OpenAI;
-using GraphRag.Net.Common.Options;
-using GraphRag.Net.Domain.Interface;
 using GraphRag.Net.Options;
+using GraphRag.Net.Domain.Interface;
 using GraphRag.Net.Utils;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.SemanticKernel;
@@ -180,7 +179,7 @@ namespace GraphRag.Net.Domain.Service
             var handler = new OpenAIHttpClientHandler();
             var httpClient = new HttpClient(handler);
             httpClient.Timeout = TimeSpan.FromMinutes(10);
-            var embeddingGenerator = new OpenAITextEmbeddingGenerationService(OpenAIOption.EmbeddingModel, OpenAIOption.Key, httpClient: new HttpClient(handler));
+            var embeddingGenerator = new OpenAITextEmbeddingGenerationService(GraphOpenAIOption.EmbeddingModel, GraphOpenAIOption.Key, httpClient: new HttpClient(handler));
             SemanticTextMemory textMemory = new(memoryStore, embeddingGenerator);
 
             return textMemory;

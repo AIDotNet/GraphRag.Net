@@ -1,4 +1,4 @@
-﻿using GraphRag.Net.Common.Options;
+﻿using GraphRag.Net.Options;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -12,7 +12,7 @@ namespace GraphRag.Net.Utils
         {
             UriBuilder uriBuilder;
             Regex regex = new Regex(@"(https?)://([^/:]+)(:\d+)?/(.*)");
-            Match match = regex.Match(OpenAIOption.Endpoint);
+            Match match = regex.Match(GraphOpenAIOption.Endpoint);
 
             var mediaType = request.Content.Headers.ContentType.MediaType;
             string requestBody = (await request.Content.ReadAsStringAsync()).Unescape();

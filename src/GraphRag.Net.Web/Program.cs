@@ -1,6 +1,5 @@
 using AntDesign.ProLayout;
 using GraphRag.Net;
-using GraphRag.Net.Common.Options;
 using GraphRag.Net.Options;
 using GraphRag.Net.Web.Mock;
 using Microsoft.AspNetCore.Components;
@@ -34,7 +33,7 @@ builder.Services.AddSwaggerGen(c => {
     c.IncludeXmlComments(xmlPath, true);
 });
 
-builder.Configuration.GetSection("OpenAI").Get<OpenAIOption>();
+builder.Configuration.GetSection("GraphOpenAI").Get<GraphOpenAIOption>();
 builder.Configuration.GetSection("TextChunker").Get<TextChunkerOption>();
 //builder.Configuration.GetSection("GraphDBConnection").Get<GraphDBConnectionOption>();
 

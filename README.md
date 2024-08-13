@@ -66,7 +66,7 @@ dotnet add package GraphRag.Net
 添加包以后，需要进行配置文件的设置以及依赖注入
 ```
 //OpenAI配置
-builder.Configuration.GetSection("OpenAI").Get<OpenAIOption>();
+builder.Configuration.GetSection("GraphOpenAI").Get<GraphOpenAIOption>();
 //文档切片配置
 builder.Configuration.GetSection("TextChunker").Get<TextChunkerOption>();
 //配置数据库链接
