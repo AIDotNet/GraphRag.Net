@@ -1,4 +1,5 @@
 ﻿using GraphRag.Net.Domain.Model.Graph;
+using Microsoft.SemanticKernel;
 
 namespace GraphRag.Net.Domain.Interface
 {
@@ -37,12 +38,26 @@ namespace GraphRag.Net.Domain.Interface
         /// <returns></returns>
         Task<string> SearchGraphAsync(string index, string input);
         /// <summary>
+        /// 搜索递归获取节点相关的所有边和节点进行图谱对话,流式返回
+        /// </summary>
+        /// <param name="index"></param>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        IAsyncEnumerable<StreamingKernelContent> SearchGraphStreamAsync(string index, string input);
+        /// <summary>
         /// 通过社区算法检索社区节点进行对话
         /// </summary>
         /// <param name="index"></param>
         /// <param name="input"></param>
         /// <returns></returns>
         Task<string> SearchGraphCommunityAsync(string index, string input);
+        /// <summary>
+        /// 通过社区算法检索社区节点进行对话，流式返回
+        /// </summary>
+        /// <param name="index"></param>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        IAsyncEnumerable<StreamingKernelContent> SearchGraphCommunityStreamAsync(string index, string input);
         /// <summary>
         /// 社区摘要
         /// </summary>
