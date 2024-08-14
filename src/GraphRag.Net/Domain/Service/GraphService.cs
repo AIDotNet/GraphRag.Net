@@ -1,6 +1,5 @@
 ﻿using GraphRag.Net.Options;
 using GraphRag.Net.Domain.Interface;
-using GraphRag.Net.Domain.Model.Constant;
 using GraphRag.Net.Domain.Model.Graph;
 using GraphRag.Net.Repositories;
 using GraphRag.Net.Utils;
