@@ -72,6 +72,11 @@ namespace GraphRag.Net.Web.Pages.Graph
                 _message.Error("请先填写index");
             }
             await _graphService.InsertGraphDataAsync(_importIndex, _importText);
+
+            //生成社区和全局摘要
+            await _graphService.GraphCommunitiesAsync(_importIndex);
+            await _graphService.GraphGlobalAsync(_importIndex);
+
             _indexList = _graphService.GetAllIndex();
             _message.Info("导入完成");
         }
