@@ -156,7 +156,7 @@ namespace GraphRag.Net.Domain.Service
                         _nodes_Repositories.Update(oldNode);
                         text2 = $"Name:{oldNode.Name};Type:{oldNode.Type};Desc:{oldNode.Desc}";
                         nodeDic.Add(n.Id, oldNode.Id);
-                        await textMemory.SaveInformationAsync(SystemConstant.NodeIndex, id: oldNode.Id, text: text2, cancellationToken: default);
+                        await textMemory.SaveInformationAsync(index, id: oldNode.Id, text: text2, cancellationToken: default);
                         continue;
                     }
 
