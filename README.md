@@ -19,7 +19,7 @@
 ```
  "OpenAI": {
    "Key": "sk-xxx",
-   "Endpoint": "https://api.antsk.cn/",
+   "EndPoint": "https://api.antsk.cn/",
    "ChatModel": "gpt-4o-mini",
    "EmbeddingModel": "text-embedding-ada-002"
  },

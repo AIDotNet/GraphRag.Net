@@ -12,7 +12,7 @@ namespace GraphRag.Net.Utils
         {
             UriBuilder uriBuilder;
             Regex regex = new Regex(@"(https?)://([^/:]+)(:\d+)?/(.*)");
-            Match match = regex.Match(GraphOpenAIOption.Endpoint);
+            Match match = regex.Match(GraphOpenAIOption.EndPoint);
 
             var mediaType = request.Content.Headers.ContentType.MediaType;
             string requestBody = (await request.Content.ReadAsStringAsync()).Unescape();

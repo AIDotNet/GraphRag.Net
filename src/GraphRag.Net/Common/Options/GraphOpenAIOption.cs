@@ -2,7 +2,7 @@
 {
     public class GraphOpenAIOption
     {
-        public static string Endpoint { get; set; }
+        public static string EndPoint { get; set; }
 
         public static string Key { get; set; }
 

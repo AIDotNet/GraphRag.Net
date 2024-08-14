@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GraphRag.Net.Common.Options
+namespace GraphRag.Net.Options
 {
     public class GraphSearchOption
     {
