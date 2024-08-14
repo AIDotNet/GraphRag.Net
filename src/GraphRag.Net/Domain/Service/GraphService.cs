@@ -502,8 +502,10 @@ namespace GraphRag.Net.Domain.Service
         {
             SemanticTextMemory textMemory = await _semanticService.GetTextMemory();
             List<TextMemModel> textMemModelList = new List<TextMemModel>();
+            int i = 0;
             await foreach (MemoryQueryResult memory in textMemory.SearchAsync(index, input, limit: GraphSearchOption.SearchLimit, minRelevanceScore: GraphSearchOption.SearchMinRelevance))
             {
+                i++;
                 var textMemModel = new TextMemModel()
                 {
                     Id = memory.Metadata.Id,
@@ -512,6 +514,7 @@ namespace GraphRag.Net.Domain.Service
                 };
                 textMemModelList.Add(textMemModel);
             }
+            Console.WriteLine($"向量匹配数:{i}");
             return textMemModelList;
         }
 
