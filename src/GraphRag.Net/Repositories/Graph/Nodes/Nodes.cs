@@ -1,6 +1,6 @@
 ﻿using SqlSugar;
 
-namespace GraphRag.Net.Repositories.Graph.Nodes
+namespace GraphRag.Net.Repositories
 {
     /// <summary>
     /// 节点

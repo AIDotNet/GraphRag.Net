@@ -1,6 +1,6 @@
-﻿namespace GraphRag.Net.Common.Options
+﻿namespace GraphRag.Net.Options
 {
-    public class OpenAIOption
+    public class GraphOpenAIOption
     {
         public static string Endpoint { get; set; }
 

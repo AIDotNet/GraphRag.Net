@@ -1,10 +1,8 @@
-﻿using GraphRag.Net.Common.Options;
+﻿using GraphRag.Net.Options;
 using GraphRag.Net.Domain.Interface;
 using GraphRag.Net.Domain.Model.Constant;
 using GraphRag.Net.Domain.Model.Graph;
 using GraphRag.Net.Repositories;
-using GraphRag.Net.Repositories.Graph.Edges;
-using GraphRag.Net.Repositories.Graph.Nodes;
 using GraphRag.Net.Utils;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.Memory;
@@ -197,6 +195,7 @@ namespace GraphRag.Net.Domain.Service
                             }
                             if (!_edges_Repositories.IsAny(p => p.Target == relationShip.Edge.Target && p.Source == relationShip.Edge.Source))
                             {
+                                relationShip.Edge.Id=Guid.NewGuid().ToString();
                                 relationShip.Edge.Index = index;
                                 _edges_Repositories.Insert(relationShip.Edge);
                             }
@@ -235,12 +234,39 @@ namespace GraphRag.Net.Domain.Service
                 {
                     Edges edge = new Edges()
                     {
+                        Id=Guid.NewGuid().ToString(),
                         Index = index,
                         Source = nodeDic[e.Source],
                         Target = nodeDic[e.Target],
                         Relationship = e.Relationship
                     };
                     _edges_Repositories.Insert(edge);
+                }
+
+                //查询Edges 的Source和Target 重复数据
+                var repeatEdges = _edges_Repositories.GetDB().Queryable<Edges>()
+                .GroupBy(p => new { p.Source, p.Target })
+                .Select(p => new { p.Source, p.Target, Count = SqlFunc.AggregateCount(p.Source) })
+                .ToList().Where(p => p.Count > 1).ToList();
+                //合并查询Edges 的Source和Target 重复数据
+                foreach (var edge in repeatEdges)
+                { 
+                    var edges = _edges_Repositories.GetList(p => p.Source == edge.Source && p.Target == edge.Target);
+                    var firstEdge=edges.First();
+
+                    for (int i = 1; i < edges.Count(); i++)
+                    {
+                        if (firstEdge.Relationship == edges[i].Relationship)
+                        {
+                            //相同的边进行合并
+                            _edges_Repositories.Delete(edges[i]);
+                            continue;
+                        }
+                        var newDesc=await _semanticService.MergeDesc(firstEdge.Relationship, edges[i].Relationship);
+                        firstEdge.Relationship= newDesc;
+                        _edges_Repositories.Update(firstEdge);
+                        _edges_Repositories.Delete(edges[i]);
+                    }       
                 }
             }
             catch (Exception ex)

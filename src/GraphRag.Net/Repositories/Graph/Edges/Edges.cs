@@ -1,6 +1,6 @@
 ﻿using SqlSugar;
 
-namespace GraphRag.Net.Repositories.Graph.Edges
+namespace GraphRag.Net.Repositories
 {
     /// <summary>
     /// 边
@@ -11,6 +11,11 @@ namespace GraphRag.Net.Repositories.Graph.Edges
     [SugarIndex("i_edges_target", nameof(Edges.Target), OrderByType.Asc)]
     public class Edges
     {
+        /// <summary>
+        /// 主键
+        /// </summary>
+        [SugarColumn(IsPrimaryKey = true)]
+        public string Id { get; set; }
         /// <summary>
         /// 索引
         /// </summary>

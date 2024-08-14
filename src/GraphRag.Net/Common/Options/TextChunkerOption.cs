@@ -1,4 +1,4 @@
-﻿namespace GraphRag.Net.Common.Options
+﻿namespace GraphRag.Net.Options
 {
     public class TextChunkerOption
     {
