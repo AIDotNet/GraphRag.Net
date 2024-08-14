@@ -476,7 +476,7 @@ namespace GraphRag.Net.Domain.Service
         {
             SemanticTextMemory textMemory = await _semanticService.GetTextMemory();
             List<TextMemModel> textMemModelList = new List<TextMemModel>();
-            await foreach (MemoryQueryResult memory in textMemory.SearchAsync(index, input, limit: 3, minRelevanceScore: 0.8))
+            await foreach (MemoryQueryResult memory in textMemory.SearchAsync(index, input, limit: GraphSearchOption.SearchLimit, minRelevanceScore: GraphSearchOption.SearchMinRelevance))
             {
                 var textMemModel = new TextMemModel()
                 {
@@ -531,7 +531,7 @@ namespace GraphRag.Net.Domain.Service
             while (nodesToExplore.Count > 0)
             {
                 //线的深度，暂时先不处理太远距离的关联
-                if (i > 3)
+                if (i > GraphSearchOption.NodeDepth)
                 {
                     break;
                 }

@@ -32,6 +32,11 @@
     "DBConnection": "Data Source=graph.db",
     "GraphDBConnection": "graphmem.db",
     "VectorSize": 1536 //DbType=PostgreSQL时需要设置，sqlite可以不设置
+},
+"GraphSearch": {
+    "SearchMinRelevance": 0.5, //搜索最小相关性
+    "SearchLimit": 3, //搜索限制
+    "NodeDepth": 3 //节点深度
 }
 ```
 ## 启动项目
