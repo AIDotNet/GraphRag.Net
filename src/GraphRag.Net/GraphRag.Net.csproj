@@ -38,7 +38,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Update="graphPlugins\**">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <Pack>true</Pack>
+      <PackagePath>graphPlugins\</PackagePath>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
 </Project>
