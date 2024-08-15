@@ -15,6 +15,24 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Remove="graphPlugins\graph\community_search\config.json" />
+    <Content Remove="graphPlugins\graph\community_summaries\config.json" />
+    <Content Remove="graphPlugins\graph\create\config.json" />
+    <Content Remove="graphPlugins\graph\global_summaries\config.json" />
+    <Content Remove="graphPlugins\graph\mergedesc\config.json" />
+    <Content Remove="graphPlugins\graph\relationship\config.json" />
+    <Content Remove="graphPlugins\graph\search\config.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="graphPlugins\**">
+      <PackagePath>graphPlugins\</PackagePath>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Pack>true</Pack>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="AntDesign.Charts" Version="0.5.5" />
     <PackageReference Include="AntDesign.ProLayout" Version="0.19.4" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
@@ -22,6 +40,44 @@
 
   <ItemGroup>
     <ProjectReference Include="..\GraphRag.Net\GraphRag.Net.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="graphPlugins\graph\community_search\skprompt.txt">
+      <PackagePath>graphPlugins\</PackagePath>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Pack>true</Pack>
+    </None>
+    <None Update="graphPlugins\graph\community_summaries\skprompt.txt">
+      <PackagePath>graphPlugins\</PackagePath>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Pack>true</Pack>
+    </None>
+    <None Update="graphPlugins\graph\create\skprompt.txt">
+      <PackagePath>graphPlugins\</PackagePath>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Pack>true</Pack>
+    </None>
+    <None Update="graphPlugins\graph\global_summaries\skprompt.txt">
+      <PackagePath>graphPlugins\</PackagePath>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Pack>true</Pack>
+    </None>
+    <None Update="graphPlugins\graph\mergedesc\skprompt.txt">
+      <PackagePath>graphPlugins\</PackagePath>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Pack>true</Pack>
+    </None>
+    <None Update="graphPlugins\graph\relationship\skprompt.txt">
+      <PackagePath>graphPlugins\</PackagePath>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Pack>true</Pack>
+    </None>
+    <None Update="graphPlugins\graph\search\skprompt.txt">
+      <PackagePath>graphPlugins\</PackagePath>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Pack>true</Pack>
+    </None>
   </ItemGroup>
 
 </Project>

@@ -36,11 +36,4 @@
     <PackageReference Include="Microsoft.SemanticKernel.Plugins.Memory" Version="$(SKVersion)-alpha" />
     <PackageReference Include="SqlSugarCore" Version="5.1.4.166" />
   </ItemGroup>
-  <ItemGroup>
-    <None Update="graphPlugins\**">
-      <Pack>true</Pack>
-      <PackagePath>graphPlugins\</PackagePath>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
 </Project>
