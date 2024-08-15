@@ -23,9 +23,9 @@ namespace GraphRag.Net.Domain.Service
             if (!_kernel.Plugins.Any(p => p.Name == "graph"))
             {
                 var basePath = AppDomain.CurrentDomain.BaseDirectory; // 或使用其他方式获取根路径
-                var pluginPath = Path.Combine(basePath, RepoFiles.SamplePluginsPath(), "graph");
+                var pluginPath = Path.Combine(basePath, RepoFiles.SamplePluginsPath());
                 Console.WriteLine($"pluginPatth:{pluginPath}");
-                _kernel.ImportPluginFromPromptDirectory(pluginPath);
+                _kernel.ImportPluginFromPromptDirectory(pluginPath, "graph");
             }
         }
         public async Task<string> CreateGraphAsync(string input)
