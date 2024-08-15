@@ -13,24 +13,8 @@ using Npgsql;
 namespace GraphRag.Net.Domain.Service
 {
     [ServiceDescription(typeof(ISemanticService), ServiceLifetime.Scoped)]
-    public class SemanticService: ISemanticService
+    public class SemanticService(Kernel _kernel) : ISemanticService
     {
-        private readonly Kernel _kernel;
-
-        private KernelPlugin _plugin;
-        public SemanticService(Kernel kernel)
-        {
-            _kernel = kernel;
-            //导入插件
-            if (!_kernel.Plugins.Any(p => p.Name == "graph"))
-            {
-                var basePath = AppDomain.CurrentDomain.BaseDirectory; // 或使用其他方式获取根路径
-                var pluginPath = Path.Combine(basePath, RepoFiles.SamplePluginsPath(), "graph");
-                Console.WriteLine($"pluginPatth:{pluginPath}");
-                _plugin=_kernel.ImportPluginFromPromptDirectory(pluginPath);
-                Console.WriteLine($"FunCount:{_plugin.Count()}");
-            }
-        }
         public async Task<string> CreateGraphAsync(string input)
         {
             OpenAIPromptExecutionSettings settings = new()
@@ -38,7 +22,7 @@ namespace GraphRag.Net.Domain.Service
                 Temperature = 0,
                 ResponseFormat = ChatCompletionsResponseFormat.JsonObject
             };
-            KernelFunction createFun = _plugin["create"];
+            KernelFunction createFun = _kernel.Plugins.GetFunction("graph", "create");
             var args = new KernelArguments(settings)
             {
                 ["input"] = input,
@@ -51,7 +35,7 @@ namespace GraphRag.Net.Domain.Service
         public async Task<string> GetGraphAnswerAsync(string graph, string input)
         {
 
-            KernelFunction createFun = _plugin["search"];
+            KernelFunction createFun = _kernel.Plugins.GetFunction("graph", "search");
             var args = new KernelArguments()
             {
                 ["graph"] = graph,
@@ -64,7 +48,7 @@ namespace GraphRag.Net.Domain.Service
         }
         public async IAsyncEnumerable<StreamingKernelContent> GetGraphAnswerStreamAsync(string graph, string input)
         {
-            KernelFunction createFun = _plugin["search"];
+            KernelFunction createFun = _kernel.Plugins.GetFunction("graph", "search");
             var args = new KernelArguments()
             {
                 ["graph"] = graph,
@@ -78,10 +62,10 @@ namespace GraphRag.Net.Domain.Service
         }
 
 
-        public async Task<string> GetGraphCommunityAnswerAsync(string graph,string community,string global,string input)
+        public async Task<string> GetGraphCommunityAnswerAsync(string graph, string community, string global, string input)
         {
 
-            KernelFunction createFun = _plugin["community_search"];
+            KernelFunction createFun = _kernel.Plugins.GetFunction("graph", "community_search");
             var args = new KernelArguments()
             {
                 ["graph"] = graph,
@@ -98,7 +82,7 @@ namespace GraphRag.Net.Domain.Service
         public async IAsyncEnumerable<StreamingKernelContent> GetGraphCommunityAnswerStreamAsync(string graph, string community, string global, string input)
         {
 
-            KernelFunction createFun = _plugin["community_search"];
+            KernelFunction createFun = _kernel.Plugins.GetFunction("graph", "community_search");
             var args = new KernelArguments()
             {
                 ["graph"] = graph,
@@ -106,7 +90,7 @@ namespace GraphRag.Net.Domain.Service
                 ["global"] = global,
                 ["input"] = input,
             };
-            var skresult =  _kernel.InvokeStreamingAsync(createFun, args);
+            var skresult = _kernel.InvokeStreamingAsync(createFun, args);
             await foreach (var content in skresult)
             {
                 yield return content;
@@ -117,7 +101,7 @@ namespace GraphRag.Net.Domain.Service
 
         public async Task<string> GetRelationship(string node1, string node2)
         {
-            KernelFunction createFun = _plugin["relationship"];
+            KernelFunction createFun = _kernel.Plugins.GetFunction("graph", "relationship");
             var args = new KernelArguments()
             {
                 ["node1"] = node1,
@@ -131,7 +115,7 @@ namespace GraphRag.Net.Domain.Service
 
         public async Task<string> MergeDesc(string desc1, string desc2)
         {
-            KernelFunction createFun = _plugin["mergedesc"];
+            KernelFunction createFun = _kernel.Plugins.GetFunction("graph", "mergedesc");
             var args = new KernelArguments()
             {
                 ["desc1"] = desc1,
@@ -141,10 +125,10 @@ namespace GraphRag.Net.Domain.Service
 
             string result = skresult.GetValue<string>()?.Trim() ?? "";
             return result;
-        }  
+        }
         public async Task<string> CommunitySummaries(string nodes)
         {
-            KernelFunction createFun = _plugin["community_summaries"];
+            KernelFunction createFun = _kernel.Plugins.GetFunction("graph", "community_summaries");
             var args = new KernelArguments()
             {
                 ["nodes"] = nodes
@@ -153,10 +137,10 @@ namespace GraphRag.Net.Domain.Service
 
             string result = skresult.GetValue<string>()?.Trim() ?? "";
             return result;
-        }    
+        }
         public async Task<string> GlobalSummaries(string community)
         {
-            KernelFunction createFun = _plugin["global_summaries"];
+            KernelFunction createFun = _kernel.Plugins.GetFunction("graph", "global_summaries");
             var args = new KernelArguments()
             {
                 ["community"] = community
@@ -174,7 +158,7 @@ namespace GraphRag.Net.Domain.Service
         /// <exception cref="InvalidOperationException"></exception>
         public async Task<SemanticTextMemory> GetTextMemory()
         {
-            IMemoryStore memoryStore=null ;
+            IMemoryStore memoryStore = null;
             switch (GraphDBConnectionOption.DbType)
             {
                 case "Sqlite":
