@@ -26,9 +26,7 @@
 
   <ItemGroup>
     <None Include="graphPlugins\**">
-      <PackagePath>graphPlugins\</PackagePath>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <Pack>true</Pack>
     </None>
   </ItemGroup>
 
