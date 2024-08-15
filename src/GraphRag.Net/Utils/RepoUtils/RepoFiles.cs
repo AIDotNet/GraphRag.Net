@@ -42,7 +42,7 @@ internal static class RepoFiles
         {
             throw new AppException("Plugins directory not found. The app needs the plugins from the repo to work.");
         }
-
+        Console.WriteLine(path);
         return path;
     }
 }
