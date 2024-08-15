@@ -17,7 +17,7 @@
 在appsettings.json配置
 
 ```
- "OpenAI": {
+ "GraphOpenAI": {
    "Key": "sk-xxx",
    "EndPoint": "https://api.antsk.cn/",
    "ChatModel": "gpt-4o-mini",
