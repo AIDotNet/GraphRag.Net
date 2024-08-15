@@ -180,6 +180,7 @@ namespace GraphRag.Net.Domain.Service
                         var node1 = _nodes_Repositories.GetFirst(p => p.Id == memory.Metadata.Id);
                         string text1 = $"Name:{node1.Name};Type:{node1.Type};Desc:{node1.Desc}";
                         var relationShipJson = await _semanticService.GetRelationship(text1, text2);
+
                         var relationShip = JsonConvert.DeserializeObject<RelationShipModel>(relationShipJson);
                         if (relationShip.IsRelationship)
                         {
@@ -198,10 +199,6 @@ namespace GraphRag.Net.Domain.Service
                                 relationShip.Edge.Id=Guid.NewGuid().ToString();
                                 relationShip.Edge.Index = index;
                                 _edges_Repositories.Insert(relationShip.Edge);
-                            }
-                            else
-                            {
-                                //相同的边进行合并
                             }
                         }
                     }
@@ -271,7 +268,7 @@ namespace GraphRag.Net.Domain.Service
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.ToString());
+                Console.WriteLine($"插入数据失败：{ex.ToString()}");
             }
         }
 

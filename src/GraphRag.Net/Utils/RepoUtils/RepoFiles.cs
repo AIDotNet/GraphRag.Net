@@ -12,25 +12,33 @@ internal static class RepoFiles
     /// <returns>The full path to samples/plugins</returns>
     public static string SamplePluginsPath()
     {
-        string Parent = System.IO.Directory.GetCurrentDirectory();
-        string Folder = "graphPlugins";
+        string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
+        string folderName = "graphPlugins";
 
-        bool SearchPath(string pathToFind, out string result, int maxAttempts = 10)
+        string FindPluginsDirectory(string startDir, string targetFolder)
         {
-            var currDir = Path.GetFullPath(Assembly.GetExecutingAssembly().Location);
-            bool found;
-            do
-            {
-                result = Path.Join(currDir, pathToFind);
-                found = Directory.Exists(result);
-                currDir = Path.GetFullPath(Path.Combine(currDir, ".."));
-            } while (maxAttempts-- > 0 && !found);
+            string currDir = Path.GetFullPath(startDir);
+            const int maxAttempts = 10;
 
-            return found;
+            for (int i = 0; i < maxAttempts; i++)
+            {
+                string potentialPath = Path.Combine(currDir, targetFolder);
+                if (Directory.Exists(potentialPath))
+                {
+                    return potentialPath;
+                }
+
+                currDir = Path.GetFullPath(Path.Combine(currDir, ".."));
+            }
+
+            return null; // Not found after max attempts.
         }
 
-        if (!SearchPath(Parent + Path.DirectorySeparatorChar + Folder, out string path)
-            && !SearchPath(Folder, out path))
+        // Check in the BaseDirectory and its parent directories
+        string path = FindPluginsDirectory(baseDirectory, folderName)
+                    ?? FindPluginsDirectory(baseDirectory + Path.DirectorySeparatorChar + folderName, folderName);
+
+        if (string.IsNullOrEmpty(path))
         {
             throw new AppException("Plugins directory not found. The app needs the plugins from the repo to work.");
         }
