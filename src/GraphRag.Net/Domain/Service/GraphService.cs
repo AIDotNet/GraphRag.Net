@@ -16,7 +16,6 @@ namespace GraphRag.Net.Domain.Service
 {
     [ServiceDescription(typeof(IGraphService), ServiceLifetime.Scoped)]
     public class GraphService(
-        Kernel _kernel,
         INodes_Repositories _nodes_Repositories,
         IEdges_Repositories _edges_Repositories,
         ISemanticService _semanticService,

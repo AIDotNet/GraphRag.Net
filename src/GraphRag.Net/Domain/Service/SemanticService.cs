@@ -13,8 +13,21 @@ using Npgsql;
 namespace GraphRag.Net.Domain.Service
 {
     [ServiceDescription(typeof(ISemanticService), ServiceLifetime.Scoped)]
-    public class SemanticService(Kernel _kernel) : ISemanticService
+    public class SemanticService: ISemanticService
     {
+        private readonly Kernel _kernel;
+        public SemanticService(Kernel kernel)
+        {
+            _kernel = kernel;
+            //导入插件
+            if (!_kernel.Plugins.Any(p => p.Name == "graph"))
+            {
+                var basePath = AppDomain.CurrentDomain.BaseDirectory; // 或使用其他方式获取根路径
+                var pluginPath = Path.Combine(basePath, RepoFiles.SamplePluginsPath(), "graph");
+                Console.WriteLine($"pluginPatth:{pluginPath}");
+                _kernel.ImportPluginFromPromptDirectory(pluginPath);
+            }
+        }
         public async Task<string> CreateGraphAsync(string input)
         {
             OpenAIPromptExecutionSettings settings = new()
