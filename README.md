@@ -66,6 +66,14 @@ http://localhost:5000/
 ```
 dotnet add package GraphRag.Net
 ```
+## 为了方便进行提示词调整与修改，SK Plugin我们剥离出了项目，您需要把GraphRag.Net.Web项目中的 graphPlugins目录拷贝到你的项目中，并设置：
+```
+  <ItemGroup>
+    <None Include="graphPlugins\**">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+```
 
 ### 默认配置，使用OpenAI标准接口，在配置了OpenAI的appsettings后可以使用下面代码进行注入
 添加包以后，需要进行配置文件的设置以及依赖注入
