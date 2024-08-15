@@ -16,6 +16,8 @@ namespace GraphRag.Net.Domain.Service
     public class SemanticService: ISemanticService
     {
         private readonly Kernel _kernel;
+
+        private KernelPlugin _plugin;
         public SemanticService(Kernel kernel)
         {
             _kernel = kernel;
@@ -23,9 +25,10 @@ namespace GraphRag.Net.Domain.Service
             if (!_kernel.Plugins.Any(p => p.Name == "graph"))
             {
                 var basePath = AppDomain.CurrentDomain.BaseDirectory; // 或使用其他方式获取根路径
-                var pluginPath = Path.Combine(basePath, RepoFiles.SamplePluginsPath());
+                var pluginPath = Path.Combine(basePath, RepoFiles.SamplePluginsPath(), "graph");
                 Console.WriteLine($"pluginPatth:{pluginPath}");
-                _kernel.ImportPluginFromPromptDirectory(pluginPath, "graph");
+                _plugin=_kernel.ImportPluginFromPromptDirectory(pluginPath);
+                Console.WriteLine($"FunCount:{_plugin.Count()}");
             }
         }
         public async Task<string> CreateGraphAsync(string input)
@@ -35,7 +38,7 @@ namespace GraphRag.Net.Domain.Service
                 Temperature = 0,
                 ResponseFormat = ChatCompletionsResponseFormat.JsonObject
             };
-            KernelFunction createFun = _kernel.Plugins.GetFunction("graph", "create");
+            KernelFunction createFun = _plugin["create"];
             var args = new KernelArguments(settings)
             {
                 ["input"] = input,
@@ -48,7 +51,7 @@ namespace GraphRag.Net.Domain.Service
         public async Task<string> GetGraphAnswerAsync(string graph, string input)
         {
 
-            KernelFunction createFun = _kernel.Plugins.GetFunction("graph", "search");
+            KernelFunction createFun = _plugin["search"];
             var args = new KernelArguments()
             {
                 ["graph"] = graph,
@@ -61,7 +64,7 @@ namespace GraphRag.Net.Domain.Service
         }
         public async IAsyncEnumerable<StreamingKernelContent> GetGraphAnswerStreamAsync(string graph, string input)
         {
-            KernelFunction createFun = _kernel.Plugins.GetFunction("graph", "search");
+            KernelFunction createFun = _plugin["search"];
             var args = new KernelArguments()
             {
                 ["graph"] = graph,
@@ -78,7 +81,7 @@ namespace GraphRag.Net.Domain.Service
         public async Task<string> GetGraphCommunityAnswerAsync(string graph,string community,string global,string input)
         {
 
-            KernelFunction createFun = _kernel.Plugins.GetFunction("graph", "community_search");
+            KernelFunction createFun = _plugin["community_search"];
             var args = new KernelArguments()
             {
                 ["graph"] = graph,
@@ -95,7 +98,7 @@ namespace GraphRag.Net.Domain.Service
         public async IAsyncEnumerable<StreamingKernelContent> GetGraphCommunityAnswerStreamAsync(string graph, string community, string global, string input)
         {
 
-            KernelFunction createFun = _kernel.Plugins.GetFunction("graph", "community_search");
+            KernelFunction createFun = _plugin["community_search"];
             var args = new KernelArguments()
             {
                 ["graph"] = graph,
@@ -114,7 +117,7 @@ namespace GraphRag.Net.Domain.Service
 
         public async Task<string> GetRelationship(string node1, string node2)
         {
-            KernelFunction createFun = _kernel.Plugins.GetFunction("graph", "relationship");
+            KernelFunction createFun = _plugin["relationship"];
             var args = new KernelArguments()
             {
                 ["node1"] = node1,
@@ -128,7 +131,7 @@ namespace GraphRag.Net.Domain.Service
 
         public async Task<string> MergeDesc(string desc1, string desc2)
         {
-            KernelFunction createFun = _kernel.Plugins.GetFunction("graph", "mergedesc");
+            KernelFunction createFun = _plugin["mergedesc"];
             var args = new KernelArguments()
             {
                 ["desc1"] = desc1,
@@ -141,7 +144,7 @@ namespace GraphRag.Net.Domain.Service
         }  
         public async Task<string> CommunitySummaries(string nodes)
         {
-            KernelFunction createFun = _kernel.Plugins.GetFunction("graph", "community_summaries");
+            KernelFunction createFun = _plugin["community_summaries"];
             var args = new KernelArguments()
             {
                 ["nodes"] = nodes
@@ -153,7 +156,7 @@ namespace GraphRag.Net.Domain.Service
         }    
         public async Task<string> GlobalSummaries(string community)
         {
-            KernelFunction createFun = _kernel.Plugins.GetFunction("graph", "global_summaries");
+            KernelFunction createFun = _plugin["global_summaries"];
             var args = new KernelArguments()
             {
                 ["community"] = community
