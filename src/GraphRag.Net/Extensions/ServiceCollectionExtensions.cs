@@ -89,28 +89,20 @@ namespace Microsoft.Extensions.DependencyInjection
         /// </summary>
         static void CodeFirst()
         {
-
             // 获取仓储服务
             var _repository = new Nodes_Repositories();
 
             // 创建数据库（如果不存在）
             _repository.GetDB().DbMaintenance.CreateDatabase();
-
-            // 获取当前应用程序域中所有程序集
-            var assemblies = AppDomain.CurrentDomain.GetAssemblies();
-
             // 在所有程序集中查找具有[SugarTable]特性的类
-            foreach (var assembly in assemblies)
-            {
-                // 获取该程序集中所有具有SugarTable特性的类型
-                var entityTypes = assembly.GetTypes()
+            var assembly = Assembly.GetExecutingAssembly();
+            // 获取该程序集中所有具有SugarTable特性的类型
+            var entityTypes = assembly.GetTypes()
                     .Where(type => TypeIsEntity(type));
-
-                // 为每个找到的类型初始化数据库表
-                foreach (var type in entityTypes)
-                {
-                    _repository.GetDB().CodeFirst.InitTables(type);
-                }
+            // 为每个找到的类型初始化数据库表
+            foreach (var type in entityTypes)
+            {
+                _repository.GetDB().CodeFirst.InitTables(type);
             }
         }
 
