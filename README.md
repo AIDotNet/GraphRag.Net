@@ -35,7 +35,7 @@
 },
 "GraphSearch": {
     "SearchMinRelevance": 0.5, //搜索最小相关性
-    "SearchLimit": 3, //搜索限制
+    "SearchLimit": 3, //向量搜索节点限制个数
     "NodeDepth": 3 ,//检索节点深度
     "MaxNodes": 100 //检索最大节点数
 },
