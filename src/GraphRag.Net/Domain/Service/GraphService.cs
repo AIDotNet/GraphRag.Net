@@ -517,7 +517,6 @@ namespace GraphRag.Net.Domain.Service
         private async Task<GraphModel> GetFilteredGraphModel(string index, string input, List<Nodes> nodes)
         {
             var graphModel = GetGraphAllRecursion(index, nodes);
-            var answer = await _semanticService.GetGraphAnswerAsync(JsonConvert.SerializeObject(graphModel), input);
             return graphModel; // or return the answer depending on your use case
         }
 

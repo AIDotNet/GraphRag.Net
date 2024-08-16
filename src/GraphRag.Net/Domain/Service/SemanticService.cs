@@ -44,7 +44,6 @@ namespace GraphRag.Net.Domain.Service
         }
         public async Task<string> GetGraphAnswerAsync(string graph, string input)
         {
-
             KernelFunction createFun = _kernel.Plugins.GetFunction("graph", "search");
             var args = new KernelArguments()
             {

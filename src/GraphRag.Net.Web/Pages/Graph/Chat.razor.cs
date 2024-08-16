@@ -26,10 +26,19 @@ namespace GraphRag.Net.Web.Pages.Graph
 
         private async Task Search()
         {
+            Console.Write("111");
             loadding = true;
             _output = await _graphService.SearchGraphAsync(_index, _input);
             loadding = false;
         }
+
+        private async Task Search1()
+        {
+            loadding = true;
+            _output = await _graphService.SearchGraphCommunityAsync(_index, _input);
+            loadding = false;
+        }
+
 
         private void OnSelectedItemChangedHandler(string value)
         {
