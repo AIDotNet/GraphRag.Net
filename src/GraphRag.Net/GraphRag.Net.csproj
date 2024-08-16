@@ -19,6 +19,7 @@
       Element Summaries → Graph Communities：使用社区检测算法将图划分为社区。
       Graph Communities → Community Summaries：为每个社区生成摘要。
       Community Summaries → Community Answers → Global Answer：使用社区摘要生成局部答案，然后汇总这些局部答案以生成全局答案。
+      商务需求联系微信xuzeyu91
     </Description>
     <PackageProjectUrl>https://github.com/xuzeyu91/GraphRag.Net</PackageProjectUrl>
     <Tags>AI, Rag, GraphRag</Tags>
@@ -36,10 +37,5 @@
     <PackageReference Include="Microsoft.SemanticKernel.Plugins.Memory" Version="$(SKVersion)-alpha" />
     <PackageReference Include="Polly" Version="8.4.1" />
     <PackageReference Include="SqlSugarCore" Version="5.1.4.166" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Update="graphPlugins\**">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
   </ItemGroup>
 </Project>

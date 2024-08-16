@@ -18,22 +18,9 @@ using GraphRag.Net.Common.Options;
 namespace GraphRag.Net.Domain.Service
 {
     [ServiceDescription(typeof(ISemanticService), ServiceLifetime.Scoped)]
-    public class SemanticService: ISemanticService
+    public class SemanticService(Kernel _kernel) : ISemanticService
     {
-        private readonly Kernel _kernel;
-        public SemanticService(Kernel kernel)
-        {
-            _kernel = kernel;
-            //导入插件
-            if (!_kernel.Plugins.Any(p => p.Name == "graph"))
-            {
-                var basePath = AppDomain.CurrentDomain.BaseDirectory; // 或使用其他方式获取根路径
-                var pluginPath = Path.Combine(basePath, RepoFiles.SamplePluginsPath(), "graph");
-                Console.WriteLine($"pluginPatth:{pluginPath}");
-                _kernel.ImportPluginFromPromptDirectory(pluginPath);
-            }
-        }
-        public async Task<GraphModel> CreateGraphAsync(string input)
+        public async Task<string> CreateGraphAsync(string input)
         {
             var retryPolicy = Policy.Handle<Exception>().RetryAsync(GraphSysOption.RetryCounnt, (ex, count) =>
             {
@@ -85,7 +72,7 @@ namespace GraphRag.Net.Domain.Service
         }
 
 
-        public async Task<string> GetGraphCommunityAnswerAsync(string graph,string community,string global,string input)
+        public async Task<string> GetGraphCommunityAnswerAsync(string graph, string community, string global, string input)
         {
 
             KernelFunction createFun = _kernel.Plugins.GetFunction("graph", "community_search");
@@ -112,7 +99,7 @@ namespace GraphRag.Net.Domain.Service
                 ["global"] = global,
                 ["input"] = input,
             };
-            var skresult =  _kernel.InvokeStreamingAsync(createFun, args);
+            var skresult = _kernel.InvokeStreamingAsync(createFun, args);
             await foreach (var content in skresult)
             {
                 yield return content;
@@ -157,7 +144,7 @@ namespace GraphRag.Net.Domain.Service
 
             string result = skresult.GetValue<string>()?.Trim() ?? "";
             return result;
-        }  
+        }
         public async Task<string> CommunitySummaries(string nodes)
         {
             KernelFunction createFun = _kernel.Plugins.GetFunction("graph", "community_summaries");
@@ -169,7 +156,7 @@ namespace GraphRag.Net.Domain.Service
 
             string result = skresult.GetValue<string>()?.Trim() ?? "";
             return result;
-        }    
+        }
         public async Task<string> GlobalSummaries(string community)
         {
             KernelFunction createFun = _kernel.Plugins.GetFunction("graph", "global_summaries");
@@ -190,7 +177,7 @@ namespace GraphRag.Net.Domain.Service
         /// <exception cref="InvalidOperationException"></exception>
         public async Task<SemanticTextMemory> GetTextMemory()
         {
-            IMemoryStore memoryStore=null ;
+            IMemoryStore memoryStore = null;
             switch (GraphDBConnectionOption.DbType)
             {
                 case "Sqlite":
