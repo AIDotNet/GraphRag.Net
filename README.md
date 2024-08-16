@@ -251,4 +251,16 @@ namespace GraphRag.Net.Api.Controllers
 
 ```
 
+## 更多Rag场景可查看 AntSK
+[AntSK](https://github.com/AIDotNet/AntSK)
+
+体验环境：
+
+[Demo地址](https://demo.antsk.cn)
+
+账号：test
+
+密码：test
+
+
 也欢迎大家加入我们的微信交流群，可以添加我的微信：**xuzeyu91** 发送进群
