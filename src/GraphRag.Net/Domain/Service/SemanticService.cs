@@ -20,7 +20,7 @@ namespace GraphRag.Net.Domain.Service
     [ServiceDescription(typeof(ISemanticService), ServiceLifetime.Scoped)]
     public class SemanticService(Kernel _kernel) : ISemanticService
     {
-        public async Task<string> CreateGraphAsync(string input)
+        public async Task<GraphModel> CreateGraphAsync(string input)
         {
             var retryPolicy = Policy.Handle<Exception>().RetryAsync(GraphSysOption.RetryCounnt, (ex, count) =>
             {
