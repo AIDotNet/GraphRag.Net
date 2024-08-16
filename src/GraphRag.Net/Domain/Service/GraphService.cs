@@ -282,7 +282,8 @@ namespace GraphRag.Net.Domain.Service
             if (textMemModelList.Any())
             {
                 var nodes = _nodes_Repositories.GetList(p => p.Index == index && textMemModelList.Select(c => c.Id).Contains(p.Id));
-                var graphModel = await GetFilteredGraphModel(index, input, nodes);
+                var graphModel = GetGraphAllRecursion(index, nodes); ;
+
                 answer = await _semanticService.GetGraphAnswerAsync(JsonConvert.SerializeObject(graphModel), input);
             }
             return answer;
@@ -505,19 +506,6 @@ namespace GraphRag.Net.Domain.Service
             }
             Console.WriteLine($"向量匹配数:{i}");
             return textMemModelList;
-        }
-
-        /// <summary>
-        /// 使用基于输入条件的语义过滤来过滤图模型。
-        /// </summary>
-        /// <param name="index"></param>
-        /// <param name="input"></param>
-        /// <param name="nodes"></param>
-        /// <returns></returns>
-        private async Task<GraphModel> GetFilteredGraphModel(string index, string input, List<Nodes> nodes)
-        {
-            var graphModel = GetGraphAllRecursion(index, nodes);
-            return graphModel; // or return the answer depending on your use case
         }
 
         /// <summary>
