@@ -121,13 +121,8 @@ namespace GraphRag.Net.Domain.Service
             try
             {
                 SemanticTextMemory textMemory = await _semanticService.GetTextMemory();
-
-                var graphJson = await _semanticService.CreateGraphAsync(input);
-
-                var graph = JsonConvert.DeserializeObject<GraphModel>(graphJson);
+                var graph = await _semanticService.CreateGraphAsync(input);
                 Dictionary<string, string> nodeDic = new Dictionary<string, string>();
-
-
                 foreach (var n in graph.Nodes)
                 {
 
@@ -177,9 +172,8 @@ namespace GraphRag.Net.Domain.Service
                         }
                         var node1 = _nodes_Repositories.GetFirst(p => p.Id == memory.Metadata.Id);
                         string text1 = $"Name:{node1.Name};Type:{node1.Type};Desc:{node1.Desc}";
-                        var relationShipJson = await _semanticService.GetRelationship(text1, text2);
 
-                        var relationShip = JsonConvert.DeserializeObject<RelationShipModel>(relationShipJson);
+                        var relationShip = await _semanticService.GetRelationship(text1, text2);
                         if (relationShip.IsRelationship)
                         {
                             if (relationShip.Edge.Source == "node1")

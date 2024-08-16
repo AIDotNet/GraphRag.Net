@@ -9,6 +9,11 @@ using Microsoft.SemanticKernel.Connectors.Postgres;
 using Microsoft.SemanticKernel.Connectors.Sqlite;
 using Microsoft.SemanticKernel.Memory;
 using Npgsql;
+using Newtonsoft.Json;
+using GraphRag.Net.Domain.Model.Graph;
+using Polly;
+using Polly.Retry;
+using GraphRag.Net.Common.Options;
 
 namespace GraphRag.Net.Domain.Service
 {
@@ -28,21 +33,26 @@ namespace GraphRag.Net.Domain.Service
                 _kernel.ImportPluginFromPromptDirectory(pluginPath);
             }
         }
-        public async Task<string> CreateGraphAsync(string input)
+        public async Task<GraphModel> CreateGraphAsync(string input)
         {
-            OpenAIPromptExecutionSettings settings = new()
+            var retryPolicy = Policy.Handle<Exception>().RetryAsync(GraphSysOption.RetryCounnt, (ex, count) =>
             {
-                Temperature = 0,
-                ResponseFormat = ChatCompletionsResponseFormat.JsonObject
-            };
-            KernelFunction createFun = _kernel.Plugins.GetFunction("graph", "create");
-            var args = new KernelArguments(settings)
+                Console.WriteLine($"CreateGraphAsync失败，重试{count}次，异常信息{ex.Message}");
+            });
+            var result =await retryPolicy.ExecuteAsync<GraphModel>(async () =>
             {
-                ["input"] = input,
-            };
-            var skresult = await _kernel.InvokeAsync(createFun, args);
+                 KernelFunction createFun = _kernel.Plugins.GetFunction("graph", "create");
+                 var args = new KernelArguments()
+                 {
+                     ["input"] = input,
+                 };
+                 var skresult = await _kernel.InvokeAsync(createFun, args);
 
-            string result = skresult.GetValue<string>()?.Trim() ?? "";
+                 string json = skresult.GetValue<string>()?.Trim() ?? "";
+                 var graph = JsonConvert.DeserializeObject<GraphModel>(json);
+                 return graph;
+
+             });
             return result;
         }
         public async Task<string> GetGraphAnswerAsync(string graph, string input)
@@ -94,7 +104,6 @@ namespace GraphRag.Net.Domain.Service
 
         public async IAsyncEnumerable<StreamingKernelContent> GetGraphCommunityAnswerStreamAsync(string graph, string community, string global, string input)
         {
-
             KernelFunction createFun = _kernel.Plugins.GetFunction("graph", "community_search");
             var args = new KernelArguments()
             {
@@ -112,17 +121,27 @@ namespace GraphRag.Net.Domain.Service
         }
 
 
-        public async Task<string> GetRelationship(string node1, string node2)
+        public async Task<RelationShipModel> GetRelationship(string node1, string node2)
         {
-            KernelFunction createFun = _kernel.Plugins.GetFunction("graph", "relationship");
-            var args = new KernelArguments()
+            var retryPolicy = Policy.Handle<Exception>().RetryAsync(GraphSysOption.RetryCounnt, (ex, count) =>
             {
-                ["node1"] = node1,
-                ["node2"] = node2,
-            };
-            var skresult = await _kernel.InvokeAsync(createFun, args);
+                Console.WriteLine($"GetRelationship失败，重试{count}次，异常信息{ex.Message}");
+            });
+            var result = await retryPolicy.ExecuteAsync<RelationShipModel>(async () =>
+            {
+                KernelFunction createFun = _kernel.Plugins.GetFunction("graph", "relationship");
+                var args = new KernelArguments()
+                {
+                    ["node1"] = node1,
+                    ["node2"] = node2,
+                };
+                var skresult = await _kernel.InvokeAsync(createFun, args);
 
-            string result = skresult.GetValue<string>()?.Trim() ?? "";
+                string json = skresult.GetValue<string>()?.Trim() ?? "";
+
+                var relation = JsonConvert.DeserializeObject<RelationShipModel>(json);
+                return relation;
+            });
             return result;
         }
 

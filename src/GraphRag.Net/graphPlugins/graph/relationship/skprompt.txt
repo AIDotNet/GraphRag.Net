@@ -5,7 +5,7 @@ node1:Name:苹果;Type:Fruit;Desc:一种水果
 node2:Name:红色;Type:Color;Desc:一种颜色
 
 ### 示例输出
-{"IsRelationship":true,"Edge": {\"Source\": \"node1\", \"Target\": \"node2\", \"Relationship\": "苹果是红色"}}
+{"IsRelationship":true,"Edge": {"Source": "node1", "Target": "node2", "Relationship": "苹果是红色"}}
 
 ### 示例输入
 node1:Name:苹果;Type:Fruit;Desc:一种水果
