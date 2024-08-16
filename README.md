@@ -37,6 +37,9 @@
     "SearchMinRelevance": 0.5, //搜索最小相关性
     "SearchLimit": 3, //搜索限制
     "NodeDepth": 3 //节点深度
+},
+"GraphSys": {
+    "RetryCounnt": 2 //重试次数，使用国产模型可能会出现json提取失败，增加重试次数可提高可用性
 }
 ```
 ## 启动项目
@@ -84,6 +87,8 @@ builder.Configuration.GetSection("GraphOpenAI").Get<GraphOpenAIOption>();
 builder.Configuration.GetSection("TextChunker").Get<TextChunkerOption>();
 //配置数据库链接
 builder.Configuration.GetSection("GraphDBConnection").Get<GraphDBConnectionOption>();
+//系统设置
+builder.Configuration.GetSection("GraphSys").Get<GraphSysOption>();
 
 //注入AddGraphRagNet,注意，需要先注入配置文件，然后再注入GraphRagNet
 builder.Services.AddGraphRagNet();
