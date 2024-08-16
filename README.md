@@ -36,7 +36,8 @@
 "GraphSearch": {
     "SearchMinRelevance": 0.5, //搜索最小相关性
     "SearchLimit": 3, //搜索限制
-    "NodeDepth": 3 //节点深度
+    "NodeDepth": 3 ,//检索节点深度
+    "MaxNodes": 100 //检索最大节点数
 },
 "GraphSys": {
     "RetryCounnt": 2 //重试次数，使用国产模型可能会出现json提取失败，增加重试次数可提高可用性

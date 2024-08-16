@@ -23,5 +23,10 @@ namespace GraphRag.Net.Options
         /// 节点关系检索深度
         /// </summary>
         public static int NodeDepth { get; set; } = 3;
+
+        /// <summary>
+        /// 节点检索最多节点数量
+        /// </summary>
+        public static int MaxNodes { get; set; } = 300;
     }
 }

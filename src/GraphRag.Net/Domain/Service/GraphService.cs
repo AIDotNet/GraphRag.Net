@@ -533,10 +533,10 @@ namespace GraphRag.Net.Domain.Service
             var allEdges = new List<Edges>();
             var nodesToExplore = new List<Nodes>(initialNodes);
             int i = 0;
+
             while (nodesToExplore.Count > 0)
             {
-                //线的深度，暂时先不处理太远距离的关联
-                if (i > GraphSearchOption.NodeDepth)
+                if (i > GraphSearchOption.NodeDepth || allNodes.Count >= GraphSearchOption.MaxNodes)
                 {
                     break;
                 }
@@ -557,21 +557,29 @@ namespace GraphRag.Net.Domain.Service
 
                 // 获取新的节点
                 var newNodes = GetNodes(index, newEdges);
-
                 // 找到新获取的节点，并更新 nodesToExplore
                 nodesToExplore = newNodes.Where(n => !allNodes.Any(existingNode => existingNode.Id == n.Id)).ToList();
-
                 // 将新节点加入到 allNodes 中
                 allNodes.AddRange(nodesToExplore);
 
                 i++;
             }
+
+            // 如果节点数超过最大限制，进行截断
+            if (allNodes.Count > GraphSearchOption.MaxNodes)
+            {
+                allNodes = allNodes.Take(GraphSearchOption.MaxNodes).ToList();  
+            }
+            // 需要相应地处理 allEdges，确保边的节点在 allNodes 中 
+            allEdges = allEdges.Where(e => allNodes.Any(p => p.Id == e.Source) && allNodes.Any(p => p.Id == e.Target)).ToList();
+
             return new GraphModel
             {
                 Nodes = allNodes,
                 Edges = allEdges
             };
         }
+
 
         /// <summary>
         /// 通过社区算法检索社区节点
@@ -600,6 +608,15 @@ namespace GraphRag.Net.Domain.Service
                     allEdges.Add(edge);
                 }
             }
+
+            // 如果节点数超过最大限制，进行截断
+            if (allNodes.Count > GraphSearchOption.MaxNodes)
+            {
+                allNodes = allNodes.Take(GraphSearchOption.MaxNodes).ToList();
+            }
+            // 需要相应地处理 allEdges，确保边的节点在 allNodes 中 
+            allEdges = allEdges.Where(e => allNodes.Any(p => p.Id == e.Source) && allNodes.Any(p => p.Id == e.Target)).ToList();
+
             return new GraphModel
             {
                 Nodes = allNodes,
@@ -616,7 +633,7 @@ namespace GraphRag.Net.Domain.Service
         {
             var nodeIds = nodes.Select(x => x.Id).ToList();
             var edges = new List<Edges>();
-            edges = _edges_Repositories.GetList(x => x.Index == index && nodeIds.Contains(x.Source) || nodeIds.Contains(x.Target));
+            edges = _edges_Repositories.GetList(x => x.Index == index && nodeIds.Contains(x.Source) && nodeIds.Contains(x.Target));
             return edges;
         }
 
@@ -633,7 +650,7 @@ namespace GraphRag.Net.Domain.Service
             nodeIds.AddRange(targets);
             nodeIds.AddRange(sources);
 
-            var nodes = _nodes_Repositories.GetList(p => p.Index == index && nodeIds.Contains(p.Id));
+            var nodes = _nodes_Repositories.GetList(p => p.Index == index || nodeIds.Contains(p.Id));
             return nodes;
         }
 
