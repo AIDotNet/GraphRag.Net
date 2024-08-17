@@ -71,6 +71,7 @@ http://localhost:5000/
 dotnet add package GraphRag.Net
 ```
 ## 为了方便进行提示词调整与修改，SK Plugin我们剥离出了项目，您需要把GraphRag.Net.Web项目中的 graphPlugins目录拷贝到你的项目中，并设置：
+[graphPlugins](https://github.com/AIDotNet/GraphRag.Net/tree/main/src/GraphRag.Net.Web/graphPlugins)
 ```
   <ItemGroup>
     <None Include="graphPlugins\**">
