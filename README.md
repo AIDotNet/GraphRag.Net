@@ -251,6 +251,11 @@ namespace GraphRag.Net.Api.Controllers
 
 ```
 
+## 测试DB，有社区朋友提前预训练了一些数据，链接如下，下载后直接放进项目目录替换即可测试体验
+```
+https://pan.quark.cn/s/bf2d21f29f85
+```
+
 ## 更多Rag场景可查看 AntSK
 [AntSK](https://github.com/AIDotNet/AntSK)
 
