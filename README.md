@@ -71,6 +71,7 @@ http://localhost:5000/
 dotnet add package GraphRag.Net
 ```
 ## 为了方便进行提示词调整与修改，SK Plugin我们剥离出了项目，您需要把GraphRag.Net.Web项目中的 graphPlugins目录拷贝到你的项目中，并设置：
+[graphPlugins](https://github.com/AIDotNet/GraphRag.Net/tree/main/src/GraphRag.Net.Web/graphPlugins)
 ```
   <ItemGroup>
     <None Include="graphPlugins\**">
@@ -250,5 +251,22 @@ namespace GraphRag.Net.Api.Controllers
 }
 
 ```
+
+## 测试DB，有社区朋友提前预训练了一些数据，链接如下，下载后直接放进项目目录替换即可测试体验
+```
+https://pan.quark.cn/s/bf2d21f29f85
+```
+
+## 更多Rag场景可查看 AntSK
+项目地址：[AntSK](https://github.com/AIDotNet/AntSK)
+
+体验环境：
+
+[Demo地址](https://demo.antsk.cn)
+
+账号：test
+
+密码：test
+
 
 也欢迎大家加入我们的微信交流群，可以添加我的微信：**xuzeyu91** 发送进群
