@@ -258,7 +258,7 @@ https://pan.quark.cn/s/bf2d21f29f85
 ```
 
 ## 更多Rag场景可查看 AntSK
-[AntSK](https://github.com/AIDotNet/AntSK)
+项目地址：[AntSK](https://github.com/AIDotNet/AntSK)
 
 体验环境：
 
