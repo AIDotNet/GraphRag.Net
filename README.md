@@ -30,7 +30,7 @@
 "GraphDBConnection": {
     "DbType": "Sqlite", //PostgreSQL
     "DBConnection": "Data Source=graph.db",
-    "GraphDBConnection": "graphmem.db",
+    "VectorConnection": "graphmem.db", //如果用PostgreSQL，可以和DBConnection一致
     "VectorSize": 1536 //DbType=PostgreSQL时需要设置，sqlite可以不设置
 },
 "GraphSearch": {
