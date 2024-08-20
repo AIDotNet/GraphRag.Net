@@ -1,4 +1,4 @@
-English | [简体中文](./README.md)
+[简体中文](./README.md) | English
 
 ## This is a simple implementation of dotnet referring to GraphRag
 
