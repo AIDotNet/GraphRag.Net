@@ -1,3 +1,5 @@
+简体中文 | [English](./README.en.md) 
+
 ## 这是一个参考GraphRag的dotnet简易实现
 
 基于微软在论文中提到的实现思路，执行过程GraphRAG主要实现了如下功能：
