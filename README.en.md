@@ -3,12 +3,12 @@ English | [简体中文](./README.md)
 ## This is a simple implementation of dotnet referring to GraphRag
 
 Based on the implementation idea mentioned by Microsoft in the paper, GraphRAG mainly implements the following functions in the execution process:
--Source Documents → Text Chunks: divide the source document into text blocks.
--Text Chunks → Element Instances: Extract instances of graph nodes and edges from each text block.
--Element Instances → Element Summaries: generate summaries for each diagram element.
--Element Summaries → Graph Communities: use the community detection algorithm to divide the graph into communities.
--Graph Communities → Community Summaries: generate summaries for each community.
--Community Summaries → Community Answers → Global Answer: use community summaries to generate local answers, and then summarize these local answers to generate global answers.
+- Source Documents → Text Chunks: divide the source document into text blocks.
+- Text Chunks → Element Instances: Extract instances of graph nodes and edges from each text block.
+- Element Instances → Element Summaries: generate summaries for each diagram element.
+- Element Summaries → Graph Communities: use the community detection algorithm to divide the graph into communities.
+- Graph Communities → Community Summaries: generate summaries for each community.
+- Community Summaries → Community Answers → Global Answer: use community summaries to generate local answers, and then summarize these local answers to generate global answers.
 
 This project is a demo example, which is only used to learn GraphRAG ideas.
 
