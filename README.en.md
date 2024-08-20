@@ -1,3 +1,5 @@
+English | [简体中文](./README.md)
+
 ## This is a simple implementation of dotnet referring to GraphRag
 
 Based on the implementation idea mentioned by Microsoft in the paper, GraphRAG mainly implements the following functions in the execution process:
