@@ -44,7 +44,7 @@ Configure in appsettings.json
     "RetryCounnt": 2 //Number of retries. Using the domestic model may cause json extraction failure. Increasing the number of retries can improve availability
 }
 ```
-## startup project
+## Startup project
 ```
 dotnet run --project GraphRag.Net.Web.csproj
 ```
@@ -270,4 +270,4 @@ User：test
 Pwd：test
 
 
-也欢迎大家加入我们的微信交流群，可以添加我的微信：**xuzeyu91** 发送进群
+You are also welcome to join our WeChat communication group. You can add my WeChat: **xuzeyu91** and send it to the group
