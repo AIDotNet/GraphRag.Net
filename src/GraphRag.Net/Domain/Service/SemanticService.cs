@@ -26,20 +26,25 @@ namespace GraphRag.Net.Domain.Service
             {
                 Console.WriteLine($"CreateGraphAsync失败，重试{count}次，异常信息{ex.Message}");
             });
-            var result =await retryPolicy.ExecuteAsync<GraphModel>(async () =>
+            var result = await retryPolicy.ExecuteAsync<GraphModel>(async () =>
             {
-                 KernelFunction createFun = _kernel.Plugins.GetFunction("graph", "create");
-                 var args = new KernelArguments()
-                 {
-                     ["input"] = input,
-                 };
-                 var skresult = await _kernel.InvokeAsync(createFun, args);
+                OpenAIPromptExecutionSettings settings = new()
+                {
+                    Temperature = 0,
+                    ResponseFormat = ChatCompletionsResponseFormat.JsonObject
+                };
+                KernelFunction createFun = _kernel.Plugins.GetFunction("graph", "create");
+                var args = new KernelArguments(settings)
+                {
+                    ["input"] = input,
+                };
+                var skresult = await _kernel.InvokeAsync(createFun, args);
 
-                 string json = skresult.GetValue<string>()?.Trim() ?? "";
-                 var graph = JsonConvert.DeserializeObject<GraphModel>(json);
-                 return graph;
+                string json = skresult.GetValue<string>()?.Trim() ?? "";
+                var graph = JsonConvert.DeserializeObject<GraphModel>(json);
+                return graph;
 
-             });
+            });
             return result;
         }
         public async Task<string> GetGraphAnswerAsync(string graph, string input)
@@ -115,8 +120,13 @@ namespace GraphRag.Net.Domain.Service
             });
             var result = await retryPolicy.ExecuteAsync<RelationShipModel>(async () =>
             {
+                OpenAIPromptExecutionSettings settings = new()
+                {
+                    Temperature = 0,
+                    ResponseFormat = ChatCompletionsResponseFormat.JsonObject
+                };
                 KernelFunction createFun = _kernel.Plugins.GetFunction("graph", "relationship");
-                var args = new KernelArguments()
+                var args = new KernelArguments(settings)
                 {
                     ["node1"] = node1,
                     ["node2"] = node2,
