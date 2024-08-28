@@ -265,12 +265,40 @@ namespace GraphRag.Net.Domain.Service
         }
 
         /// <summary>
-        /// 搜索递归获取节点相关的所有边和节点进行图谱对话
+        /// 检索相关节点
         /// </summary>
         /// <param name="index"></param>
         /// <param name="input"></param>
         /// <returns></returns>
-        public async Task<string> SearchGraphAsync(string index, string input)
+        /// <exception cref="ArgumentException"></exception>
+        public async Task<GraphModel> SearchGraphModel(string index, string input) {
+            if (string.IsNullOrWhiteSpace(index) || string.IsNullOrWhiteSpace(input))
+            {
+                throw new ArgumentException("Values required for index and input cannot be null.");
+            }
+
+            var textMemModelList = await RetrieveTextMemModelList(index, input);
+
+            if (textMemModelList.Any())
+            {
+                var nodes = _nodes_Repositories.GetList(p => p.Index == index && textMemModelList.Select(c => c.Id).Contains(p.Id));
+                var graphModel = GetGraphAllRecursion(index, nodes); ;
+                return graphModel;
+            }
+            else
+            {
+                return new GraphModel();
+            }
+        }
+
+        /// <summary>
+        /// 通过社区算法匹配相关节点信息
+        /// </summary>
+        /// <param name="index"></param>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentException"></exception>
+        public async Task<GraphModel> SearchGraphCommunityModel(string index, string input)
         {
             if (string.IsNullOrWhiteSpace(index) || string.IsNullOrWhiteSpace(input))
             {
@@ -278,14 +306,29 @@ namespace GraphRag.Net.Domain.Service
             }
             string answer = "";
             var textMemModelList = await RetrieveTextMemModelList(index, input);
-
-            if (textMemModelList.Any())
+            if (textMemModelList.Count() > 0)
             {
                 var nodes = _nodes_Repositories.GetList(p => p.Index == index && textMemModelList.Select(c => c.Id).Contains(p.Id));
-                var graphModel = GetGraphAllRecursion(index, nodes); ;
-
-                answer = await _semanticService.GetGraphAnswerAsync(JsonConvert.SerializeObject(graphModel), input);
+                //匹配到节点信息
+                var graphModel = GetGraphAllCommunitiesRecursion(index, nodes);
+                return graphModel;
             }
+            else
+            {
+                return new GraphModel();
+            }
+        }
+
+        /// <summary>
+        /// 搜索递归获取节点相关的所有边和节点进行图谱对话
+        /// </summary>
+        /// <param name="index"></param>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        public async Task<string> SearchGraphAsync(string index, string input)
+        {
+            var graphModel = await SearchGraphModel(index, input); 
+            string answer = await _semanticService.GetGraphAnswerAsync(JsonConvert.SerializeObject(graphModel), input);
             return answer;
         }
 
@@ -297,16 +340,10 @@ namespace GraphRag.Net.Domain.Service
         /// <returns></returns>
         public async IAsyncEnumerable<StreamingKernelContent> SearchGraphStreamAsync(string index, string input)
         {
-            if (string.IsNullOrWhiteSpace(index) || string.IsNullOrWhiteSpace(input))
+            var graphModel = await SearchGraphModel(index, input);
+            if (graphModel.Nodes.Count() > 0)
             {
-                throw new ArgumentException("Values required for index and input cannot be null.");
-            }
-            var textMemModelList = await RetrieveTextMemModelList(index, input);
-
-            if (textMemModelList.Any())
-            {
-                var nodes = _nodes_Repositories.GetList(p => p.Index == index && textMemModelList.Select(c => c.Id).Contains(p.Id));
-                var answerStream = GetFilteredGraphModelStream(index, input, nodes);
+                var answerStream = _semanticService.GetGraphAnswerStreamAsync(JsonConvert.SerializeObject(graphModel), input);
                 await foreach (var content in answerStream)
                 {
                     yield return content;
@@ -322,19 +359,11 @@ namespace GraphRag.Net.Domain.Service
         /// <returns></returns>
         public async Task<string> SearchGraphCommunityAsync(string index, string input)
         {
-            if (string.IsNullOrWhiteSpace(index) || string.IsNullOrWhiteSpace(input))
-            {
-                throw new ArgumentException("Values required for index and input cannot be null.");
-            }
             string answer = "";
-            var textMemModelList = await RetrieveTextMemModelList(index, input);
+            var graphModel = await SearchGraphCommunityModel(index, input);
             var global = _globals_Repositories.GetFirst(p => p.Index == index)?.Summaries;
-            if (textMemModelList.Count() > 0)
-            {
-                var nodes = _nodes_Repositories.GetList(p => p.Index == index && textMemModelList.Select(c => c.Id).Contains(p.Id));
-                //匹配到节点信息
-                var graphModel = GetGraphAllCommunitiesRecursion(index, nodes);
-
+            if (graphModel.Nodes.Count()>0)
+            { 
                 var community = string.Join(Environment.NewLine, _communities_Repositories.GetDB().Queryable<Communities>().Where(p => p.Index == index).Select(p => p.Summaries).ToList());
 
                 //这里数据有点多，要通过语义进行一次过滤
@@ -356,19 +385,14 @@ namespace GraphRag.Net.Domain.Service
         /// <returns></returns>
         public async IAsyncEnumerable<StreamingKernelContent> SearchGraphCommunityStreamAsync(string index, string input)
         {
-            if (string.IsNullOrWhiteSpace(index) || string.IsNullOrWhiteSpace(input))
-            {
-                throw new ArgumentException("Values required for index and input cannot be null.");
-            }
             var textMemModelList = await RetrieveTextMemModelList(index, input);
-
             var global = _globals_Repositories.GetFirst(p => p.Index == index)?.Summaries;
             IAsyncEnumerable<StreamingKernelContent> answer;
-            if (textMemModelList.Count() > 0)
+         
+            //匹配到节点信息
+            var graphModel = await SearchGraphCommunityModel(index, input);
+            if (graphModel.Nodes.Count() > 0)
             {
-                var nodes = _nodes_Repositories.GetList(p => p.Index == index && textMemModelList.Select(c => c.Id).Contains(p.Id));
-                //匹配到节点信息
-                var graphModel = GetGraphAllCommunitiesRecursion(index, nodes);
                 var community = string.Join(Environment.NewLine, _communities_Repositories.GetDB().Queryable<Communities>().Where(p => p.Index == index).Select(p => p.Summaries).ToList());
                 //这里数据有点多，要通过语义进行一次过滤
                 answer = _semanticService.GetGraphCommunityAnswerStreamAsync(JsonConvert.SerializeObject(graphModel), community, global, input);
@@ -509,20 +533,6 @@ namespace GraphRag.Net.Domain.Service
         }
 
         /// <summary>
-        /// 使用基于输入条件的语义过滤来过滤图模型。流式返回
-        /// </summary>
-        /// <param name="index"></param>
-        /// <param name="input"></param>
-        /// <param name="nodes"></param>
-        /// <returns></returns>
-        private IAsyncEnumerable<StreamingKernelContent> GetFilteredGraphModelStream(string index, string input, List<Nodes> nodes)
-        {
-            var graphModel = GetGraphAllRecursion(index, nodes);
-            var answerStream = _semanticService.GetGraphAnswerStreamAsync(JsonConvert.SerializeObject(graphModel), input);
-            return answerStream;
-        }
-
-        /// <summary>
         /// 递归获取节点相关的所有边和节点
         /// </summary>
         /// <param name="initialNodes"></param>
@@ -653,8 +663,6 @@ namespace GraphRag.Net.Domain.Service
             var nodes = _nodes_Repositories.GetList(p => p.Index == index || nodeIds.Contains(p.Id));
             return nodes;
         }
-
-
 
         #endregion
     }

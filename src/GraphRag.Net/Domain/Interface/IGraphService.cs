@@ -30,6 +30,15 @@ namespace GraphRag.Net.Domain.Interface
         /// <param name="input"></param>
         /// <returns></returns>
         Task InsertGraphDataAsync(string index, string input);
+
+        /// <summary>
+        ///  搜索递归获取节点相关的所有边和节点
+        /// </summary>
+        /// <param name="index"></param>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        Task<GraphModel> SearchGraphModel(string index, string input);
+
         /// <summary>
         /// 搜索递归获取节点相关的所有边和节点进行图谱对话
         /// </summary>
@@ -37,6 +46,13 @@ namespace GraphRag.Net.Domain.Interface
         /// <param name="input"></param>
         /// <returns></returns>
         Task<string> SearchGraphAsync(string index, string input);
+        /// <summary>
+        /// 通过社区算法匹配相关节点信息
+        /// </summary>
+        /// <param name="index"></param>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        Task<GraphModel> SearchGraphCommunityModel(string index, string input);
         /// <summary>
         /// 搜索递归获取节点相关的所有边和节点进行图谱对话,流式返回
         /// </summary>
