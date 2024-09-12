@@ -5,31 +5,64 @@
 - Id: 唯一标识符，例如 "node1"
 - Name: 节点名称
 - Type: 节点类型，例如 "Person"
-- Desc: 节点的描述，例如 "有5个苹果"
+- Desc: 节点的描述，例如 "公有100元"
 
 边的数据结构包含以下字段：
 - Source: 边的起始节点Id，例如 "node1"
 - Target: 边的目标节点Id，例如 "node2"
-- Relationship: 边的关系描述，例如 "给了2个苹果"
+- Relationship: 边的关系描述，例如 "转账20元给"
 
-输入的文本将描述节点和它们之间的关系。生成的数据应包括节点和边，并且每个节点和边的数据应以JSON格式表示。
+###  输入说明：
+用户将输入描述节点及其关系的自然语言文本。你需要根据输入文本提取信息并生成知识图谱数据，数据格式如下：
+- Nodes: 包含所有节点的列表，每个节点是一个JSON对象。
+- Edges: 包含所有边的列表，每条边是一个JSON对象。
+
+### 请注意：
+- 输入文本可能包含多个句子，每个句子都可能描述一个或多个节点和它们之间的关系。
+- 节点的描述字段是可选的，不一定每个节点都包含描述。
+- 如果节点类型无法确定，请默认类型为 "Unknown"。
 
 ### 示例输入：
-大雄有5个苹果，碰到哆啦A梦给了2个，碰到静香，静香又给大雄一个，最后碰到了胖虎
+Alice拥有100元，遇到了Bob并转账20元给他。之后，她见到了Charlie并转账30元给他，最后她遇到了David。
 
 ### 示例输出，只返回JSON，不要包含markdown：
 
 {
-  "Nodes": [
-    {"Id": "node1", "Name":"大雄", "Type":"Pserson", "Desc":"有5个苹果"},
-    {"Id": "node2", "Name":"哆啦A梦", "Type":"Pserson"},
-    {"Id": "node3", "Name":"静香", "Type":"Pserson"},
-    {"Id": "node4", "Name":"胖虎", "Type":"Pserson"}
-  ],
-  "Edges": [
-    {"Source": "node2", "Target": "node1", "Relationship": "给了2个苹果"},
-    {"Source": "node3", "Target": "node1", "Relationship": "给了1个苹果"}
-  ]
+    "Nodes": [
+        {
+            "Id": "node1",
+            "Name": "Alice",
+            "Type": "Person",
+            "Desc": "持有100元"
+        },
+        {
+            "Id": "node2",
+            "Name": "Bob",
+            "Type": "Person"
+        },
+        {
+            "Id": "node3",
+            "Name": "Charlie",
+            "Type": "Person"
+        },
+        {
+            "Id": "node4",
+            "Name": "David",
+            "Type": "Person"
+        }
+    ],
+    "Edges": [
+        {
+            "Source": "node1",
+            "Target": "node2",
+            "Relationship": "转账20元给"
+        },
+        {
+            "Source": "node1",
+            "Target": "node3",
+            "Relationship": "转账30元给"
+        }
+    ]
 }
 
 你要生成的内容是：
