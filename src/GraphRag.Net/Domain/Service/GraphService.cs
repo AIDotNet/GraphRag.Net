@@ -131,7 +131,7 @@ namespace GraphRag.Net.Domain.Service
                     bool isContinue = false;
 
                     //判断是否存在相同节点
-                    var oldNode = _nodes_Repositories.GetFirst(p => p.Name == n.Name);
+                    var oldNode = _nodes_Repositories.GetFirst(p =>p.Index==index&& p.Name == n.Name);
                     if (oldNode.IsNotNull())
                     {
                         //相同节点关联edge关系
