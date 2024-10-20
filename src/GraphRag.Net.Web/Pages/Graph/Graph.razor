@@ -8,58 +8,82 @@
 </div>
 
 <script>
-    const app = new Vue({
-        el: '#app',
-        data: {
-            message: 'Hello Vue!',
-            graphOptions: {
-                defaultJunctionPoint: 'border'
-                // 这里可以参考"Graph 图谱"中的参数进行设置
-            }
-        },
-        mounted() {
-            this.showRelationGraph();
-        },
-        methods: {
-            showRelationGraph() {
+    window.onload = function () {
+        initializeVueApp();
+    };
+    function initializeVueApp() {
+        let app = new Vue({
+            el: '#app',
+            data: {
+                message: 'Hello Vue!',
+                graphOptions: {
+                    defaultJunctionPoint: 'border'
+                    // 这里可以参考"Graph 图谱"中的参数进行设置
+                }
+            },
+            mounted() {
+                this.showRelationGraph();
+            },
+            methods: {
+                showRelationGraph() {
 
-                debugger;
-                console.log('ref:btn:', this.$refs.btn);
-                console.log('ref:', this.$refs.seeksRelationGraph);
-                const url = new URL(window.location.href);
+                    debugger;
+                    console.log('ref:btn:', this.$refs.btn);
+                    console.log('ref:', this.$refs.seeksRelationGraph);
+                    const url = new URL(window.location.href);
 
-                // 获取查询字符串部分
-                const queryString = url.search;
+                    // 获取查询字符串部分
+                    const queryString = url.search;
 
-                // 解析查询字符串为一个 URLSearchParams 对象
-                const urlParams = new URLSearchParams(queryString);
+                    // 解析查询字符串为一个 URLSearchParams 对象
+                    const urlParams = new URLSearchParams(queryString);
 
-                // 获取参数的值，例如 'index'
-                const index = urlParams.get('index');
-                fetch('/api/GraphDemo/GetAllGraphs?index=' + index)
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error('网络响应不成功，状态码：' + response.status);
-                        }
-                        return response.json(); // 或者 response.json() 取决于你的响应内容类型
-                    })
-                    .then(data => {
-                        // 请求成功，处理响应数据
-                        console.log(data);
-                        this.$refs.seeksRelationGraph.setJsonData(data, (seeksRGGraph) => {
-                            // 这些写上当图谱初始化完成后需要执行的代码
+                    // 获取参数的值，例如 'index'
+                    const index = urlParams.get('index');
+                    fetch('/api/GraphDemo/GetAllGraphs?index=' + index)
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('网络响应不成功，状态码：' + response.status);
+                            }
+                            return response.json(); // 或者 response.json() 取决于你的响应内容类型
+                        })
+                        .then(data => {
+                            // 请求成功，处理响应数据
+                            console.log(data);
+                            this.$refs.seeksRelationGraph.setJsonData(data, (seeksRGGraph) => {
+                                // 这些写上当图谱初始化完成后需要执行的代码
+                            });
+                        })
+                        .catch(error => {
+                            // 处理错误
+                            console.error('请求出错：', error);
                         });
-                    })
-                    .catch(error => {
-                        // 处理错误
-                        console.error('请求出错：', error);
-                    });
+                }
             }
-        }
-    })
+        })
+    }
 </script>
 
 @code 
 {
-   
+    [Inject]
+    protected IJSRuntime _jsRuntime { get; set; }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            // 确保所有脚本加载完成后，调用初始化 Vue 的 JavaScript 函数
+            await Task.Delay(500); // 短暂延时
+
+            try
+            {
+                await _jsRuntime.InvokeVoidAsync("initializeVueApp");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+        }
+    }
 }

@@ -1,7 +1,7 @@
 <Project>
   <!-- See https://aka.ms/dotnet/msbuild/customize for more details on customizing your build -->
   <PropertyGroup>
-    <Version>0.1.29</Version>
+    <Version>0.1.30</Version>
     <SKVersion>1.17.1</SKVersion>  
   </PropertyGroup>
 </Project>
