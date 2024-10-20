@@ -131,8 +131,8 @@ namespace GraphRag.Net.Domain.Service
                     bool isContinue = false;
 
                     //判断是否存在相同节点
-                    var oldNode = _nodes_Repositories.GetFirst(p => p.Name == n.Name);
-                    if (oldNode.IsNotNull())
+                    var oldNode = _nodes_Repositories.GetFirst(p => p.Index == index && p.Name == n.Name);
+                    if (oldNode.IsNotNull() && !string.IsNullOrWhiteSpace(n.Desc))
                     {
                         //相同节点关联edge关系
                         var newDesc = await _semanticService.MergeDesc(oldNode.Desc.ConvertToString(), n.Desc.ConvertToString());
@@ -188,7 +188,7 @@ namespace GraphRag.Net.Domain.Service
                             }
                             if (!_edges_Repositories.IsAny(p => p.Target == relationShip.Edge.Target && p.Source == relationShip.Edge.Source))
                             {
-                                relationShip.Edge.Id=Guid.NewGuid().ToString();
+                                relationShip.Edge.Id = Guid.NewGuid().ToString();
                                 relationShip.Edge.Index = index;
                                 _edges_Repositories.Insert(relationShip.Edge);
                             }
@@ -223,7 +223,7 @@ namespace GraphRag.Net.Domain.Service
                 {
                     Edges edge = new Edges()
                     {
-                        Id=Guid.NewGuid().ToString(),
+                        Id = Guid.NewGuid().ToString(),
                         Index = index,
                         Source = nodeDic[e.Source],
                         Target = nodeDic[e.Target],
@@ -239,9 +239,9 @@ namespace GraphRag.Net.Domain.Service
                 .ToList().Where(p => p.Count > 1).ToList();
                 //合并查询Edges 的Source和Target 重复数据
                 foreach (var edge in repeatEdges)
-                { 
+                {
                     var edges = _edges_Repositories.GetList(p => p.Source == edge.Source && p.Target == edge.Target);
-                    var firstEdge=edges.First();
+                    var firstEdge = edges.First();
 
                     for (int i = 1; i < edges.Count(); i++)
                     {
@@ -251,11 +251,11 @@ namespace GraphRag.Net.Domain.Service
                             _edges_Repositories.Delete(edges[i]);
                             continue;
                         }
-                        var newDesc=await _semanticService.MergeDesc(firstEdge.Relationship, edges[i].Relationship);
-                        firstEdge.Relationship= newDesc;
+                        var newDesc = await _semanticService.MergeDesc(firstEdge.Relationship, edges[i].Relationship);
+                        firstEdge.Relationship = newDesc;
                         _edges_Repositories.Update(firstEdge);
                         _edges_Repositories.Delete(edges[i]);
-                    }       
+                    }
                 }
             }
             catch (Exception ex)
@@ -271,7 +271,8 @@ namespace GraphRag.Net.Domain.Service
         /// <param name="input"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentException"></exception>
-        public async Task<GraphModel> SearchGraphModel(string index, string input) {
+        public async Task<GraphModel> SearchGraphModel(string index, string input)
+        {
             if (string.IsNullOrWhiteSpace(index) || string.IsNullOrWhiteSpace(input))
             {
                 throw new ArgumentException("Values required for index and input cannot be null.");
@@ -327,7 +328,7 @@ namespace GraphRag.Net.Domain.Service
         /// <returns></returns>
         public async Task<string> SearchGraphAsync(string index, string input)
         {
-            var graphModel = await SearchGraphModel(index, input); 
+            var graphModel = await SearchGraphModel(index, input);
             string answer = await _semanticService.GetGraphAnswerAsync(JsonConvert.SerializeObject(graphModel), input);
             return answer;
         }
@@ -362,8 +363,8 @@ namespace GraphRag.Net.Domain.Service
             string answer = "";
             var graphModel = await SearchGraphCommunityModel(index, input);
             var global = _globals_Repositories.GetFirst(p => p.Index == index)?.Summaries;
-            if (graphModel.Nodes.Count()>0)
-            { 
+            if (graphModel.Nodes.Count() > 0)
+            {
                 var community = string.Join(Environment.NewLine, _communities_Repositories.GetDB().Queryable<Communities>().Where(p => p.Index == index).Select(p => p.Summaries).ToList());
 
                 //这里数据有点多，要通过语义进行一次过滤
@@ -388,7 +389,7 @@ namespace GraphRag.Net.Domain.Service
             var textMemModelList = await RetrieveTextMemModelList(index, input);
             var global = _globals_Repositories.GetFirst(p => p.Index == index)?.Summaries;
             IAsyncEnumerable<StreamingKernelContent> answer;
-         
+
             //匹配到节点信息
             var graphModel = await SearchGraphCommunityModel(index, input);
             if (graphModel.Nodes.Count() > 0)
@@ -475,8 +476,8 @@ namespace GraphRag.Net.Domain.Service
         public async Task GraphGlobalAsync(string index)
         {
             _globals_Repositories.Delete(p => p.Index == index);
-            var communitieSummariesList = _communities_Repositories.GetDB().Queryable<Communities>().Where(p => p.Index == index).Select(p=>p.Summaries).ToList();
-            var communitieSummaries =string.Join(Environment.NewLine, communitieSummariesList);
+            var communitieSummariesList = _communities_Repositories.GetDB().Queryable<Communities>().Where(p => p.Index == index).Select(p => p.Summaries).ToList();
+            var communitieSummaries = string.Join(Environment.NewLine, communitieSummariesList);
             var globalSummaries = await _semanticService.GlobalSummaries(communitieSummaries);
 
             Globals globals = new Globals()
@@ -578,7 +579,7 @@ namespace GraphRag.Net.Domain.Service
             // 如果节点数超过最大限制，进行截断
             if (allNodes.Count > GraphSearchOption.MaxNodes)
             {
-                allNodes = allNodes.Take(GraphSearchOption.MaxNodes).ToList();  
+                allNodes = allNodes.Take(GraphSearchOption.MaxNodes).ToList();
             }
             // 需要相应地处理 allEdges，确保边的节点在 allNodes 中 
             allEdges = allEdges.Where(e => allNodes.Any(p => p.Id == e.Source) && allNodes.Any(p => p.Id == e.Target)).ToList();
