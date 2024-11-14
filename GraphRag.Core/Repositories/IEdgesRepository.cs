@@ -2,7 +2,7 @@
 
 namespace GraphRag.Core.Repositories;
 
-public interface IEdgesRepositories : IRepositories<Edges, string>
+public interface IEdgesRepository : IRepository<Edges, string>
 {
     /// <summary>
     /// 查询Edges 的Source和Target 重复数据

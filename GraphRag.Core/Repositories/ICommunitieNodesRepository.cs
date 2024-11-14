@@ -2,7 +2,7 @@
 
 namespace GraphRag.Core.Repositories;
 
-public interface ICommunitieNodesRepositories : IRepositories<CommunitieNodes>
+public interface ICommunitieNodesRepository : IRepository<CommunitieNodes>
 {
     /// <summary>
     /// 获取所有社区ID

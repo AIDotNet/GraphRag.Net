@@ -2,7 +2,6 @@
 
 namespace GraphRag.Core.Repositories;
 
-public interface INodesRepositorieses : IRepositories<Nodes,string>
+public interface IGlobalsRepository : IRepository<Globals>
 {
-    
 }

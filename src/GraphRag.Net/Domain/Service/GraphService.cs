@@ -14,12 +14,12 @@ namespace GraphRag.Net.Domain.Service;
 
 [ServiceDescription(typeof(IGraphService), ServiceLifetime.Scoped)]
 public class GraphService(
-    INodesRepositorieses nodesRepositorieses,
-    IEdgesRepositories _edges_Repositories,
+    INodesRepository nodesRepository,
+    IEdgesRepository edgesRepository,
     ISemanticService _semanticService,
-    ICommunitiesRepositories _communities_Repositories,
-    ICommunitieNodesRepositories _communitieNodes_Repositories,
-    IGlobalsRepositories _globals_Repositories,
+    ICommunitiesRepository communitiesRepository,
+    ICommunitieNodesRepository communitieNodesRepository,
+    IGlobalsRepository globalsRepository,
     ICommunityDetectionService _communityDetectionService
 ) : IGraphService
 {
@@ -29,7 +29,7 @@ public class GraphService(
     /// <returns></returns>
     public async Task<List<string>> GetAllIndex()
     {
-        var indexs = await nodesRepositorieses.OrderByGroupBySelect(x => true, x => x.Index, true, x => x.Index);
+        var indexs = await nodesRepository.OrderByGroupBySelect(x => true, x => x.Index, true, x => x);
         return indexs.Select(x => x.Index).ToList();
     }
 
@@ -41,8 +41,8 @@ public class GraphService(
     {
         if (string.IsNullOrWhiteSpace(index)) throw new ArgumentException("Index required value cannot be null.");
         var graphViewModel = new GraphViewModel();
-        var nodes = nodesRepositorieses.GetList(p => p.Index == index);
-        var edges = _edges_Repositories.GetList(p => p.Index == index);
+        var nodes = nodesRepository.GetList(p => p.Index == index);
+        var edges = edgesRepository.GetList(p => p.Index == index);
         Dictionary<string, string> TypeColor = new();
         var random = new Random();
         foreach (var n in nodes)
@@ -119,7 +119,7 @@ public class GraphService(
                 var isContinue = false;
 
                 //判断是否存在相同节点
-                var oldNode = nodesRepositorieses.GetFirst(p => p.Index == index && p.Name == n.Name);
+                var oldNode = nodesRepository.GetFirst(p => p.Index == index && p.Name == n.Name);
                 if (oldNode.IsNotNull() && !string.IsNullOrWhiteSpace(n.Desc))
                 {
                     //相同节点关联edge关系
@@ -131,7 +131,7 @@ public class GraphService(
                     else
                         oldNode.Desc = newDesc;
                     //更新描述
-                    nodesRepositorieses.Update(oldNode);
+                    nodesRepository.Update(oldNode);
                     text2 = $"Name:{oldNode.Name};Type:{oldNode.Type};Desc:{oldNode.Desc}";
                     nodeDic.Add(n.Id, oldNode.Id);
                     await textMemory.SaveInformationAsync(index, id: oldNode.Id, text: text2,
@@ -154,7 +154,7 @@ public class GraphService(
                     if (graph.Nodes.Select(p => p.Id).Contains(memory.Metadata.Id))
                         //如果本次包含了向量近似的数据，则跳过
                         break;
-                    var node1 = nodesRepositorieses.GetFirst(p => p.Id == memory.Metadata.Id);
+                    var node1 = nodesRepository.GetFirst(p => p.Id == memory.Metadata.Id);
                     var text1 = $"Name:{node1.Name};Type:{node1.Type};Desc:{node1.Desc}";
 
                     var relationShip = await _semanticService.GetRelationship(text1, text2);
@@ -171,12 +171,12 @@ public class GraphService(
                             relationShip.Edge.Target = node1.Id;
                         }
 
-                        if (!_edges_Repositories.IsAny(p =>
+                        if (!await edgesRepository.AnyAsync(p =>
                                 p.Target == relationShip.Edge.Target && p.Source == relationShip.Edge.Source))
                         {
                             relationShip.Edge.Id = Guid.NewGuid().ToString();
                             relationShip.Edge.Index = index;
-                            _edges_Repositories.Insert(relationShip.Edge);
+                            await edgesRepository.InsertAsync(relationShip.Edge);
                         }
                     }
                 }
@@ -195,7 +195,7 @@ public class GraphService(
                 };
 
                 if (!nodeDic.ContainsKey(n.Id)) nodeDic.Add(n.Id, node.Id);
-                nodesRepositorieses.Insert(node);
+                nodesRepository.Insert(node);
                 //向量处理节点信息
                 await textMemory.SaveInformationAsync(index, id: node.Id, text: text2, cancellationToken: default);
             }
@@ -210,7 +210,7 @@ public class GraphService(
                     Target = nodeDic[e.Target],
                     Relationship = e.Relationship
                 };
-                _edges_Repositories.Insert(edge);
+                edgesRepository.Insert(edge);
             }
 
             //查询Edges 的Source和Target 重复数据
@@ -218,12 +218,12 @@ public class GraphService(
             //     .GroupBy(p => new { p.Source, p.Target })
             //     .Select(p => new { p.Source, p.Target, Count = SqlFunc.AggregateCount(p.Source) })
             //     .ToList().Where(p => p.Count > 1).ToList();
-            var repeatEdges = await _edges_Repositories.QueryEdgesRepeatAsync();
+            var repeatEdges = await edgesRepository.QueryEdgesRepeatAsync();
 
             //合并查询Edges 的Source和Target 重复数据
             foreach (var edge in repeatEdges)
             {
-                var edges = _edges_Repositories.GetList(p => p.Source == edge.Source && p.Target == edge.Target);
+                var edges = edgesRepository.GetList(p => p.Source == edge.Source && p.Target == edge.Target);
                 var firstEdge = edges.First();
 
                 for (var i = 1; i < edges.Count(); i++)
@@ -231,14 +231,14 @@ public class GraphService(
                     if (firstEdge.Relationship == edges[i].Relationship)
                     {
                         //相同的边进行合并
-                        _edges_Repositories.Delete(edges[i]);
+                        edgesRepository.Delete(edges[i]);
                         continue;
                     }
 
                     var newDesc = await _semanticService.MergeDesc(firstEdge.Relationship, edges[i].Relationship);
                     firstEdge.Relationship = newDesc;
-                    _edges_Repositories.Update(firstEdge);
-                    _edges_Repositories.Delete(edges[i]);
+                    edgesRepository.Update(firstEdge);
+                    edgesRepository.Delete(edges[i]);
                 }
             }
         }
@@ -264,7 +264,7 @@ public class GraphService(
 
         if (textMemModelList.Any())
         {
-            var nodes = nodesRepositorieses.GetList(p =>
+            var nodes = nodesRepository.GetList(p =>
                 p.Index == index && textMemModelList.Select(c => c.Id).Contains(p.Id));
             var graphModel = GetGraphAllRecursion(index, nodes);
             ;
@@ -289,7 +289,7 @@ public class GraphService(
         var textMemModelList = await RetrieveTextMemModelList(index, input);
         if (textMemModelList.Count() > 0)
         {
-            var nodes = nodesRepositorieses.GetList(p =>
+            var nodes = nodesRepository.GetList(p =>
                 p.Index == index && textMemModelList.Select(c => c.Id).Contains(p.Id));
             //匹配到节点信息
             var graphModel = await GetGraphAllCommunitiesRecursion(index, nodes);
@@ -339,11 +339,11 @@ public class GraphService(
     {
         var answer = "";
         var graphModel = await SearchGraphCommunityModel(index, input);
-        var global = _globals_Repositories.GetFirst(p => p.Index == index)?.Summaries;
+        var global = globalsRepository.GetFirst(p => p.Index == index)?.Summaries;
         if (graphModel.Nodes.Count > 0)
         {
             var community = string.Join(Environment.NewLine,
-                await _communities_Repositories.Select(x => x.Index == index, x => x.Summaries));
+                await communitiesRepository.Select(x => x.Index == index, x => x.Summaries));
 
             //这里数据有点多，要通过语义进行一次过滤
             answer = await _semanticService.GetGraphCommunityAnswerAsync(JsonConvert.SerializeObject(graphModel),
@@ -367,7 +367,7 @@ public class GraphService(
     public async IAsyncEnumerable<StreamingKernelContent> SearchGraphCommunityStreamAsync(string index, string input)
     {
         var textMemModelList = await RetrieveTextMemModelList(index, input);
-        var global = _globals_Repositories.GetFirst(p => p.Index == index)?.Summaries;
+        var global = globalsRepository.GetFirst(p => p.Index == index)?.Summaries;
         IAsyncEnumerable<StreamingKernelContent> answer;
 
         //匹配到节点信息
@@ -375,7 +375,7 @@ public class GraphService(
         if (graphModel.Nodes.Any())
         {
             var community = string.Join(Environment.NewLine,
-                await _communities_Repositories.Select(x => x.Index == index, x => x.Summaries));
+                await communitiesRepository.Select(x => x.Index == index, x => x.Summaries));
             //这里数据有点多，要通过语义进行一次过滤
             answer = _semanticService.GetGraphCommunityAnswerStreamAsync(JsonConvert.SerializeObject(graphModel),
                 community, global, input);
@@ -396,12 +396,12 @@ public class GraphService(
     /// <returns></returns>
     public async Task GraphCommunitiesAsync(string index)
     {
-        var nodes = nodesRepositorieses.GetList(p => p.Index == index);
-        var edges = _edges_Repositories.GetList(p => p.Index == index);
+        var nodes = await nodesRepository.GetListAsync(p => p.Index == index);
+        var edges = await edgesRepository.GetListAsync(p => p.Index == index);
 
         //删除社区数据
-        _communitieNodes_Repositories.Delete(p => p.Index == index);
-        _communities_Repositories.Delete(p => p.Index == index);
+        await communitieNodesRepository.DeleteAsync(p => p.Index == index);
+        await communitiesRepository.DeleteAsync(p => p.Index == index);
 
         var graph = new Graph();
         foreach (var edge in edges) graph.AddEdge(edge.Source, edge.Target);
@@ -417,11 +417,11 @@ public class GraphService(
             communitieNodes.Index = index;
             communitieNodes.CommunitieId = kvp.Value;
             communitieNodes.NodeId = kvp.Key;
-            _communitieNodes_Repositories.Insert(communitieNodes);
+            communitieNodesRepository.Insert(communitieNodes);
         }
 
         //获取所有社区ID
-        var communitieIds = await _communitieNodes_Repositories.GetAllCommunitieIdAsync(index);
+        var communitieIds = await communitieNodesRepository.GetAllCommunitieIdAsync(index);
         // var communitieIds = _communitieNodes_Repositories.GetDB().Queryable<CommunitieNodes>()
         //     .Where(p => p.Index == index).GroupBy(p => p.CommunitieId).Select(p => p.CommunitieId).ToList();
 
@@ -433,7 +433,7 @@ public class GraphService(
             //     .Where(c => c.CommunitieId == communitieId)
             //     .Select((c, n) => $"Name:{n.Name}; Type:{n.Type}; Desc:{n.Desc}")
             //     .ToList();
-            var nodeList = await _communitieNodes_Repositories.GetCommunitieNodesAsync(communitieId);
+            var nodeList = await communitieNodesRepository.GetCommunitieNodesAsync(communitieId);
 
             var nodeDescs = string.Join(Environment.NewLine, nodeList);
             var summaries = await _semanticService.CommunitySummaries(nodeDescs);
@@ -445,7 +445,7 @@ public class GraphService(
                 Summaries = summaries
             };
             //插入社区总结数据
-            _communities_Repositories.Insert(communities);
+            communitiesRepository.Insert(communities);
         }
     }
 
@@ -456,8 +456,8 @@ public class GraphService(
     /// <returns></returns>
     public async Task GraphGlobalAsync(string index)
     {
-        await _globals_Repositories.DeleteAsync(p => p.Index == index);
-        var communitieSummariesList = await _communities_Repositories.Select(x => x.Index == index, x => x.Summaries);
+        await globalsRepository.DeleteAsync(p => p.Index == index);
+        var communitieSummariesList = await communitiesRepository.Select(x => x.Index == index, x => x.Summaries);
         var communitieSummaries = string.Join(Environment.NewLine, communitieSummariesList);
         var globalSummaries = await _semanticService.GlobalSummaries(communitieSummaries);
 
@@ -466,22 +466,22 @@ public class GraphService(
             Index = index,
             Summaries = globalSummaries
         };
-        await _globals_Repositories.InsertAsync(globals);
+        await globalsRepository.InsertAsync(globals);
     }
 
     public async Task DeleteGraph(string index)
     {
         var textMemory = await _semanticService.GetTextMemory();
-        var nodes = await nodesRepositorieses.GetListAsync(p => p.Index == index);
+        var nodes = await nodesRepository.GetListAsync(p => p.Index == index);
         foreach (var node in nodes)
             //删除向量数据
             await textMemory.RemoveAsync(index, node.Id);
         //删除索引数据
-        await nodesRepositorieses.DeleteAsync(p => p.Index == index);
-        await _edges_Repositories.DeleteAsync(p => p.Index == index);
-        await _communities_Repositories.DeleteAsync(p => p.Index == index);
-        await _communitieNodes_Repositories.DeleteAsync(p => p.Index == index);
-        await _globals_Repositories.DeleteAsync(p => p.Index == index);
+        await nodesRepository.DeleteAsync(p => p.Index == index);
+        await edgesRepository.DeleteAsync(p => p.Index == index);
+        await communitiesRepository.DeleteAsync(p => p.Index == index);
+        await communitieNodesRepository.DeleteAsync(p => p.Index == index);
+        await globalsRepository.DeleteAsync(p => p.Index == index);
     }
 
 
@@ -576,7 +576,7 @@ public class GraphService(
         var nodeIds = initialNodes.Select(x => x.Id).ToList();
 
         /// 获取社区节点,并获取社区节点的所有边
-        var communitiesNodes = await _communities_Repositories.GetCommunitiesNodesAsync(nodeIds);
+        var communitiesNodes = await communitiesRepository.GetCommunitiesNodesAsync(nodeIds);
 
         allNodes.AddRange(communitiesNodes);
         var newEdges = GetEdges(index, allNodes);
@@ -607,7 +607,7 @@ public class GraphService(
     {
         var nodeIds = nodes.Select(x => x.Id).ToList();
         var edges = new List<Edges>();
-        edges = _edges_Repositories.GetList(x =>
+        edges = edgesRepository.GetList(x =>
             x.Index == index && nodeIds.Contains(x.Source) && nodeIds.Contains(x.Target));
         return edges;
     }
@@ -625,7 +625,7 @@ public class GraphService(
         nodeIds.AddRange(targets);
         nodeIds.AddRange(sources);
 
-        var nodes = nodesRepositorieses.GetList(p => p.Index == index || nodeIds.Contains(p.Id));
+        var nodes = nodesRepository.GetList(p => p.Index == index || nodeIds.Contains(p.Id));
         return nodes;
     }
 

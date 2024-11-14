@@ -3,5 +3,11 @@
     <PropertyGroup>
         <Version>0.1.30</Version>
         <SKVersion>1.17.1</SKVersion>
+        
+        <TargetFrameworks>net6.0;net7.0;net8.0</TargetFrameworks>
+        <MicrosoftAspNetCorePackageVersion Condition="'$(TargetFramework)' == 'net6.0'">6.0.0</MicrosoftAspNetCorePackageVersion>
+        <MicrosoftAspNetCorePackageVersion Condition="'$(TargetFramework)' == 'net7.0'">7.0.0</MicrosoftAspNetCorePackageVersion>
+        <MicrosoftAspNetCorePackageVersion Condition="'$(TargetFramework)' == 'net8.0'">8.0.0</MicrosoftAspNetCorePackageVersion>
+
     </PropertyGroup>
 </Project>

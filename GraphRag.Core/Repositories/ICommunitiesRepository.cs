@@ -2,7 +2,7 @@
 
 namespace GraphRag.Core.Repositories;
 
-public interface ICommunitiesRepositories : IRepositories<Communities>
+public interface ICommunitiesRepository : IRepository<Communities>
 {
     /// <summary>
     /// 获取社区节点,并获取社区节点的所有边

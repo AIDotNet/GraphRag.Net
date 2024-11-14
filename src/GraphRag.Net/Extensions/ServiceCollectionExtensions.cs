@@ -72,7 +72,7 @@ public static class ServiceCollectionExtensions
                     )
                     .Build();
             //导入插件
-            if (!_kernel.Plugins.Any(p => p.Name == "graph"))
+            if (_kernel.Plugins.All(p => p.Name != "graph"))
             {
                 var pluginPatth = Path.Combine(RepoFiles.SamplePluginsPath(), "graph");
                 Console.WriteLine($"pluginPatth:{pluginPatth}");

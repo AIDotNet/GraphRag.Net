@@ -3,22 +3,16 @@ using GraphRag.Core.Entities;
 
 namespace GraphRag.Core.Repositories;
 
-public interface IRepositories<TEntity, in TKey> : IRepositories<TEntity> where TEntity : Entity<TKey>
+public interface IRepository<TEntity, in TKey> : IRepository<TEntity> where TEntity : IEntity<TKey>
 {
-    TEntity GetById(TKey id);
-
     Task<TEntity> GetByIdAsync(TKey id);
 
-    bool DeleteByIds(TKey[] ids);
-
     Task<bool> DeleteByIdsAsync(TKey[] ids);
-
-    bool Delete(TKey id);
 
     Task<bool> DeleteAsync(TKey id);
 }
 
-public interface IRepositories<TEntity> where TEntity : class
+public interface IRepository<TEntity>
 {
     List<TEntity> GetList();
 
@@ -60,8 +54,6 @@ public interface IRepositories<TEntity> where TEntity : class
 
     Task<bool> DeleteAsync(TEntity obj);
 
-    bool Delete(Expression<Func<TEntity, bool>> whereExpression);
-
     Task<bool> DeleteAsync(Expression<Func<TEntity, bool>> whereExpression);
 
     bool Update(TEntity obj);
@@ -70,15 +62,11 @@ public interface IRepositories<TEntity> where TEntity : class
 
     bool UpdateRange(List<TEntity> objs);
 
-    bool InsertOrUpdate(TEntity obj);
-
-    Task<bool> InsertOrUpdateAsync(TEntity obj);
-
     Task<bool> UpdateRangeAsync(List<TEntity> objs);
 
-    bool IsAny(Expression<Func<TEntity, bool>> whereExpression);
+    bool Any(Expression<Func<TEntity, bool>> whereExpression);
 
-    Task<bool> IsAnyAsync(Expression<Func<TEntity, bool>> whereExpression);
+    Task<bool> AnyAsync(Expression<Func<TEntity, bool>> whereExpression);
 
     /// <summary>
     /// 排序并且Select指定列
@@ -104,7 +92,7 @@ public interface IRepositories<TEntity> where TEntity : class
     /// <returns></returns>
     Task<IEnumerable<TEntity>> OrderByGroupBySelect(Expression<Func<TEntity, bool>> whereExpression,
         Expression<Func<TEntity, object>> orderExpression, bool isAsc,
-        Expression<Func<TEntity, object>> groupExpression);
+        Expression<Func<TEntity, TEntity>> groupExpression);
 
     /// <summary>
     /// 查询并且Select指定列
