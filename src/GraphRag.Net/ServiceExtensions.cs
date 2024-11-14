@@ -1,7 +1,5 @@
-﻿using System.Reflection;
-using GraphRag.Net;
+﻿using GraphRag.Core;
 using GraphRag.Net.Options;
-using GraphRag.Net.Repositories;
 using GraphRag.Net.Utils;
 using Microsoft.SemanticKernel;
 using SqlSugar;
@@ -11,75 +9,60 @@ namespace Microsoft.Extensions.DependencyInjection;
 /// <summary>
 ///     容器扩展
 /// </summary>
-public static class ServiceCollectionExtensions
+public static class ServiceExtensions
 {
     /// <summary>
     ///     从程序集中加载类型并添加到容器中
     /// </summary>
     /// <param name="services">容器</param>
+    /// <param name="kernelFunc"></param>
     /// <returns></returns>
-    public static IServiceCollection AddGraphRagNet(this IServiceCollection services, Kernel _kernel = null)
+    public static GraphRagBuilder AddGraphRagNet(this IServiceCollection services,
+        Func<IServiceProvider, Kernel>? kernelFunc = null)
     {
-        var attributeType = typeof(ServiceDescriptionAttribute);
-        //var refAssembyNames = Assembly.GetExecutingAssembly().GetReferencedAssemblies();
-
-        var assembly = Assembly.Load("GraphRag.Net");
-
-        var types = assembly.GetTypes();
-
-        foreach (var classType in types)
-            if (!classType.IsAbstract && classType.IsClass && classType.IsDefined(attributeType, false))
-            {
-                var serviceAttribute = classType.GetCustomAttribute(attributeType) as ServiceDescriptionAttribute;
-                switch (serviceAttribute.Lifetime)
-                {
-                    case ServiceLifetime.Scoped:
-                        services.AddScoped(serviceAttribute.ServiceType, classType);
-                        break;
-
-                    case ServiceLifetime.Singleton:
-                        services.AddSingleton(serviceAttribute.ServiceType, classType);
-                        break;
-
-                    case ServiceLifetime.Transient:
-                        services.AddTransient(serviceAttribute.ServiceType, classType);
-                        break;
-                }
-            }
+        services.AddAutoGnarly();
 
         CodeFirst();
-        InitSK(services, _kernel);
+        InitSk(services, kernelFunc);
 
-        return services;
+        return new GraphRagBuilder(services);
     }
 
     /// <summary>
     ///     初始化SK
     /// </summary>
     /// <param name="services"></param>
-    /// <param name="_kernel">可以提供自定义Kernel</param>
-    private static void InitSK(IServiceCollection services, Kernel _kernel = null)
+    /// <param name="kernelFunc"></param>
+    private static void InitSk(IServiceCollection services, Func<IServiceProvider, Kernel>? kernelFunc)
     {
         var handler = new OpenAIHttpClientHandler();
-        services.AddTransient<Kernel>(serviceProvider =>
+        services.AddTransient<Kernel>((serviceProvider) =>
         {
-            if (_kernel == null)
-                _kernel = Kernel.CreateBuilder()
+            Kernel kernel;
+            if (kernelFunc != null)
+            {
+                kernel = kernelFunc(serviceProvider);
+            }
+            else
+            {
+                kernel = Kernel.CreateBuilder()
                     .AddOpenAIChatCompletion(
                         GraphOpenAIOption.ChatModel,
                         GraphOpenAIOption.Key,
                         httpClient: new HttpClient(handler)
                     )
                     .Build();
+            }
+
             //导入插件
-            if (_kernel.Plugins.All(p => p.Name != "graph"))
+            if (kernel.Plugins.All(p => p.Name != "graph"))
             {
                 var pluginPatth = Path.Combine(RepoFiles.SamplePluginsPath(), "graph");
                 Console.WriteLine($"pluginPatth:{pluginPatth}");
-                _kernel.ImportPluginFromPromptDirectory(pluginPatth);
+                kernel.ImportPluginFromPromptDirectory(pluginPatth);
             }
 
-            return _kernel;
+            return kernel;
         });
     }
 

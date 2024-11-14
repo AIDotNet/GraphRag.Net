@@ -1,18 +1,16 @@
-﻿using GraphRag.Core.Repositories;
+﻿using Gnarly.Data;
+using GraphRag.Core.Repositories;
 using GraphRag.Net.Domain.Interface;
 using GraphRag.Net.Domain.Model.Graph;
 using GraphRag.Net.Options;
 using GraphRag.Net.Repositories;
 using GraphRag.Net.Utils;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.Text;
 using Newtonsoft.Json;
-using SqlSugar;
 
 namespace GraphRag.Net.Domain.Service;
 
-[ServiceDescription(typeof(IGraphService), ServiceLifetime.Scoped)]
 public class GraphService(
     INodesRepository nodesRepository,
     IEdgesRepository edgesRepository,
@@ -21,7 +19,7 @@ public class GraphService(
     ICommunitieNodesRepository communitieNodesRepository,
     IGlobalsRepository globalsRepository,
     ICommunityDetectionService _communityDetectionService
-) : IGraphService
+) : IGraphService,IScopeDependency
 {
     /// <summary>
     ///     获取所有索引信息

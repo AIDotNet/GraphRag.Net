@@ -29,10 +29,15 @@
         <DocumentationFile>GraphRag.Net.xml</DocumentationFile>
     </PropertyGroup>
     <ItemGroup>
+        <PackageReference Include="Gnarly" Version="1.0.7" />
+        <PackageReference Include="Gnarly.Data" Version="1.0.7" />
         <PackageReference Include="Polly" Version="8.4.1"/>
         <PackageReference Include="SqlSugarCore" Version="5.1.4.166"/>
     </ItemGroup>
     <ItemGroup>
         <ProjectReference Include="..\..\GraphRag.Core\GraphRag.Core.csproj"/>
+    </ItemGroup>
+    <ItemGroup>
+      <Folder Include="Extensions\" />
     </ItemGroup>
 </Project>

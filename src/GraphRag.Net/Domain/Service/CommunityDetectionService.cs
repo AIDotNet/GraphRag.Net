@@ -1,11 +1,10 @@
-﻿using GraphRag.Net.Domain.Interface;
+﻿using Gnarly.Data;
+using GraphRag.Net.Domain.Interface;
 using GraphRag.Net.Domain.Model.Graph;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace GraphRag.Net.Domain.Service;
 
-[ServiceDescription(typeof(ICommunityDetectionService), ServiceLifetime.Scoped)]
-public class CommunityDetectionService : ICommunityDetectionService
+public class CommunityDetectionService : ICommunityDetectionService,IScopeDependency
 {
     /// <summary>
     ///     标签传播算法
