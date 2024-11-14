@@ -1,9 +1,8 @@
-﻿namespace GraphRag.Net.Web.Models
+﻿namespace GraphRag.Net.Web.Models;
+
+public class OfflineChartDataItem
 {
-    public class OfflineChartDataItem
-    {
-        public long X { get; set; }
-        public int Y1 { get; set; }
-        public int Y2 { get; set; }
-    }
+    public long X { get; set; }
+    public int Y1 { get; set; }
+    public int Y2 { get; set; }
 }

@@ -1,9 +1,8 @@
-﻿namespace GraphRag.Net.Web.Models
+﻿namespace GraphRag.Net.Web.Models;
+
+public class RadarDataItem
 {
-    public class RadarDataItem
-    {
-        public string Name { get; set; }
-        public string Label { get; set; }
-        public int Value { get; set; }
-    }
+    public string Name { get; set; }
+    public string Label { get; set; }
+    public int Value { get; set; }
 }

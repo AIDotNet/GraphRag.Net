@@ -1,8 +1,9 @@
-简体中文 | [English](./README.en.md) 
+简体中文 | [English](./README.en.md)
 
 ## 这是一个参考GraphRag的dotnet简易实现
 
 基于微软在论文中提到的实现思路，执行过程GraphRAG主要实现了如下功能：
+
 - Source Documents → Text Chunks：将源文档分割成文本块。
 - Text Chunks → Element Instances：从每个文本块中提取图节点和边的实例。
 - Element Instances → Element Summaries：为每个图元素生成摘要。
@@ -45,20 +46,25 @@
     "RetryCounnt": 2 //重试次数，使用国产模型可能会出现json提取失败，增加重试次数可提高可用性
 }
 ```
+
 ## 启动项目
+
 ```
 dotnet run --project GraphRag.Net.Web.csproj
 ```
 
 ## 启动项目后可以通过
+
 ```
 http://localhost:5000/swagger
 ```
+
 ## 打开swagger查看接口
 
 ![Graoh](https://github.com/xuzeyu91/GraphRag.Net/blob/main/doc/api.png)
 
 ### 也可以使用界面
+
 ```
 http://localhost:5000/
 ```
@@ -67,13 +73,16 @@ http://localhost:5000/
 
 ![Graoh](https://github.com/xuzeyu91/GraphRag.Net/blob/main/doc/graph1.png)
 
-
 ## Nuget包使用
+
 ```
 dotnet add package GraphRag.Net
 ```
+
 ## 为了方便进行提示词调整与修改，SK Plugin我们剥离出了项目，您需要把GraphRag.Net.Web项目中的 graphPlugins目录拷贝到你的项目中，并设置：
+
 [graphPlugins](https://github.com/AIDotNet/GraphRag.Net/tree/main/src/GraphRag.Net.Web/graphPlugins)
+
 ```
   <ItemGroup>
     <None Include="graphPlugins\**">
@@ -83,7 +92,9 @@ dotnet add package GraphRag.Net
 ```
 
 ### 默认配置，使用OpenAI标准接口，在配置了OpenAI的appsettings后可以使用下面代码进行注入
+
 添加包以后，需要进行配置文件的设置以及依赖注入
+
 ```
 //OpenAI配置
 builder.Configuration.GetSection("GraphOpenAI").Get<GraphOpenAIOption>();
@@ -99,6 +110,7 @@ builder.Services.AddGraphRagNet();
 ```
 
 ### 如果你想接入其他模型，可以参考以下代码,这里抽象了Kernel的实现，你可以自定义实现
+
 ```
 var kernelBuild = Kernel.CreateBuilder();
 kernelBuild.Services.AddKeyedSingleton<ITextGenerationService>("mock-text", new MockTextCompletion());
@@ -116,8 +128,8 @@ builder.Services.AddGraphRagNet(kernelBuild.Build());
     await _graphService.GraphGlobalAsync(index);
 ```
 
+使用时注入 IGraphService 服务,以下为参考示例代码
 
-使用时注入 IGraphService  服务,以下为参考示例代码
 ```
 namespace GraphRag.Net.Api.Controllers
 {
@@ -255,11 +267,13 @@ namespace GraphRag.Net.Api.Controllers
 ```
 
 ## 测试DB，有社区朋友提前预训练了一些数据，链接如下，下载后直接放进项目目录替换即可测试体验
+
 ```
 https://pan.quark.cn/s/bf2d21f29f85
 ```
 
 ## 更多Rag场景可查看 AntSK
+
 项目地址：[AntSK](https://github.com/AIDotNet/AntSK)
 
 体验环境：
@@ -269,6 +283,5 @@ https://pan.quark.cn/s/bf2d21f29f85
 账号：test
 
 密码：test
-
 
 也欢迎大家加入我们的微信交流群，可以添加我的微信：**xuzeyu91** 发送进群

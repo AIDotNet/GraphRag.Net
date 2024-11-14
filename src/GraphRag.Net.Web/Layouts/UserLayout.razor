@@ -1,5 +1,4 @@
 ﻿@namespace GraphRag.Net.Web
-@using OneOf
 @inherits LayoutComponentBase
 
 <div class="container__b__0">
@@ -10,7 +9,7 @@
         <div class="top">
             <div class="header">
                 <a>
-                    <img alt="logo" class="logo" src="assets/logo.svg" />
+                    <img alt="logo" class="logo" src="assets/logo.svg"/>
                     <span class="title">GraphRag.Net.Web</span>
                 </a>
             </div>
@@ -22,15 +21,16 @@
 </div>
 
 @code
+
 {
     public LinkItem[] Links { get; set; } =
     {
-        new LinkItem
+        new()
         {
             Key = "GraphRag.Net",
             Title = "GraphRag.Net",
             Href = "https://github.com/xuzeyu91/GraphRag.Net",
-            BlankTarget = true,
+            BlankTarget = true
         }
     };
 }

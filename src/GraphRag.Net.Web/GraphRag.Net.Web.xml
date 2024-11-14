@@ -6,41 +6,41 @@
     <members>
         <member name="M:GraphRag.Net.Api.Controllers.GraphDemoController.GetAllIndex">
             <summary>
-            获取所有的索引数据
+                获取所有的索引数据
             </summary>
             <returns></returns>
         </member>
         <member name="M:GraphRag.Net.Api.Controllers.GraphDemoController.GetAllGraphs(System.String)">
             <summary>
-            获取所有的图谱数据
+                获取所有的图谱数据
             </summary>
             <param name="index"></param>
             <returns></returns>
         </member>
         <member name="M:GraphRag.Net.Api.Controllers.GraphDemoController.InsertGraphData(GraphRag.Net.Api.Controllers.InputModel)">
             <summary>
-            插入文本数据
+                插入文本数据
             </summary>
             <param name="model"></param>
             <returns></returns>
         </member>
         <member name="M:GraphRag.Net.Api.Controllers.GraphDemoController.SearchGraph(GraphRag.Net.Api.Controllers.InputModel)">
             <summary>
-            搜索递归获取节点相关的所有边和节点进行图谱对话
+                搜索递归获取节点相关的所有边和节点进行图谱对话
             </summary>
             <param name="model"></param>
             <returns></returns>
         </member>
         <member name="M:GraphRag.Net.Api.Controllers.GraphDemoController.SearchGraphCommunity(GraphRag.Net.Api.Controllers.InputModel)">
             <summary>
-            通过社区算法检索社区节点进行对话
+                通过社区算法检索社区节点进行对话
             </summary>
             <param name="model"></param>
             <returns></returns>
         </member>
         <member name="M:GraphRag.Net.Api.Controllers.GraphDemoController.ImportTxt(System.String,Microsoft.AspNetCore.Http.IFormFile)">
             <summary>
-            导入txt文档
+                导入txt文档
             </summary>
             <param name="index"></param>
             <param name="file"></param>
@@ -48,21 +48,21 @@
         </member>
         <member name="M:GraphRag.Net.Api.Controllers.GraphDemoController.GraphCommunities(System.String)">
             <summary>
-            通过社区检测生成社区和摘要
+                通过社区检测生成社区和摘要
             </summary>
             <param name="index"></param>
             <returns></returns>
         </member>
         <member name="M:GraphRag.Net.Api.Controllers.GraphDemoController.GraphGlobal(System.String)">
             <summary>
-            通过社区摘要生成全局摘要
+                通过社区摘要生成全局摘要
             </summary>
             <param name="index"></param>
             <returns></returns>
         </member>
         <member name="M:GraphRag.Net.Api.Controllers.GraphDemoController.DeleteGraph(System.String)">
             <summary>
-            删除图谱数据
+                删除图谱数据
             </summary>
             <param name="index"></param>
             <returns></returns>

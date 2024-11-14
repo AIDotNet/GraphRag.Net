@@ -1,8 +1,7 @@
-﻿namespace GraphRag.Net.Web.Models
+﻿namespace GraphRag.Net.Web.Models;
+
+public class OfflineDataItem
 {
-    public class OfflineDataItem
-    {
-        public string Name { get; set; }
-        public float Cvr { get; set; }
-    }
+    public string Name { get; set; }
+    public float Cvr { get; set; }
 }

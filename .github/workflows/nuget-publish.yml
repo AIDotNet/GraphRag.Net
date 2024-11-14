@@ -2,8 +2,8 @@ name: main
 on:
   push:
     branches:
-      - main 
-    paths: 
+      - main
+    paths:
       - 'Directory.Build.props'
 
 jobs:

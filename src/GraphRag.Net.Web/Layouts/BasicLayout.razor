@@ -1,11 +1,11 @@
 ﻿@namespace GraphRag.Net.Web
 @inherits LayoutComponentBase
 
-<AntDesign.ProLayout.BasicLayout 
+<AntDesign.ProLayout.BasicLayout
     Logo="@("https://gw.alipayobjects.com/zos/rmsportal/KDpgvguMpGfqaHPjicRK.svg")"
     MenuData="_menuData">
     <RightContentRender>
-        <GraphRag.Net.Web.Components.RightContent />
+        <GraphRag.Net.Web.Components.RightContent/>
     </RightContentRender>
     <ChildContent>
         @Body
@@ -14,9 +14,10 @@
         <FooterView Copyright="2024 许泽宇的技术分享" Links="Links"></FooterView>
     </FooterRender>
 </AntDesign.ProLayout.BasicLayout>
-<SettingDrawer />
+<SettingDrawer/>
 
 @code
+
 {
     private MenuDataItem[] _menuData = { };
 
@@ -31,12 +32,12 @@
 
     public LinkItem[] Links { get; set; } =
     {
-        new LinkItem
+        new()
         {
             Key = "GraphRag.Net",
             Title = "GraphRag.Net",
             Href = "https://github.com/xuzeyu91/GraphRag.Net",
-            BlankTarget = true,
+            BlankTarget = true
         }
     };
 }

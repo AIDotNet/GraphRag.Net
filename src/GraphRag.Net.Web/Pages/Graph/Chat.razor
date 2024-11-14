@@ -1,11 +1,10 @@
 ﻿@namespace GraphRag.Net.Web.Pages.Graph
 @page "/Chat"
-@using GraphRag.Net.Domain.Interface
 
 <GridContent>
     <Row Gutter="24">
         <Col Lg="7" Md="24">
-        <Spin Spinning=@loadding>
+        <Spin Spinning="@loadding">
             <label>搜索图谱内容</label>
             <Select TItem="string"
                     TItemValue="string"
@@ -14,10 +13,10 @@
                     DataSource="@_indexList"
                     @bind-Value="@_index"
                     Placeholder="选择索引"
-                    OnSelectedItemChanged="OnSelectedItemChangedHandler" >
+                    OnSelectedItemChanged="OnSelectedItemChangedHandler">
             </Select>
-            <Input @bind-Value="_input" Style="margin-top:10px;" Placeholder="问题" />
-            <TextArea @bind-Value="_output" Style="margin-top:10px;" MinRows="8" Placeholder="答案" />
+            <Input @bind-Value="_input" Style="margin-top:10px;" Placeholder="问题"/>
+            <TextArea @bind-Value="_output" Style="margin-top:10px;" MinRows="8" Placeholder="答案"/>
             <Button Type="@ButtonType.Primary" Style="margin-top:10px;" OnClick="Search">节点搜索</Button>
             <Button Type="@ButtonType.Primary" Style="margin-top:10px;" OnClick="Search1">社区搜索</Button>
             <a href="/graph?index=@_index" target="_blank" style="margin-left:10px;">查看图谱</a>
@@ -25,17 +24,17 @@
         </Col>
         <Col Lg="7" Md="24">
         <label>导入文本数据</label>
-        <Input @bind-Value="_importIndex"  Placeholder="索引名称，可以一个文件一个，也可以多个文件公用一个" />
-        <TextArea @bind-Value="_importText" Style="margin-top:10px;" MinRows="8" Placeholder="输入文本进行导入" />
+        <Input @bind-Value="_importIndex" Placeholder="索引名称，可以一个文件一个，也可以多个文件公用一个"/>
+        <TextArea @bind-Value="_importText" Style="margin-top:10px;" MinRows="8" Placeholder="输入文本进行导入"/>
         <Button Type="@ButtonType.Primary" Style="margin-top:10px;" OnClick="InputText">导入</Button>
 
         </Col>
 
         <Col Lg="10" Md="24">
         <label>导入txt数据</label>
-        <Input @bind-Value="_importIndex"  Placeholder="索引名称，可以一个文件一个，也可以多个文件公用一个" />
+        <Input @bind-Value="_importIndex" Placeholder="索引名称，可以一个文件一个，也可以多个文件公用一个"/>
 
-        <Upload Action="@("api/GraphDemo/ImportTxt?index="+_importIndex)"
+        <Upload Action="@("api/GraphDemo/ImportTxt?index=" + _importIndex)"
                 Name="file"
                 Accept="text/plain"
                 BeforeUpload="BeforeUpload"
@@ -47,7 +46,8 @@
         </Col>
     </Row>
 </GridContent>
+
 @code {
 
-  
+
 }

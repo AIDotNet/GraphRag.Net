@@ -1,9 +1,8 @@
-﻿namespace GraphRag.Net.Web.Models
+﻿namespace GraphRag.Net.Web.Models;
+
+public class AdvancedProfileData
 {
-    public class AdvancedProfileData
-    {
-        public AdvancedOperation[] AdvancedOperation1 { get; set; }
-        public AdvancedOperation[] AdvancedOperation2 { get; set; }
-        public AdvancedOperation[] AdvancedOperation3 { get; set; }
-    }
+    public AdvancedOperation[] AdvancedOperation1 { get; set; }
+    public AdvancedOperation[] AdvancedOperation2 { get; set; }
+    public AdvancedOperation[] AdvancedOperation3 { get; set; }
 }

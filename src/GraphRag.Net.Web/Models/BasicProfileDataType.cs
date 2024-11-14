@@ -1,8 +1,7 @@
-﻿namespace GraphRag.Net.Web.Models
+﻿namespace GraphRag.Net.Web.Models;
+
+public class BasicProfileDataType
 {
-    public class BasicProfileDataType
-    {
-        public BasicGood[] BasicGoods { get; set; }
-        public BasicProgress[] BasicProgress { get; set; }
-    }
+    public BasicGood[] BasicGoods { get; set; }
+    public BasicProgress[] BasicProgress { get; set; }
 }

@@ -2,22 +2,21 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace GraphRag.Net.Web.Utils
+namespace GraphRag.Net.Web.Utils;
+
+public class LongToDateTimeConverter : JsonConverter<DateTime>
 {
-    public class LongToDateTimeConverter : JsonConverter<DateTime>
+    public override DateTime Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
-        public override DateTime Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-        {
-            if (Utf8Parser.TryParse(reader.ValueSpan, out long value, out _))
-                return DateTime.UnixEpoch.AddMilliseconds(value);
+        if (Utf8Parser.TryParse(reader.ValueSpan, out long value, out _))
+            return DateTime.UnixEpoch.AddMilliseconds(value);
 
-            throw new FormatException();
-        }
+        throw new FormatException();
+    }
 
-        public override void Write(Utf8JsonWriter writer, DateTime value, JsonSerializerOptions options)
-        {
-            writer.WriteStringValue(
-                JsonEncodedText.Encode(((long)(value - DateTime.UnixEpoch).TotalMilliseconds).ToString()));
-        }
+    public override void Write(Utf8JsonWriter writer, DateTime value, JsonSerializerOptions options)
+    {
+        writer.WriteStringValue(
+            JsonEncodedText.Encode(((long)(value - DateTime.UnixEpoch).TotalMilliseconds).ToString()));
     }
 }

@@ -14,6 +14,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "解决方案项", "解决�
 		README.md = README.md
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GraphRag.Core", "GraphRag.Core\GraphRag.Core.csproj", "{B4F68D9A-8A18-4C43-9CC8-3E44233B2CDA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -28,6 +30,10 @@ Global
 		{214FF6B8-E291-4CC8-94BC-16C1CD9DB3B8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{214FF6B8-E291-4CC8-94BC-16C1CD9DB3B8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{214FF6B8-E291-4CC8-94BC-16C1CD9DB3B8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B4F68D9A-8A18-4C43-9CC8-3E44233B2CDA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B4F68D9A-8A18-4C43-9CC8-3E44233B2CDA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B4F68D9A-8A18-4C43-9CC8-3E44233B2CDA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B4F68D9A-8A18-4C43-9CC8-3E44233B2CDA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

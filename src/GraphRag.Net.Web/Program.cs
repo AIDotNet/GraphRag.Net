@@ -1,14 +1,8 @@
-using AntDesign.ProLayout;
-using GraphRag.Net;
-using GraphRag.Net.Options;
-using GraphRag.Net.Web.Mock;
-using Microsoft.AspNetCore.Components;
-using Microsoft.Extensions.Options;
-using Microsoft.SemanticKernel;
-using Microsoft.SemanticKernel.ChatCompletion;
-using Microsoft.SemanticKernel.Embeddings;
-using Microsoft.SemanticKernel.TextGeneration;
 using System.Reflection;
+using AntDesign.ProLayout;
+using GraphRag.Net.Options;
+using Microsoft.AspNetCore.Components;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,8 +19,9 @@ builder.Services.Configure<ProSettings>(builder.Configuration.GetSection("ProSet
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(c => {
-    c.SwaggerDoc("v1", new() { Title = "GraphRag.Net.Api", Version = "v1" });
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "GraphRag.Net.Api", Version = "v1" });
     //添加Api层注释（true表示显示控制器注释）
     var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
     var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);

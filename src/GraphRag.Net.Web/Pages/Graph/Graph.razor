@@ -3,7 +3,7 @@
 
 <div id="app">
     <div style="height:calc(100vh - 30px);width:100%;border:#eeeeee solid 1px;">
-        <relation-graph ref="seeksRelationGraph" :options="graphOptions" />
+        <relation-graph ref="seeksRelationGraph" :options="graphOptions"/>
     </div>
 </div>
 
@@ -11,6 +11,7 @@
     window.onload = function () {
         initializeVueApp();
     };
+
     function initializeVueApp() {
         let app = new Vue({
             el: '#app',
@@ -65,9 +66,9 @@
 </script>
 
 @code 
+
 {
-    [Inject]
-    protected IJSRuntime _jsRuntime { get; set; }
+    [Inject] protected IJSRuntime _jsRuntime { get; set; }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
