@@ -36,6 +36,7 @@
     </ItemGroup>
     <ItemGroup>
         <ProjectReference Include="..\..\GraphRag.Core\GraphRag.Core.csproj"/>
+        <ProjectReference Include="..\GraphRag.EntityFrameworkCore\GraphRag.EntityFrameworkCore.csproj" />
     </ItemGroup>
     <ItemGroup>
       <Folder Include="Extensions\" />

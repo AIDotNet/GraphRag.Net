@@ -18,6 +18,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GraphRag.Core", "GraphRag.C
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GraphRag.EntityFrameworkCore", "src\GraphRag.EntityFrameworkCore\GraphRag.EntityFrameworkCore.csproj", "{14008953-C23E-49DE-8921-8755A90D5381}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GraphRag.SqlSugar", "src\GraphRag.SqlSugar\GraphRag.SqlSugar.csproj", "{D0679E66-1C32-47A4-B782-996F816FDC95}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -40,6 +42,10 @@ Global
 		{14008953-C23E-49DE-8921-8755A90D5381}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{14008953-C23E-49DE-8921-8755A90D5381}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{14008953-C23E-49DE-8921-8755A90D5381}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D0679E66-1C32-47A4-B782-996F816FDC95}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D0679E66-1C32-47A4-B782-996F816FDC95}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D0679E66-1C32-47A4-B782-996F816FDC95}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D0679E66-1C32-47A4-B782-996F816FDC95}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
