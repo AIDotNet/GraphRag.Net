@@ -17,19 +17,9 @@ public class BaseRepository<TDbContext, TEntity> : IRepository<TEntity>
         _dbSet = dbSet;
     }
 
-    public List<TEntity> GetList()
-    {
-        return _dbSet.ToList();
-    }
-
     public Task<List<TEntity>> GetListAsync()
     {
         return _dbSet.ToListAsync();
-    }
-
-    public List<TEntity> GetList(Expression<Func<TEntity, bool>> whereExpression)
-    {
-        return _dbSet.Where(whereExpression).ToList();
     }
 
     public Task<List<TEntity>> GetListAsync(Expression<Func<TEntity, bool>> whereExpression)
@@ -195,7 +185,7 @@ public class BaseRepository<TDbContext, TEntity> : IRepository<TEntity>
 
     public async Task<IEnumerable<TEntity>> OrderByGroupBySelect(Expression<Func<TEntity, bool>> whereExpression,
         Expression<Func<TEntity, object>> orderExpression, bool isAsc,
-        Expression<Func<TEntity, TEntity>> groupExpression)
+        Expression<Func<TEntity, object>> groupExpression)
     {
         var query = _dbSet.Where(whereExpression);
 
@@ -208,13 +198,14 @@ public class BaseRepository<TDbContext, TEntity> : IRepository<TEntity>
             query = query.OrderByDescending(orderExpression);
         }
 
-        var result = await query.GroupBy(groupExpression).Select(g => g.Key).ToListAsync();
+        var result = await query.GroupBy(groupExpression).Select(g => g.Key as TEntity).ToListAsync();
+
 
         return result;
     }
 
     public async Task<IEnumerable<TEntity>> OrderByGroupBySelect(Expression<Func<TEntity, bool>> whereExpression,
-        Expression<Func<TEntity, TEntity>> orderExpression, bool isAsc,
+        Expression<Func<TEntity, object>> orderExpression, bool isAsc,
         Expression<Func<TEntity, TEntity>> groupExpression)
     {
         var query = _dbSet.Where(whereExpression);

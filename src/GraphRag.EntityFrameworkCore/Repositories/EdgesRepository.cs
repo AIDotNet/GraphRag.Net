@@ -10,7 +10,7 @@ public class EdgesRepository : BaseRepository<GraphRagContext, Edges, string>, I
     {
     }
 
-    public async Task<IEnumerable<Edges>> QueryEdgesRepeatAsync()
+    public async Task<IEnumerable<(string source, string target)>> QueryEdgesRepeatAsync()
     {
         // var repeatEdges = _edges_Repositories.GetDB().Queryable<Edges>()
         //     .GroupBy(p => new { p.Source, p.Target })
@@ -29,9 +29,8 @@ public class EdgesRepository : BaseRepository<GraphRagContext, Edges, string>, I
             };
 
         var repeatEdges = await query.Where(p => p.Count > 1)
-            .SelectMany(x => x.edges)
             .ToListAsync();
 
-        return repeatEdges;
+        return repeatEdges.Select(p => (p.Source, p.Target));
     }
 }

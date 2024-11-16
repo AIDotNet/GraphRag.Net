@@ -14,6 +14,16 @@ public class SqlSugarHelper
         var DBType = GraphDBConnectionOption.DbType;
         var ConnectionString = GraphDBConnectionOption.DBConnection;
 
+        if (string.IsNullOrEmpty(ConnectionString))
+        {
+            throw new Exception("数据库连接字符串为空");
+        }
+        
+        if (string.IsNullOrEmpty(DBType))
+        {
+            throw new Exception("数据库类型为空");
+        }
+        
         var config = new ConnectionConfig
         {
             ConnectionString = ConnectionString,

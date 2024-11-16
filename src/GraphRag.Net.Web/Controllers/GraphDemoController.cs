@@ -29,7 +29,7 @@ public class GraphDemoController(IGraphService _graphService) : ControllerBase
     public async Task<IActionResult> GetAllGraphs(string index)
     {
         if (string.IsNullOrEmpty(index)) return Ok(new GraphViewModel());
-        var graphModel = _graphService.GetAllGraphs(index);
+        var graphModel = await _graphService.GetAllGraphsAsync(index);
         return Ok(graphModel);
     }
 

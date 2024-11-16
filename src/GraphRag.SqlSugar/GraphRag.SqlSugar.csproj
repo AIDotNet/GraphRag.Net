@@ -5,4 +5,11 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
+    <ItemGroup>
+        <PackageReference Include="SqlSugar" Version="$(SqlSugarVersion)" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\GraphRag.Core\GraphRag.Core.csproj" />
+    </ItemGroup>
 </Project>

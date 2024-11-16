@@ -14,11 +14,7 @@ public interface IRepository<TEntity, in TKey> : IRepository<TEntity> where TEnt
 
 public interface IRepository<TEntity>
 {
-    List<TEntity> GetList();
-
     Task<List<TEntity>> GetListAsync();
-
-    List<TEntity> GetList(Expression<Func<TEntity, bool>> whereExpression);
 
     Task<List<TEntity>> GetListAsync(Expression<Func<TEntity, bool>> whereExpression);
 
@@ -92,7 +88,7 @@ public interface IRepository<TEntity>
     /// <returns></returns>
     Task<IEnumerable<TEntity>> OrderByGroupBySelect(Expression<Func<TEntity, bool>> whereExpression,
         Expression<Func<TEntity, object>> orderExpression, bool isAsc,
-        Expression<Func<TEntity, TEntity>> groupExpression);
+        Expression<Func<TEntity, object>> groupExpression);
 
     /// <summary>
     /// 查询并且Select指定列

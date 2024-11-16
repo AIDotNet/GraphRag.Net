@@ -16,7 +16,7 @@ public interface IGraphService
     /// </summary>
     /// <param name="index"></param>
     /// <returns></returns>
-    GraphViewModel GetAllGraphs(string index);
+    Task<GraphViewModel> GetAllGraphsAsync(string index);
 
     /// <summary>
     ///     切片导入文本数据

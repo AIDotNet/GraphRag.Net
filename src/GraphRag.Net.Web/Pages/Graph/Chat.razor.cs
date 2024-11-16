@@ -21,7 +21,7 @@ public partial class Chat
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
-        _indexList = _graphService.GetAllIndex();
+        _indexList = await _graphService.GetAllIndex();
     }
 
     private async Task Search()
@@ -70,10 +70,10 @@ public partial class Chat
         return true;
     }
 
-    private void OnSingleCompleted(UploadInfo fileinfo)
+    private async Task OnSingleCompleted(UploadInfo fileinfo)
     {
-        _indexList = _graphService.GetAllIndex();
-        _message.Info("导入完成");
+        _indexList = await _graphService.GetAllIndex();
+        await _message.Info("导入完成");
     }
 
     private async Task InputText()
@@ -85,7 +85,7 @@ public partial class Chat
         await _graphService.GraphCommunitiesAsync(_importIndex);
         await _graphService.GraphGlobalAsync(_importIndex);
 
-        _indexList = _graphService.GetAllIndex();
-        _message.Info("导入完成");
+        _indexList = await _graphService.GetAllIndex();
+        await _message.Info("导入完成");
     }
 }

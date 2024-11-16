@@ -8,5 +8,5 @@ public interface IEdgesRepository : IRepository<Edges, string>
     /// 查询Edges 的Source和Target 重复数据
     /// </summary>
     /// <returns></returns>
-    Task<IEnumerable<Edges>> QueryEdgesRepeatAsync();
+    Task<IEnumerable<(string source, string target)>> QueryEdgesRepeatAsync();
 }

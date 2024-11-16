@@ -19,7 +19,7 @@ public class GraphService(
     ICommunitieNodesRepository communitieNodesRepository,
     IGlobalsRepository globalsRepository,
     ICommunityDetectionService _communityDetectionService
-) : IGraphService,IScopeDependency
+) : IGraphService, IScopeDependency
 {
     /// <summary>
     ///     获取所有索引信息
@@ -35,12 +35,12 @@ public class GraphService(
     ///     获取Graph数据
     /// </summary>
     /// <returns></returns>
-    public GraphViewModel GetAllGraphs(string index)
+    public async Task<GraphViewModel> GetAllGraphsAsync(string index)
     {
         if (string.IsNullOrWhiteSpace(index)) throw new ArgumentException("Index required value cannot be null.");
         var graphViewModel = new GraphViewModel();
-        var nodes = nodesRepository.GetList(p => p.Index == index);
-        var edges = edgesRepository.GetList(p => p.Index == index);
+        var nodes = await nodesRepository.GetListAsync(p => p.Index == index);
+        var edges = await edgesRepository.GetListAsync(p => p.Index == index);
         Dictionary<string, string> TypeColor = new();
         var random = new Random();
         foreach (var n in nodes)
@@ -219,9 +219,9 @@ public class GraphService(
             var repeatEdges = await edgesRepository.QueryEdgesRepeatAsync();
 
             //合并查询Edges 的Source和Target 重复数据
-            foreach (var edge in repeatEdges)
+            foreach (var (source,target) in repeatEdges)
             {
-                var edges = edgesRepository.GetList(p => p.Source == edge.Source && p.Target == edge.Target);
+                var edges = await edgesRepository.GetListAsync(p => p.Source == source && p.Target == target);
                 var firstEdge = edges.First();
 
                 for (var i = 1; i < edges.Count(); i++)
@@ -229,14 +229,14 @@ public class GraphService(
                     if (firstEdge.Relationship == edges[i].Relationship)
                     {
                         //相同的边进行合并
-                        edgesRepository.Delete(edges[i]);
+                        await edgesRepository.DeleteAsync(edges[i]);
                         continue;
                     }
 
                     var newDesc = await _semanticService.MergeDesc(firstEdge.Relationship, edges[i].Relationship);
                     firstEdge.Relationship = newDesc;
-                    edgesRepository.Update(firstEdge);
-                    edgesRepository.Delete(edges[i]);
+                    await edgesRepository.UpdateAsync(firstEdge);
+                    await edgesRepository.DeleteAsync(edges[i]);
                 }
             }
         }
@@ -262,10 +262,9 @@ public class GraphService(
 
         if (textMemModelList.Any())
         {
-            var nodes = nodesRepository.GetList(p =>
+            var nodes = await nodesRepository.GetListAsync(p =>
                 p.Index == index && textMemModelList.Select(c => c.Id).Contains(p.Id));
-            var graphModel = GetGraphAllRecursion(index, nodes);
-            ;
+            var graphModel = await GetGraphAllRecursion(index, nodes);
             return graphModel;
         }
 
@@ -285,9 +284,9 @@ public class GraphService(
             throw new ArgumentException("Values required for index and input cannot be null.");
         var answer = "";
         var textMemModelList = await RetrieveTextMemModelList(index, input);
-        if (textMemModelList.Count() > 0)
+        if (textMemModelList.Any())
         {
-            var nodes = nodesRepository.GetList(p =>
+            var nodes = await nodesRepository.GetListAsync(p =>
                 p.Index == index && textMemModelList.Select(c => c.Id).Contains(p.Id));
             //匹配到节点信息
             var graphModel = await GetGraphAllCommunitiesRecursion(index, nodes);
@@ -518,7 +517,7 @@ public class GraphService(
     /// </summary>
     /// <param name="initialNodes"></param>
     /// <returns></returns>
-    private GraphModel GetGraphAllRecursion(string index, List<Nodes> initialNodes)
+    private async Task<GraphModel> GetGraphAllRecursion(string index, List<Nodes> initialNodes)
     {
         var allNodes = new List<Nodes>(initialNodes);
         var allEdges = new List<Edges>();
@@ -529,17 +528,17 @@ public class GraphService(
         {
             if (i > GraphSearchOption.NodeDepth || allNodes.Count >= GraphSearchOption.MaxNodes) break;
 
-            var newEdges = GetEdges(index, nodesToExplore);
-            if (newEdges.Count() == 0) break; // 没有新的边可以获取，终止递归
+            var newEdges = await GetEdges(index, nodesToExplore);
+            if (!newEdges.Any()) break; // 没有新的边可以获取，终止递归
             // 将新获取的边加入到allEdges中，避免重复
             foreach (var edge in newEdges)
                 if (!allEdges.Any(e => e.Source == edge.Source && e.Target == edge.Target))
                     allEdges.Add(edge);
 
             // 获取新的节点
-            var newNodes = GetNodes(index, newEdges);
+            var newNodes = await GetNodes(index, newEdges);
             // 找到新获取的节点，并更新 nodesToExplore
-            nodesToExplore = newNodes.Where(n => !allNodes.Any(existingNode => existingNode.Id == n.Id)).ToList();
+            nodesToExplore = newNodes.Where(n => allNodes.All(existingNode => existingNode.Id != n.Id)).ToList();
             // 将新节点加入到 allNodes 中
             allNodes.AddRange(nodesToExplore);
 
@@ -577,7 +576,7 @@ public class GraphService(
         var communitiesNodes = await communitiesRepository.GetCommunitiesNodesAsync(nodeIds);
 
         allNodes.AddRange(communitiesNodes);
-        var newEdges = GetEdges(index, allNodes);
+        var newEdges = await GetEdges(index, allNodes);
 
         foreach (var edge in newEdges)
             if (!allEdges.Any(e => e.Source == edge.Source && e.Target == edge.Target))
@@ -601,11 +600,11 @@ public class GraphService(
     /// </summary>
     /// <param name="nodeIds"></param>
     /// <returns></returns>
-    private List<Edges> GetEdges(string index, List<Nodes> nodes)
+    private async Task<List<Edges>> GetEdges(string index, List<Nodes> nodes)
     {
         var nodeIds = nodes.Select(x => x.Id).ToList();
         var edges = new List<Edges>();
-        edges = edgesRepository.GetList(x =>
+        edges = await edgesRepository.GetListAsync(x =>
             x.Index == index && nodeIds.Contains(x.Source) && nodeIds.Contains(x.Target));
         return edges;
     }
@@ -615,7 +614,7 @@ public class GraphService(
     /// </summary>
     /// <param name="edges"></param>
     /// <returns></returns>
-    private List<Nodes> GetNodes(string index, List<Edges> edges)
+    private async Task<List<Nodes>> GetNodes(string index, List<Edges> edges)
     {
         var targets = edges.Select(p => p.Target).ToList();
         var sources = edges.Select(p => p.Source).ToList();
@@ -623,7 +622,7 @@ public class GraphService(
         nodeIds.AddRange(targets);
         nodeIds.AddRange(sources);
 
-        var nodes = nodesRepository.GetList(p => p.Index == index || nodeIds.Contains(p.Id));
+        var nodes = await nodesRepository.GetListAsync(p => p.Index == index || nodeIds.Contains(p.Id));
         return nodes;
     }
 

@@ -3,6 +3,7 @@
     <PropertyGroup>
         <Version>0.1.30</Version>
         <SKVersion>1.17.1</SKVersion>
+        <SqlSugarVersion>5.1.4.170</SqlSugarVersion>
         
         <TargetFrameworks>net6.0;net7.0;net8.0</TargetFrameworks>
         <MicrosoftAspNetCorePackageVersion Condition="'$(TargetFramework)' == 'net6.0'">6.0.0</MicrosoftAspNetCorePackageVersion>

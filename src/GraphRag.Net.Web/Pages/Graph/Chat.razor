@@ -4,23 +4,23 @@
 <GridContent>
     <Row Gutter="24">
         <Col Lg="7" Md="24">
-        <Spin Spinning="@loadding">
-            <label>搜索图谱内容</label>
-            <Select TItem="string"
-                    TItemValue="string"
-                    ValueProperty="c=>c"
-                    LabelProperty="c=>c"
-                    DataSource="@_indexList"
-                    @bind-Value="@_index"
-                    Placeholder="选择索引"
-                    OnSelectedItemChanged="OnSelectedItemChangedHandler">
-            </Select>
-            <Input @bind-Value="_input" Style="margin-top:10px;" Placeholder="问题"/>
-            <TextArea @bind-Value="_output" Style="margin-top:10px;" MinRows="8" Placeholder="答案"/>
-            <Button Type="@ButtonType.Primary" Style="margin-top:10px;" OnClick="Search">节点搜索</Button>
-            <Button Type="@ButtonType.Primary" Style="margin-top:10px;" OnClick="Search1">社区搜索</Button>
-            <a href="/graph?index=@_index" target="_blank" style="margin-left:10px;">查看图谱</a>
-        </Spin>
+            <Spin Spinning="@loadding">
+                <label>搜索图谱内容</label>
+                <Select TItem="string"
+                        TItemValue="string"
+                        ValueProperty="c=>c"
+                        LabelProperty="c=>c"
+                        DataSource="@_indexList"
+                        @bind-Value="@_index"
+                        Placeholder="选择索引"
+                        OnSelectedItemChanged="OnSelectedItemChangedHandler">
+                </Select>
+                <Input @bind-Value="_input" Style="margin-top:10px;" Placeholder="问题"/>
+                <TextArea @bind-Value="_output" Style="margin-top:10px;" MinRows="8" Placeholder="答案"/>
+                <Button Type="@ButtonType.Primary" Style="margin-top:10px;" OnClick="Search">节点搜索</Button>
+                <Button Type="@ButtonType.Primary" Style="margin-top:10px;" OnClick="Search1">社区搜索</Button>
+                <a href="/graph?index=@_index" target="_blank" style="margin-left:10px;">查看图谱</a>
+            </Spin>
         </Col>
         <Col Lg="7" Md="24">
         <label>导入文本数据</label>
