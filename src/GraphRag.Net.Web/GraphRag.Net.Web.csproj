@@ -34,10 +34,13 @@
         <PackageReference Include="AntDesign.Charts" Version="0.5.5"/>
         <PackageReference Include="AntDesign.ProLayout" Version="0.19.4"/>
         <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0"/>
+        <PackageReference Include="System.Data.SQLite" Version="1.0.119" />
     </ItemGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\GraphRag.EntityFrameworkCore\GraphRag.EntityFrameworkCore.csproj" />
         <ProjectReference Include="..\GraphRag.Net\GraphRag.Net.csproj"/>
+        <ProjectReference Include="..\GraphRag.SqlSugar\GraphRag.SqlSugar.csproj" />
     </ItemGroup>
 
     <ItemGroup>

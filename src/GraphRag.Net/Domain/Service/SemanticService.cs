@@ -1,5 +1,4 @@
 ﻿using Azure.AI.OpenAI;
-using Gnarly.Data;
 using GraphRag.Net.Common.Options;
 using GraphRag.Net.Domain.Interface;
 using GraphRag.Net.Domain.Model.Graph;
@@ -16,7 +15,7 @@ using Polly;
 
 namespace GraphRag.Net.Domain.Service;
 
-public class SemanticService(Kernel _kernel) : ISemanticService, IScopeDependency
+public class SemanticService(Kernel _kernel) : ISemanticService
 {
     public async Task<GraphModel> CreateGraphAsync(string input)
     {

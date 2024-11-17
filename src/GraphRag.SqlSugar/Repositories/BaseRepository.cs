@@ -210,14 +210,22 @@ public class BaseRepository<TEntity> : IRepository<TEntity>
     {
         var query = SqlSugarClient.Queryable<TEntity>().Where(whereExpression);
 
-        query = isAsc ? query.OrderBy(orderExpression) : query.OrderByDescending(orderExpression);
-
-        return await query.GroupBy(groupExpression).ToListAsync();
+        query= query.GroupBy(groupExpression);
+        
+        query = isAsc ? query.OrderBy(orderExpression, OrderByType.Asc) : query.OrderBy(orderExpression, OrderByType.Desc);
+        
+        return await query.ToListAsync();
     }
 
     public Task<List<TResult>> Select<TResult>(Expression<Func<TEntity, bool>> whereExpression,
         Expression<Func<TEntity, TResult>> selectExpression)
     {
         return SqlSugarClient.Queryable<TEntity>().Where(whereExpression).Select(selectExpression).ToListAsync();
+    }
+
+    public async Task<List<TResult>> GroupBySelect<TResult>(Expression<Func<TEntity, object>> groupExpression,
+        Expression<Func<TEntity, TResult>> selectExpression)
+    {
+        return await SqlSugarClient.Queryable<TEntity>().GroupBy(groupExpression).Select(selectExpression).ToListAsync();
     }
 }

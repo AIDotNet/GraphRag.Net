@@ -1,10 +1,9 @@
-﻿using Gnarly.Data;
-using GraphRag.Net.Domain.Interface;
+﻿using GraphRag.Net.Domain.Interface;
 using GraphRag.Net.Domain.Model.Graph;
 
 namespace GraphRag.Net.Domain.Service;
 
-public class CommunityDetectionService : ICommunityDetectionService,IScopeDependency
+public class CommunityDetectionService : ICommunityDetectionService
 {
     /// <summary>
     ///     标签传播算法

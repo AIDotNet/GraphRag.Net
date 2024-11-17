@@ -1,5 +1,4 @@
-﻿using Gnarly.Data;
-using GraphRag.Core.Repositories;
+﻿using GraphRag.Core.Repositories;
 using GraphRag.Net.Domain.Interface;
 using GraphRag.Net.Domain.Model.Graph;
 using GraphRag.Net.Options;
@@ -19,7 +18,7 @@ public class GraphService(
     ICommunitieNodesRepository communitieNodesRepository,
     IGlobalsRepository globalsRepository,
     ICommunityDetectionService _communityDetectionService
-) : IGraphService, IScopeDependency
+) : IGraphService
 {
     /// <summary>
     ///     获取所有索引信息
@@ -27,8 +26,9 @@ public class GraphService(
     /// <returns></returns>
     public async Task<List<string>> GetAllIndex()
     {
-        var indexs = await nodesRepository.OrderByGroupBySelect(x => true, x => x.Index, true, x => x);
-        return indexs.Select(x => x.Index).ToList();
+        var indexs = await nodesRepository.GetAllIndexAsync();
+        
+        return indexs.ToList();
     }
 
     /// <summary>

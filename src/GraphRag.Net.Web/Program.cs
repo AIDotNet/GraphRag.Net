@@ -1,6 +1,7 @@
 using System.Reflection;
 using AntDesign.ProLayout;
 using GraphRag.Net.Options;
+using GraphRag.SqlSugar;
 using Microsoft.AspNetCore.Components;
 using Microsoft.OpenApi.Models;
 
@@ -10,6 +11,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddAntDesign();
+
+builder.Services.AddSqlSugar();
+
 builder.Services.AddScoped(sp => new HttpClient
 {
     BaseAddress = new Uri(sp.GetService<NavigationManager>()!.BaseUri)

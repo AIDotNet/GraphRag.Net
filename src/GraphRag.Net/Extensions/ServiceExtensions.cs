@@ -1,8 +1,9 @@
 ﻿using GraphRag.Core;
+using GraphRag.Net.Domain.Interface;
+using GraphRag.Net.Domain.Service;
 using GraphRag.Net.Options;
 using GraphRag.Net.Utils;
 using Microsoft.SemanticKernel;
-using SqlSugar;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
@@ -20,9 +21,10 @@ public static class ServiceExtensions
     public static GraphRagBuilder AddGraphRagNet(this IServiceCollection services,
         Func<IServiceProvider, Kernel>? kernelFunc = null)
     {
-        services.AddAutoGnarly();
-
-        CodeFirst();
+        services.AddScoped<ICommunityDetectionService, CommunityDetectionService>();
+        services.AddScoped<IGraphService, GraphService>();
+        services.AddScoped<ISemanticService, SemanticService>();
+        
         InitSk(services, kernelFunc);
 
         return new GraphRagBuilder(services);
@@ -66,28 +68,4 @@ public static class ServiceExtensions
         });
     }
 
-    /// <summary>
-    ///     初始化DB
-    /// </summary>
-    private static void CodeFirst()
-    {
-        // 获取仓储服务
-        // var _repository = new Nodes_Repositories();
-        //
-        // // 创建数据库（如果不存在）
-        // _repository.GetDB().DbMaintenance.CreateDatabase();
-        // // 在所有程序集中查找具有[SugarTable]特性的类
-        // var assembly = Assembly.GetExecutingAssembly();
-        // // 获取该程序集中所有具有SugarTable特性的类型
-        // var entityTypes = assembly.GetTypes()
-        //     .Where(type => TypeIsEntity(type));
-        // // 为每个找到的类型初始化数据库表
-        // foreach (var type in entityTypes) _repository.GetDB().CodeFirst.InitTables(type);
-    }
-
-    private static bool TypeIsEntity(Type type)
-    {
-        // 检查类型是否具有SugarTable特性
-        return type.GetCustomAttributes(typeof(SugarTable), false).Length > 0;
-    }
 }

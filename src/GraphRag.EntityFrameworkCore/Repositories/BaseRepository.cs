@@ -229,6 +229,7 @@ public class BaseRepository<TDbContext, TEntity> : IRepository<TEntity>
     {
         return _dbSet.Where(whereExpression).Select(selectExpression).ToListAsync();
     }
+
 }
 
 public class BaseRepository<TDbContext, TEntity, TKey> : BaseRepository<TDbContext, TEntity>, IRepository<TEntity, TKey>

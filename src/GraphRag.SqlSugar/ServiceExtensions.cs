@@ -12,6 +12,8 @@ public static class ServiceExtensions
     {
         services.AddScoped<ISqlSugarClient>(provider => SqlSugarHelper.SqlScope());
 
+        services.AddHostedService<DatabaseMigration>();
+
         services.AddScoped<INodesRepository, NodesRepository>();
         services.AddScoped<IEdgesRepository, EdgesRepository>();
         services.AddScoped<IGlobalsRepository, GlobalsRepository>();
