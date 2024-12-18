@@ -35,7 +35,7 @@
     <PackageReference Include="Microsoft.SemanticKernel.Connectors.Postgres" Version="$(SKVersion)-alpha" />
     <PackageReference Include="Microsoft.SemanticKernel.Connectors.Sqlite" Version="$(SKVersion)-alpha" />
     <PackageReference Include="Microsoft.SemanticKernel.Plugins.Memory" Version="$(SKVersion)-alpha" />
-    <PackageReference Include="Polly" Version="8.4.1" />
-    <PackageReference Include="SqlSugarCore" Version="5.1.4.166" />
+    <PackageReference Include="Polly" Version="8.5.0" />
+    <PackageReference Include="SqlSugarCore" Version="5.1.4.171" />
   </ItemGroup>
 </Project>

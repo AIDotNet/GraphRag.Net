@@ -31,9 +31,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="AntDesign.Charts" Version="0.5.5" />
-    <PackageReference Include="AntDesign.ProLayout" Version="0.19.4" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
+    <PackageReference Include="AntDesign.Charts" Version="0.5.6" />
+    <PackageReference Include="AntDesign.ProLayout" Version="1.0.1" />
+    <PackageReference Include="Polly" Version="8.5.0" />
+    <PackageReference Include="SqlSugarCore" Version="5.1.4.171" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="7.2.0" />
   </ItemGroup>
 
   <ItemGroup>
