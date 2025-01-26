@@ -55,7 +55,8 @@ namespace GraphRag.Net.Domain.Service
                 NodesViewModel nodesViewModel = new NodesViewModel()
                 {
                     id = n.Id,
-                    text = n.Name
+                    text = n.Name,
+                    desc=n.Desc
                 };
                 //处理相同的Type用相同的颜色
                 if (TypeColor.ContainsKey(n.Type))

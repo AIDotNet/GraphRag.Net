@@ -123,7 +123,7 @@ namespace GraphRag.Net.Api.Controllers
 {
     [Route("api/[controller]/[action]")]
     [ApiController]
-    public class GraphDemoController(IGraphService _graphService) : ControllerBase
+    public class GraphController(IGraphService _graphService) : ControllerBase
     {
         /// <summary>
         /// 获取所有的索引数据

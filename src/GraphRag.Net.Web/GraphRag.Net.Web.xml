@@ -4,41 +4,41 @@
         <name>GraphRag.Net.Web</name>
     </assembly>
     <members>
-        <member name="M:GraphRag.Net.Api.Controllers.GraphDemoController.GetAllIndex">
+        <member name="M:GraphRag.Net.Api.Controllers.GraphController.GetAllIndex">
             <summary>
             获取所有的索引数据
             </summary>
             <returns></returns>
         </member>
-        <member name="M:GraphRag.Net.Api.Controllers.GraphDemoController.GetAllGraphs(System.String)">
+        <member name="M:GraphRag.Net.Api.Controllers.GraphController.GetAllGraphs(System.String)">
             <summary>
             获取所有的图谱数据
             </summary>
             <param name="index"></param>
             <returns></returns>
         </member>
-        <member name="M:GraphRag.Net.Api.Controllers.GraphDemoController.InsertGraphData(GraphRag.Net.Api.Controllers.InputModel)">
+        <member name="M:GraphRag.Net.Api.Controllers.GraphController.InsertGraphData(GraphRag.Net.Api.Controllers.InputModel)">
             <summary>
             插入文本数据
             </summary>
             <param name="model"></param>
             <returns></returns>
         </member>
-        <member name="M:GraphRag.Net.Api.Controllers.GraphDemoController.SearchGraph(GraphRag.Net.Api.Controllers.InputModel)">
+        <member name="M:GraphRag.Net.Api.Controllers.GraphController.SearchGraph(GraphRag.Net.Api.Controllers.InputModel)">
             <summary>
             搜索递归获取节点相关的所有边和节点进行图谱对话
             </summary>
             <param name="model"></param>
             <returns></returns>
         </member>
-        <member name="M:GraphRag.Net.Api.Controllers.GraphDemoController.SearchGraphCommunity(GraphRag.Net.Api.Controllers.InputModel)">
+        <member name="M:GraphRag.Net.Api.Controllers.GraphController.SearchGraphCommunity(GraphRag.Net.Api.Controllers.InputModel)">
             <summary>
             通过社区算法检索社区节点进行对话
             </summary>
             <param name="model"></param>
             <returns></returns>
         </member>
-        <member name="M:GraphRag.Net.Api.Controllers.GraphDemoController.ImportTxt(System.String,Microsoft.AspNetCore.Http.IFormFile)">
+        <member name="M:GraphRag.Net.Api.Controllers.GraphController.ImportTxt(System.String,Microsoft.AspNetCore.Http.IFormFile)">
             <summary>
             导入txt文档
             </summary>
@@ -46,21 +46,21 @@
             <param name="file"></param>
             <returns></returns>
         </member>
-        <member name="M:GraphRag.Net.Api.Controllers.GraphDemoController.GraphCommunities(System.String)">
+        <member name="M:GraphRag.Net.Api.Controllers.GraphController.GraphCommunities(System.String)">
             <summary>
             通过社区检测生成社区和摘要
             </summary>
             <param name="index"></param>
             <returns></returns>
         </member>
-        <member name="M:GraphRag.Net.Api.Controllers.GraphDemoController.GraphGlobal(System.String)">
+        <member name="M:GraphRag.Net.Api.Controllers.GraphController.GraphGlobal(System.String)">
             <summary>
             通过社区摘要生成全局摘要
             </summary>
             <param name="index"></param>
             <returns></returns>
         </member>
-        <member name="M:GraphRag.Net.Api.Controllers.GraphDemoController.DeleteGraph(System.String)">
+        <member name="M:GraphRag.Net.Api.Controllers.GraphController.DeleteGraph(System.String)">
             <summary>
             删除图谱数据
             </summary>

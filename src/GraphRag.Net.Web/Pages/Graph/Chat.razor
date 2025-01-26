@@ -35,7 +35,7 @@
         <label>导入txt数据</label>
         <Input @bind-Value="_importIndex"  Placeholder="索引名称，可以一个文件一个，也可以多个文件公用一个" />
 
-        <Upload Action="@("api/GraphDemo/ImportTxt?index="+_importIndex)"
+        <Upload Action="@("api/Graph/ImportTxt?index="+_importIndex)"
                 Name="file"
                 Accept="text/plain"
                 BeforeUpload="BeforeUpload"
