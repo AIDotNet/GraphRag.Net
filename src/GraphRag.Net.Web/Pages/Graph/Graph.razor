@@ -1,22 +1,32 @@
 ﻿@namespace GraphRag.Net.Web.Pages.Demo
 @page "/Graph"
 
-<div id="app">
+<div id="graph">
     <div style="height:calc(100vh - 30px);width:100%;border:#eeeeee solid 1px;">
-        <relation-graph 
-            ref="seeksRelationGraph" 
-            :options="graphOptions"
-            :on-node-click="onNodeClick" />
+        <relation-graph ref="seeksRelationGraph"
+                        :options="graphOptions"
+                        :on-node-click="onNodeClick" />
     </div>
 </div>
+<Modal Title="@nodeTitle" Visible="@isModalVisible" OnOk="HandleOk" OnCancel="HandleCancel">
+    @nodeDescription
+</Modal>
+<!-- 引入relation-graph -->
+<script src="./js/vue2.js"></script>
+<script src="./js/screenfull.min.js"></script>
+<script src="./js/html2canvas.min.js"></script>
+<script src="./js/relation-graph.umd.js"></script>
 
 <script>
-    window.onload = function () {
-        initializeVueApp();
-    };
-    function initializeVueApp() {
-        let app = new Vue({
-            el: '#app',
+    // window.onload = function () {
+    //      // 等待 Blazor 初始化完成
+    //    Blazor.start().then(function () {
+    //       initializeVueApp(dotNetHelper);
+    //    });
+    // };
+    function initializeVueApp(dotNetHelper) {
+        let graph = new Vue({
+            el: '#graph',
             data: {
                 message: 'Hello Vue!',
                 graphOptions: {
@@ -30,7 +40,6 @@
             methods: {
                 showRelationGraph() {
 
-                    debugger;
                     console.log('ref:btn:', this.$refs.btn);
                     console.log('ref:', this.$refs.seeksRelationGraph);
                     const url = new URL(window.location.href);
@@ -63,17 +72,42 @@
                         });
                 },
                 onNodeClick(nodeObject, $event) {
-                    alert(nodeObject.data.desc);
+                     dotNetHelper.invokeMethodAsync('ShowNodeDescription',nodeObject.text, nodeObject.data.desc);
                 }
             }
         })
     }
 </script>
 
-@code 
+@code
 {
     [Inject]
     protected IJSRuntime _jsRuntime { get; set; }
+
+    private bool isModalVisible = false;
+    private string nodeDescription = string.Empty;
+    private string nodeTitle = string.Empty;
+
+    private DotNetObjectReference<Graph> objRef;
+
+    [JSInvokable("ShowNodeDescription")]
+    public void ShowNodeDescription(string title, string description)
+    {
+        nodeTitle = title;
+        nodeDescription = description;
+        isModalVisible = true;
+        StateHasChanged();
+    }
+
+    private void HandleOk()
+    {
+        isModalVisible = false;
+    }
+
+    private void HandleCancel()
+    {
+        isModalVisible = false;
+    }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -81,15 +115,20 @@
         {
             // 确保所有脚本加载完成后，调用初始化 Vue 的 JavaScript 函数
             await Task.Delay(500); // 短暂延时
-
+            objRef = DotNetObjectReference.Create(this);
             try
             {
-                await _jsRuntime.InvokeVoidAsync("initializeVueApp");
+                await _jsRuntime.InvokeVoidAsync("initializeVueApp", objRef);
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
             }
         }
+    }
+
+    public void Dispose()
+    {
+        objRef?.Dispose();
     }
 }
