@@ -3,7 +3,10 @@
 
 <div id="app">
     <div style="height:calc(100vh - 30px);width:100%;border:#eeeeee solid 1px;">
-        <relation-graph ref="seeksRelationGraph" :options="graphOptions" />
+        <relation-graph 
+            ref="seeksRelationGraph" 
+            :options="graphOptions"
+            :on-node-click="onNodeClick" />
     </div>
 </div>
 
@@ -58,6 +61,9 @@
                             // 处理错误
                             console.error('请求出错：', error);
                         });
+                },
+                onNodeClick(nodeObject, $event) {
+                    alert(nodeObject.data.desc);
                 }
             }
         })

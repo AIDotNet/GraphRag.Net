@@ -56,7 +56,10 @@ namespace GraphRag.Net.Domain.Service
                 {
                     id = n.Id,
                     text = n.Name,
-                    desc=n.Desc
+                    data = new NodesDataModel()
+                    {
+                        desc = n.Desc.ConvertToString()
+                    }
                 };
                 //处理相同的Type用相同的颜色
                 if (TypeColor.ContainsKey(n.Type))

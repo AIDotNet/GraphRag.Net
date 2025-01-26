@@ -12,6 +12,11 @@
         public string text { get; set; }
         public string color { get; set; } = "#43a2f1";
 
+        public NodesDataModel data { get; set; }=new NodesDataModel();
+    }
+
+    public class NodesDataModel
+    {
         public string desc { get; set; }
     }
 
