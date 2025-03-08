@@ -287,7 +287,12 @@ namespace GraphRag.Net.Domain.Service
             if (textMemModelList.Any())
             {
                 var nodes = _nodes_Repositories.GetList(p => p.Index == index && textMemModelList.Select(c => c.Id).Contains(p.Id));
-                var graphModel = GetGraphAllRecursion(index, nodes); ;
+                // 创建节点权重字典
+                Dictionary<string, double> nodeWeights = textMemModelList.ToDictionary(
+                    t => t.Id,
+                    t => t.Relevance
+                );
+                var graphModel = GetGraphAllRecursion(index, nodes, nodeWeights);
                 return graphModel;
             }
             else
@@ -309,19 +314,48 @@ namespace GraphRag.Net.Domain.Service
             {
                 throw new ArgumentException("Values required for index and input cannot be null.");
             }
-            string answer = "";
+
             var textMemModelList = await RetrieveTextMemModelList(index, input);
-            if (textMemModelList.Count() > 0)
+            if (!textMemModelList.Any())
             {
-                var nodes = _nodes_Repositories.GetList(p => p.Index == index && textMemModelList.Select(c => c.Id).Contains(p.Id));
-                //匹配到节点信息
-                var graphModel = GetGraphAllCommunitiesRecursion(index, nodes);
+                // 尝试降低阈值重新检索
+                textMemModelList = await RetrieveTextMemModelList(index, input, 0.3, GraphSearchOption.SearchLimit + 2);
+            }
+
+            if (textMemModelList.Any())
+            {
+                var nodeIds = textMemModelList.Select(x => x.Id).ToList();
+
+                // 获取相关社区
+                var relevantCommunityIds = await GetRelevantCommunities(index, nodeIds);
+
+                // 获取社区内的所有节点
+                var communityNodes = _communitieNodes_Repositories.GetDB().Queryable<CommunitieNodes>()
+                    .Where(cn => relevantCommunityIds.Contains(cn.CommunitieId))
+                    .Select(cn => cn.NodeId)
+                    .ToList();
+
+                // 合并原始匹配节点和社区节点
+                var allNodeIds = nodeIds.Union(communityNodes).ToList();
+
+                var nodes = _nodes_Repositories.GetList(p => allNodeIds.Contains(p.Id));
+
+                // 创建节点权重字典，原始匹配节点权重更高
+                Dictionary<string, double> nodeWeights = new Dictionary<string, double>();
+                foreach (var textMem in textMemModelList)
+                {
+                    nodeWeights[textMem.Id] = textMem.Relevance;
+                }
+                foreach (var nodeId in communityNodes.Except(nodeIds))
+                {
+                    nodeWeights[nodeId] = 0.5; // 社区节点基础权重
+                }
+
+                var graphModel = GetGraphAllRecursion(index, nodes, nodeWeights);
                 return graphModel;
             }
-            else
-            {
-                return new GraphModel();
-            }
+
+            return new GraphModel();
         }
 
         /// <summary>
@@ -517,14 +551,19 @@ namespace GraphRag.Net.Domain.Service
         /// <param name="index"></param>
         /// <param name="input"></param>
         /// <returns></returns>
-        private async Task<List<TextMemModel>> RetrieveTextMemModelList(string index, string input)
+        private async Task<List<TextMemModel>> RetrieveTextMemModelList(string index, string input, double? minRelevance = null, int? limit = null)
         {
             SemanticTextMemory textMemory = await _semanticService.GetTextMemory();
             List<TextMemModel> textMemModelList = new List<TextMemModel>();
-            int i = 0;
-            await foreach (MemoryQueryResult memory in textMemory.SearchAsync(index, input, limit: GraphSearchOption.SearchLimit, minRelevanceScore: GraphSearchOption.SearchMinRelevance))
+
+            // 使用提供的阈值或默认配置
+            double relevanceThreshold = minRelevance ?? GraphSearchOption.SearchMinRelevance;
+            int resultLimit = limit ?? GraphSearchOption.SearchLimit;
+
+            int matchCount = 0;
+            await foreach (MemoryQueryResult memory in textMemory.SearchAsync(index, input, limit: resultLimit, minRelevanceScore: relevanceThreshold))
             {
-                i++;
+                matchCount++;
                 var textMemModel = new TextMemModel()
                 {
                     Id = memory.Metadata.Id,
@@ -533,7 +572,32 @@ namespace GraphRag.Net.Domain.Service
                 };
                 textMemModelList.Add(textMemModel);
             }
-            Console.WriteLine($"向量匹配数:{i}");
+
+            // 如果结果不足，尝试降低阈值
+            if (matchCount < 2 && relevanceThreshold > 0.3)
+            {
+                double lowerThreshold = Math.Max(0.3, relevanceThreshold - 0.2);
+                Console.WriteLine($"结果不足，降低阈值至:{lowerThreshold}重试");
+
+                await foreach (MemoryQueryResult memory in textMemory.SearchAsync(index, input, limit: resultLimit + 2, minRelevanceScore: lowerThreshold))
+                {
+                    if (!textMemModelList.Any(t => t.Id == memory.Metadata.Id))
+                    {
+                        matchCount++;
+                        var textMemModel = new TextMemModel()
+                        {
+                            Id = memory.Metadata.Id,
+                            Text = memory.Metadata.Text,
+                            Relevance = memory.Relevance
+                        };
+                        textMemModelList.Add(textMemModel);
+                    }
+                }
+            }
+
+            // 按相关性排序
+            textMemModelList = textMemModelList.OrderByDescending(t => t.Relevance).ToList();
+            Console.WriteLine($"向量匹配数:{matchCount}, 最高相关度:{(textMemModelList.Any() ? textMemModelList.First().Relevance.ToString("F2") : "N/A")}");
             return textMemModelList;
         }
 
@@ -542,51 +606,74 @@ namespace GraphRag.Net.Domain.Service
         /// </summary>
         /// <param name="initialNodes"></param>
         /// <returns></returns>
-        private GraphModel GetGraphAllRecursion(string index, List<Nodes> initialNodes)
+        private GraphModel GetGraphAllRecursion(string index, List<Nodes> initialNodes, Dictionary<string, double> nodeWeights)
         {
             var allNodes = new List<Nodes>(initialNodes);
             var allEdges = new List<Edges>();
             var nodesToExplore = new List<Nodes>(initialNodes);
-            int i = 0;
+            int depth = 0;
 
             while (nodesToExplore.Count > 0)
             {
-                if (i > GraphSearchOption.NodeDepth || allNodes.Count >= GraphSearchOption.MaxNodes)
+                if (depth >= GraphSearchOption.NodeDepth || allNodes.Count >= GraphSearchOption.MaxNodes)
                 {
                     break;
                 }
 
-                var newEdges = GetEdges(index, nodesToExplore);
-                if (newEdges.Count() == 0)
+                // 按权重排序待探索节点
+                nodesToExplore = nodesToExplore
+                    .OrderByDescending(n => nodeWeights.ContainsKey(n.Id) ? nodeWeights[n.Id] : 0)
+                    .ToList();
+
+                var currentNodes = nodesToExplore.Take(Math.Min(5, nodesToExplore.Count)).ToList();
+                nodesToExplore.RemoveRange(0, currentNodes.Count);
+
+                var newEdges = GetEdges(index, currentNodes);
+                if (!newEdges.Any())
                 {
-                    break; // 没有新的边可以获取，终止递归
+                    continue;
                 }
-                // 将新获取的边加入到allEdges中，避免重复
+
+                // 添加新边，避免重复
                 foreach (var edge in newEdges)
                 {
                     if (!allEdges.Any(e => e.Source == edge.Source && e.Target == edge.Target))
                     {
                         allEdges.Add(edge);
+
+                        // 为新发现的节点设置权重
+                        double parentWeight = nodeWeights.GetValueOrDefault(edge.Source, 0);
+                        double weightDecay = 0.8; // 权重衰减因子
+
+                        if (!nodeWeights.ContainsKey(edge.Target))
+                        {
+                            nodeWeights[edge.Target] = parentWeight * weightDecay;
+                        }
                     }
                 }
 
-                // 获取新的节点
+                // 获取新节点
                 var newNodes = GetNodes(index, newEdges);
-                // 找到新获取的节点，并更新 nodesToExplore
-                nodesToExplore = newNodes.Where(n => !allNodes.Any(existingNode => existingNode.Id == n.Id)).ToList();
-                // 将新节点加入到 allNodes 中
-                allNodes.AddRange(nodesToExplore);
+                var nodesToAdd = newNodes.Where(n => !allNodes.Any(existingNode => existingNode.Id == n.Id)).ToList();
+                allNodes.AddRange(nodesToAdd);
+                nodesToExplore.AddRange(nodesToAdd);
 
-                i++;
+                depth++;
             }
 
-            // 如果节点数超过最大限制，进行截断
+            // 如果节点数超过限制，保留权重最高的节点
             if (allNodes.Count > GraphSearchOption.MaxNodes)
             {
-                allNodes = allNodes.Take(GraphSearchOption.MaxNodes).ToList();
+                allNodes = allNodes
+                    .OrderByDescending(n => nodeWeights.GetValueOrDefault(n.Id, 0))
+                    .Take(GraphSearchOption.MaxNodes)
+                    .ToList();
+
+                // 确保边的节点都在保留的节点中
+                allEdges = allEdges
+                    .Where(e => allNodes.Any(n => n.Id == e.Source) && allNodes.Any(n => n.Id == e.Target))
+                    .ToList();
             }
-            // 需要相应地处理 allEdges，确保边的节点在 allNodes 中 
-            allEdges = allEdges.Where(e => allNodes.Any(p => p.Id == e.Source) && allNodes.Any(p => p.Id == e.Target)).ToList();
 
             return new GraphModel
             {
@@ -669,6 +756,19 @@ namespace GraphRag.Net.Domain.Service
             return nodes;
         }
 
+        /// <summary>
+        /// 获取相关社区ID列表
+        /// </summary>
+        private async Task<List<string>> GetRelevantCommunities(string index, List<string> nodeIds)
+        {
+            var communities = _communitieNodes_Repositories.GetDB().Queryable<CommunitieNodes>()
+                .Where(cn => nodeIds.Contains(cn.NodeId))
+                .Select(cn => cn.CommunitieId)
+                .Distinct()
+                .ToList();
+
+            return communities;
+        }
         #endregion
     }
 }
