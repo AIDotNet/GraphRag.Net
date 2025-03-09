@@ -28,5 +28,10 @@ namespace GraphRag.Net.Options
         /// 节点检索最多节点数量
         /// </summary>
         public static int MaxNodes { get; set; } = 300;
+
+        /// <summary>
+        /// 最大Token数量限制（32K）
+        /// </summary>
+        public static int MaxTokens { get; set; } = 32000;
     }
 }

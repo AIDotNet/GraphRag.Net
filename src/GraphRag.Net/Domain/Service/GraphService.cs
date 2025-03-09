@@ -293,12 +293,110 @@ namespace GraphRag.Net.Domain.Service
                     t => t.Relevance
                 );
                 var graphModel = GetGraphAllRecursion(index, nodes, nodeWeights);
+                
+                // 计算预估的token数量，并在必要时限制节点数量
+                int estimatedTokens = EstimateTokenCount(graphModel);
+                if (estimatedTokens > GraphSearchOption.MaxTokens)
+                {
+                    Console.WriteLine($"预估Token数量 {estimatedTokens} 超过限制 {GraphSearchOption.MaxTokens}，正在调整节点数量...");
+                    graphModel = LimitGraphByTokenCount(graphModel, nodeWeights);
+                }
+                
                 return graphModel;
             }
             else
             {
                 return new GraphModel();
             }
+        }
+
+        /// <summary>
+        /// 估算图模型的token数量
+        /// </summary>
+        /// <param name="model">图模型</param>
+        /// <returns>估算的token数量</returns>
+        private int EstimateTokenCount(GraphModel model)
+        {
+            int tokenCount = 0;
+            
+            // 估算节点的token（每个单词约1.3个token，每个节点信息加上额外开销）
+            foreach (var node in model.Nodes)
+            {
+                // 节点ID和名称估算
+                tokenCount += (node.Id?.Length ?? 0) / 3 + 2;
+                tokenCount += (node.Name?.Length ?? 0) / 3 + 2;
+                
+                // 节点描述估算（一个汉字约等于1个token，英文单词约等于0.75个token）
+                string desc = node.Desc ?? "";
+                int chineseCount = desc.Count(c => c >= 0x4E00 && c <= 0x9FFF);
+                int otherCount = desc.Length - chineseCount;
+                tokenCount += chineseCount + (int)(otherCount * 0.75);
+                
+                // 节点额外属性估算
+                tokenCount += 10; // 额外结构开销
+            }
+            
+            // 估算边的token
+            tokenCount += model.Edges.Count * 10; // 每个边的结构信息约10个token
+            
+            // JSON结构开销
+            tokenCount += 200;
+            
+            return tokenCount;
+        }
+        
+        /// <summary>
+        /// 根据token数量限制图大小
+        /// </summary>
+        /// <param name="model">原始图模型</param>
+        /// <param name="nodeWeights">节点权重</param>
+        /// <returns>裁剪后的图模型</returns>
+        private GraphModel LimitGraphByTokenCount(GraphModel model, Dictionary<string, double> nodeWeights)
+        {
+            var result = new GraphModel();
+            
+            // 将节点按权重排序
+            var sortedNodes = model.Nodes
+                .OrderByDescending(n => nodeWeights.GetValueOrDefault(n.Id, 0))
+                .ToList();
+            
+            // 从高权重节点开始添加，直到接近token限制
+            var selectedNodes = new List<Nodes>();
+            int currentTokens = 200; // 基础结构开销
+            
+            foreach (var node in sortedNodes)
+            {
+                // 计算添加此节点后的token数
+                string desc = node.Desc ?? "";
+                int chineseCount = desc.Count(c => c >= 0x4E00 && c <= 0x9FFF);
+                int otherCount = desc.Length - chineseCount;
+                int nodeTokens = chineseCount + (int)(otherCount * 0.75) + 
+                                (node.Id?.Length ?? 0) / 3 + 
+                                (node.Name?.Length ?? 0) / 3 + 15;
+                
+                // 如果添加此节点会超过限制，跳过
+                if (currentTokens + nodeTokens > GraphSearchOption.MaxTokens * 0.9)
+                {
+                    continue;
+                }
+                
+                selectedNodes.Add(node);
+                currentTokens += nodeTokens;
+            }
+            
+            // 只保留连接选中节点的边
+            var selectedEdges = model.Edges.Where(e => 
+                selectedNodes.Any(n => n.Id == e.Source) && 
+                selectedNodes.Any(n => n.Id == e.Target)
+            ).ToList();
+            
+            result.Nodes = selectedNodes;
+            result.Edges = selectedEdges;
+            
+            Console.WriteLine($"节点限制调整：从 {model.Nodes.Count} 个节点减少到 {result.Nodes.Count} 个节点");
+            Console.WriteLine($"预估调整后Token数：约 {currentTokens}");
+            
+            return result;
         }
 
         /// <summary>
@@ -319,43 +417,41 @@ namespace GraphRag.Net.Domain.Service
             if (!textMemModelList.Any())
             {
                 // 尝试降低阈值重新检索
-                textMemModelList = await RetrieveTextMemModelList(index, input, 0.3, GraphSearchOption.SearchLimit + 2);
+                textMemModelList = await RetrieveTextMemModelList(index, input, 0.3, 5);
             }
 
             if (textMemModelList.Any())
             {
-                var nodeIds = textMemModelList.Select(x => x.Id).ToList();
-
-                // 获取相关社区
-                var relevantCommunityIds = await GetRelevantCommunities(index, nodeIds);
-
-                // 获取社区内的所有节点
-                var communityNodes = _communitieNodes_Repositories.GetDB().Queryable<CommunitieNodes>()
-                    .Where(cn => relevantCommunityIds.Contains(cn.CommunitieId))
-                    .Select(cn => cn.NodeId)
-                    .ToList();
-
-                // 合并原始匹配节点和社区节点
-                var allNodeIds = nodeIds.Union(communityNodes).ToList();
-
-                var nodes = _nodes_Repositories.GetList(p => allNodeIds.Contains(p.Id));
-
-                // 创建节点权重字典，原始匹配节点权重更高
-                Dictionary<string, double> nodeWeights = new Dictionary<string, double>();
-                foreach (var textMem in textMemModelList)
+                var nodes = _nodes_Repositories.GetList(p => p.Index == index && textMemModelList.Select(c => c.Id).Contains(p.Id));
+                var graphModel = GetGraphAllCommunitiesRecursion(index, nodes);
+                
+                // 计算预估的token数量，并在必要时限制节点数量
+                int estimatedTokens = EstimateTokenCount(graphModel);
+                if (estimatedTokens > GraphSearchOption.MaxTokens)
                 {
-                    nodeWeights[textMem.Id] = textMem.Relevance;
+                    Console.WriteLine($"社区检索：预估Token数量 {estimatedTokens} 超过限制 {GraphSearchOption.MaxTokens}，正在调整节点数量...");
+                    // 为社区节点创建权重字典（默认权重相同）
+                    Dictionary<string, double> nodeWeights = graphModel.Nodes.ToDictionary(
+                        n => n.Id,
+                        n => 1.0
+                    );
+                    // 为初始检索到的节点赋予更高权重
+                    foreach (var node in nodes)
+                    {
+                        if (nodeWeights.ContainsKey(node.Id))
+                        {
+                            nodeWeights[node.Id] = 2.0; // 给初始节点更高权重
+                        }
+                    }
+                    graphModel = LimitGraphByTokenCount(graphModel, nodeWeights);
                 }
-                foreach (var nodeId in communityNodes.Except(nodeIds))
-                {
-                    nodeWeights[nodeId] = 0.5; // 社区节点基础权重
-                }
-
-                var graphModel = GetGraphAllRecursion(index, nodes, nodeWeights);
+                
                 return graphModel;
             }
-
-            return new GraphModel();
+            else
+            {
+                return new GraphModel();
+            }
         }
 
         /// <summary>
