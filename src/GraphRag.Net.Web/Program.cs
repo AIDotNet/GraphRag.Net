@@ -38,6 +38,7 @@ builder.Configuration.GetSection("TextChunker").Get<TextChunkerOption>();
 builder.Configuration.GetSection("GraphSearch").Get<GraphSearchOption>();
 //builder.Configuration.GetSection("GraphDBConnection").Get<GraphDBConnectionOption>();
 
+//这里可以自定义Kernel,如果不传则使用默认Kernel
 builder.Services.AddGraphRagNet();
 
 ////自定义Kernel 可以实现其他模型的对接实现
