@@ -122,6 +122,7 @@ namespace GraphRag.Net.Domain.Service
             {
                 throw new ArgumentException("Values required for index and input cannot be null.");
             }
+
             try
             {
                 SemanticTextMemory textMemory = await _semanticService.GetTextMemory();
@@ -129,7 +130,6 @@ namespace GraphRag.Net.Domain.Service
                 Dictionary<string, string> nodeDic = new Dictionary<string, string>();
                 foreach (var n in graph.Nodes)
                 {
-
                     string Id = Guid.NewGuid().ToString();
                     string text2 = $"Name:{n.Name};Type:{n.Type};Desc:{n.Desc}";
                     bool isContinue = false;
@@ -153,7 +153,12 @@ namespace GraphRag.Net.Domain.Service
                         _nodes_Repositories.Update(oldNode);
                         text2 = $"Name:{oldNode.Name};Type:{oldNode.Type};Desc:{oldNode.Desc}";
                         nodeDic.Add(n.Id, oldNode.Id);
-                        await textMemory.SaveInformationAsync(index, id: oldNode.Id, text: text2, cancellationToken: default);
+                        // 优化：仅当内容变化时才Embedding
+                        var lastEmbedding = await textMemory.GetAsync(index, oldNode.Id);
+                        if (lastEmbedding == null || lastEmbedding.Metadata.Text != text2)
+                        {
+                            await textMemory.SaveInformationAsync(index, id: oldNode.Id, text: text2, cancellationToken: default);
+                        }
                         continue;
                     }
 
@@ -219,8 +224,12 @@ namespace GraphRag.Net.Domain.Service
                         nodeDic.Add(n.Id, node.Id);
                     }
                     _nodes_Repositories.Insert(node);
-                    //向量处理节点信息
-                    await textMemory.SaveInformationAsync(index, id: node.Id, text: text2, cancellationToken: default);
+                    // 优化：仅当内容变化时才Embedding
+                    var lastEmbeddingNew = await textMemory.GetAsync(index, node.Id);
+                    if (lastEmbeddingNew == null || lastEmbeddingNew.Metadata.Text != text2)
+                    {
+                        await textMemory.SaveInformationAsync(index, id: node.Id, text: text2, cancellationToken: default);
+                    }
                 }
 
                 foreach (var e in graph.Edges)
