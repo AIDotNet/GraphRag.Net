@@ -8,7 +8,7 @@ namespace GraphRag.Net.Base
     public class Repository<T> : SimpleClient<T> where T : class, new()
     {
 
-        public Repository(ISqlSugarClient context = null) : base(context)//注意这里要有默认值等于null
+        public Repository(ISqlSugarClient context = null) : base(context)// Обратите внимание: здесь нужно значение по умолчанию null
         {
 
             if (context == null)
@@ -17,13 +17,13 @@ namespace GraphRag.Net.Base
 
         }
 
-        //注意：如果使用Client不能写成静态的，Scope并发更高
+        // Важно: Client не должен быть статическим, Scope обеспечивает лучшую параллельность
 
         public static SqlSugarScope SqlScope = SqlSugarHelper.SqlScope();
         public SimpleClient<T> CurrentDb
-        { get { return new SimpleClient<T>(SqlScope); } }//用来处理T表的常用操作
+        { get { return new SimpleClient<T>(SqlScope); } }// Для обработки типовых операций таблицы T
 
-        #region 通用方法
+        #region Общие методы
 
         public virtual SqlSugarScope GetDB()
         {
@@ -31,7 +31,7 @@ namespace GraphRag.Net.Base
         }
 
         /// <summary>
-        /// 获取所有list
+        /// Получить весь список
         /// </summary>
         /// <returns></returns>
         public virtual List<T> GetList()
@@ -40,7 +40,7 @@ namespace GraphRag.Net.Base
         }
 
         /// <summary>
-        /// 获取所有list-异步
+        /// Получить весь список — асинхронно
         /// </summary>
         /// <returns></returns>
         public virtual async Task<List<T>> GetListAsync()
@@ -49,7 +49,7 @@ namespace GraphRag.Net.Base
         }
 
         /// <summary>
-        /// 根据lambda查询
+        /// Запрос по выражению lambda
         /// </summary>
         /// <param name="whereExpression"></param>
         /// <returns></returns>
@@ -59,7 +59,7 @@ namespace GraphRag.Net.Base
         }
 
         /// <summary>
-        /// 根据lambda查询-异步
+        /// Запрос по выражению lambda — асинхронно
         /// </summary>
         /// <param name="whereExpression"></param>
         /// <returns></returns>
@@ -69,7 +69,7 @@ namespace GraphRag.Net.Base
         }
 
         /// <summary>
-        /// 根据lambda表达式获取数量
+        /// Получить количество по выражению lambda
         /// </summary>
         /// <param name="whereExpression"></param>
         /// <returns></returns>
@@ -79,7 +79,7 @@ namespace GraphRag.Net.Base
         }
 
         /// <summary>
-        /// 根据lambda表达式获取数量-异步
+        /// Получить количество по выражению lambda — асинхронно
         /// </summary>
         /// <param name="whereExpression"></param>
         /// <returns></returns>
@@ -89,7 +89,7 @@ namespace GraphRag.Net.Base
         }
 
         /// <summary>
-        /// 获取分页
+        /// Получить страницу
         /// </summary>
         /// <param name="whereExpression"></param>
         /// <param name="page"></param>
@@ -105,7 +105,7 @@ namespace GraphRag.Net.Base
         }
 
         /// <summary>
-        /// 获取分页-异步
+        /// Получить страницу — асинхронно
         /// </summary>
         /// <param name="whereExpression"></param>
         /// <param name="page"></param>
@@ -181,7 +181,7 @@ namespace GraphRag.Net.Base
         }
 
         /// <summary>
-        /// 根据id获取实体
+        /// Получить сущность по id
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
@@ -191,7 +191,7 @@ namespace GraphRag.Net.Base
         }
 
         /// <summary>
-        /// 根据id获取实体-异步
+        /// Получить сущность по id — асинхронно
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
@@ -201,7 +201,7 @@ namespace GraphRag.Net.Base
         }
 
         /// <summary>
-        /// 根据lambda获取单个对象 （注意，需要确保唯一，如果获取到2个会报错，这种场景需要使用GetFirst）
+        /// Получить один объект по lambda (важно: должен быть уникальным, иначе используйте GetFirst)
         /// </summary>
         /// <param name="whereExpression"></param>
         /// <returns></returns>
@@ -211,7 +211,7 @@ namespace GraphRag.Net.Base
         }
 
         /// <summary>
-        /// 根据lambda获取单个对象-异步  （注意，需要确保唯一，如果获取到2个会报错，这种场景需要使用GetFirst）
+        /// Получить один объект по lambda — асинхронно (важно: должен быть уникальным, иначе используйте GetFirst)
         /// </summary>
         /// <param name="whereExpression"></param>
         /// <returns></returns>
@@ -221,7 +221,7 @@ namespace GraphRag.Net.Base
         }
 
         /// <summary>
-        /// 根据lambda获取单个对象
+        /// Получить первый объект по lambda
         /// </summary>
         /// <param name="whereExpression"></param>
         /// <returns></returns>
@@ -231,7 +231,7 @@ namespace GraphRag.Net.Base
         }
 
         /// <summary>
-        /// 根据lambda获取单个对象 --异步
+        /// Получить первый объект по lambda — асинхронно
         /// </summary>
         /// <param name="whereExpression"></param>
         /// <returns></returns>
@@ -241,7 +241,7 @@ namespace GraphRag.Net.Base
         }
 
         /// <summary>
-        /// 实体插入
+        /// Вставка сущности
         /// </summary>
         /// <param name="obj"></param>
         /// <returns></returns>
@@ -251,7 +251,7 @@ namespace GraphRag.Net.Base
         }
 
         /// <summary>
-        /// 实体插入-异步
+        /// Вставка сущности — асинхронно
         /// </summary>
         /// <param name="obj"></param>
         /// <returns></returns>
@@ -261,7 +261,7 @@ namespace GraphRag.Net.Base
         }
 
         /// <summary>
-        /// 批量插入
+        /// Пакетная вставка
         /// </summary>
         /// <param name="objs"></param>
         /// <returns></returns>
@@ -271,7 +271,7 @@ namespace GraphRag.Net.Base
         }
 
         /// <summary>
-        /// 批量插入-异步
+        /// Пакетная вставка — асинхронно
         /// </summary>
         /// <param name="objs"></param>
         /// <returns></returns>
@@ -281,7 +281,7 @@ namespace GraphRag.Net.Base
         }
 
         /// <summary>
-        /// 插入返回自增列
+        /// Вставка с возвратом автоинкремента
         /// </summary>
         /// <param name="obj"></param>
         /// <returns></returns>
@@ -291,7 +291,7 @@ namespace GraphRag.Net.Base
         }
 
         /// <summary>
-        /// 插入返回自增列-异步
+        /// Вставка с возвратом автоинкремента — асинхронно
         /// </summary>
         /// <param name="obj"></param>
         /// <returns></returns>
@@ -301,7 +301,7 @@ namespace GraphRag.Net.Base
         }
 
         /// <summary>
-        /// 插入返回longid
+        /// Вставка с возвратом longid
         /// </summary>
         /// <param name="obj"></param>
         /// <returns></returns>
@@ -311,7 +311,7 @@ namespace GraphRag.Net.Base
         }
 
         /// <summary>
-        /// 插入返回longid-异步
+        /// Вставка с возвратом longid — асинхронно
         /// </summary>
         /// <param name="obj"></param>
         /// <returns></returns>
@@ -321,7 +321,7 @@ namespace GraphRag.Net.Base
         }
 
         /// <summary>
-        /// 批量删除
+        /// Пакетное удаление
         /// </summary>
         /// <param name="ids"></param>
         /// <returns></returns>
@@ -331,7 +331,7 @@ namespace GraphRag.Net.Base
         }
 
         /// <summary>
-        /// 批量删除-异步
+        /// Пакетное удаление — асинхронно
         /// </summary>
         /// <param name="ids"></param>
         /// <returns></returns>
@@ -341,7 +341,7 @@ namespace GraphRag.Net.Base
         }
 
         /// <summary>
-        /// 根据主键删除
+        /// Удалить по первичному ключу
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
@@ -351,7 +351,7 @@ namespace GraphRag.Net.Base
         }
 
         /// <summary>
-        /// 根据主键删除-异步
+        /// Удалить по первичному ключу — асинхронно
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
@@ -361,7 +361,7 @@ namespace GraphRag.Net.Base
         }
 
         /// <summary>
-        /// 根据实体删除
+        /// Удалить по сущности
         /// </summary>
         /// <param name="obj"></param>
         /// <returns></returns>
@@ -371,7 +371,7 @@ namespace GraphRag.Net.Base
         }
 
         /// <summary>
-        /// 根据实体删除-异步
+        /// Удалить по сущности — асинхронно
         /// </summary>
         /// <param name="obj"></param>
         /// <returns></returns>
@@ -381,7 +381,7 @@ namespace GraphRag.Net.Base
         }
 
         /// <summary>
-        /// 根据表达式删除
+        /// Удалить по выражению
         /// </summary>
         /// <param name="whereExpression"></param>
         /// <returns></returns>
@@ -391,7 +391,7 @@ namespace GraphRag.Net.Base
         }
 
         /// <summary>
-        /// 根据表达式删除-异步
+        /// Удалить по выражению — асинхронно
         /// </summary>
         /// <param name="whereExpression"></param>
         /// <returns></returns>
@@ -401,7 +401,7 @@ namespace GraphRag.Net.Base
         }
 
         /// <summary>
-        /// 更新
+        /// Обновление
         /// </summary>
         /// <param name="obj"></param>
         /// <returns></returns>
@@ -411,7 +411,7 @@ namespace GraphRag.Net.Base
         }
 
         /// <summary>
-        /// 更新-异步
+        /// Обновление — асинхронно
         /// </summary>
         /// <param name="obj"></param>
         /// <returns></returns>
@@ -421,7 +421,7 @@ namespace GraphRag.Net.Base
         }
 
         /// <summary>
-        /// 批量更新
+        /// Пакетное обновление
         /// </summary>
         /// <param name="objs"></param>
         /// <returns></returns>
@@ -431,7 +431,7 @@ namespace GraphRag.Net.Base
         }
 
         /// <summary>
-        /// 新增或修改
+        /// Добавить или обновить
         /// </summary>
         /// <param name="obj"></param>
         /// <returns></returns>
@@ -441,7 +441,7 @@ namespace GraphRag.Net.Base
         }
 
         /// <summary>
-        /// 新增或修改-异步
+        /// Добавить или обновить — асинхронно
         /// </summary>
         /// <param name="obj"></param>
         /// <returns></returns>
@@ -452,7 +452,7 @@ namespace GraphRag.Net.Base
 
 
         /// <summary>
-        /// 批量更新-异步
+        /// Пакетное обновление — асинхронно
         /// </summary>
         /// <param name="objs"></param>
         /// <returns></returns>
@@ -462,7 +462,7 @@ namespace GraphRag.Net.Base
         }
 
         /// <summary>
-        /// 是否包含元素
+        /// Содержит ли элемент
         /// </summary>
         /// <param name="whereExpression"></param>
         /// <returns></returns>
@@ -472,7 +472,7 @@ namespace GraphRag.Net.Base
         }
 
         /// <summary>
-        /// 是否包含元素-异步
+        /// Содержит ли элемент — асинхронно
         /// </summary>
         /// <param name="whereExpression"></param>
         /// <returns></returns>
@@ -481,6 +481,6 @@ namespace GraphRag.Net.Base
             return await CurrentDb.IsAnyAsync(whereExpression);
         }
 
-        #endregion 通用方法
+        #endregion Общие методы
     }
 }

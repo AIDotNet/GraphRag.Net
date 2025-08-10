@@ -8,7 +8,7 @@ namespace GraphRag.Net.Base
     {
 
         /// <summary>
-        /// sqlserver连接
+        /// Подключение к SQL Server
         /// </summary>
         public static SqlSugarScope SqlScope()
         {
@@ -19,15 +19,15 @@ namespace GraphRag.Net.Base
             var config = new ConnectionConfig()
             {
                 ConnectionString = ConnectionString,
-                InitKeyType = InitKeyType.Attribute,//从特性读取主键和自增列信息
+                InitKeyType = InitKeyType.Attribute,// Извлекает информацию о первичных ключах и автоинкременте из атрибутов
                 IsAutoCloseConnection = true,
                 ConfigureExternalServices = new ConfigureExternalServices
                 {
-                    //注意:  这儿AOP设置不能少
+                    // Важно: здесь настройка AOP обязательна
                     EntityService = (c, p) =>
                     {
-                        /***高版C#写法***/
-                        //支持string?和string  
+                        /*** Стиль высокого уровня C# ***/
+                        // Поддерживает string? и string
                         if (p.IsPrimarykey == false && new NullabilityInfoContext()
                          .Create(c).WriteState is NullabilityState.Nullable)
                         {

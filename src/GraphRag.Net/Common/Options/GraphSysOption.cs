@@ -9,7 +9,7 @@ namespace GraphRag.Net.Common.Options
     public class GraphSysOption
     {
         /// <summary>
-        /// 重试次数
+        /// Количество повторных попыток
         /// </summary>
         public static int RetryCounnt { get; set; } = 2;
     }

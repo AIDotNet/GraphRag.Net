@@ -3,21 +3,21 @@
     public class GraphDBConnectionOption
     {
         /// <summary>
-        /// sqlite连接字符串
+        /// Строка подключения SQLite
         /// </summary>
         public static string DbType { get; set; } = "Sqlite";
 
 
         /// <summary>
-        /// 业务数据链接字符串
+        /// Строка подключения бизнес-данных
         /// </summary>
         public static string DBConnection { get; set; } = $"Data Source=graph.db";
         /// <summary>
-        /// 向量数据连接字符串
+        /// Строка подключения векторных данных
         /// </summary>
         public static string VectorConnection { get; set; } = "graphmem.db";
         /// <summary>
-        /// 向量数据维度，PG需要设置
+        /// Размерность векторных данных, требуется для PG
         /// </summary>
         public static int VectorSize { get; set; } = 1536;
     }

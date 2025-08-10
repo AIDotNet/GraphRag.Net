@@ -26,7 +26,7 @@ namespace GraphRag.Net.Domain.Service
         ) : IGraphService
     {
         /// <summary>
-        /// 获取所有索引信息
+        /// Получить всю информацию об индексах
         /// </summary>
         /// <returns></returns>
         public List<string> GetAllIndex()
@@ -36,7 +36,7 @@ namespace GraphRag.Net.Domain.Service
         }
 
         /// <summary>
-        /// 获取Graph数据
+        /// Получить данные графа
         /// </summary>
         /// <returns></returns>
         public GraphViewModel GetAllGraphs(string index)
@@ -61,7 +61,7 @@ namespace GraphRag.Net.Domain.Service
                         desc = n.Desc.ConvertToString()
                     }
                 };
-                //处理相同的Type用相同的颜色
+                // Обрабатывать одинаковый тип одним цветом
                 if (TypeColor.ContainsKey(n.Type))
                 {
                     nodesViewModel.color = TypeColor[n.Type];
@@ -89,7 +89,7 @@ namespace GraphRag.Net.Domain.Service
         }
 
         /// <summary>
-        /// 切片导入文本数据
+        /// Импортировать текстовые данные по частям
         /// </summary>
         /// <param name="index"></param>
         /// <param name="input"></param>
@@ -111,7 +111,7 @@ namespace GraphRag.Net.Domain.Service
         }
 
         /// <summary>
-        /// 生成图谱数据
+        /// Создать данные графа
         /// </summary>
         /// <param name="index"></param>
         /// <param name="input"></param>
@@ -134,22 +134,22 @@ namespace GraphRag.Net.Domain.Service
                     string text2 = $"Name:{n.Name};Type:{n.Type};Desc:{n.Desc}";
                     bool isContinue = false;
 
-                    //判断是否存在相同节点
+                    // Проверить наличие одинаковых узлов
                     var oldNode = _nodes_Repositories.GetFirst(p => p.Index == index && p.Name == n.Name);
                     if (oldNode.IsNotNull() && !string.IsNullOrWhiteSpace(n.Desc))
                     {
-                        //相同节点关联edge关系
+                        // Связать одинаковые узлы ребрами
                         var newDesc = await _semanticService.MergeDesc(oldNode.Desc.ConvertToString(), n.Desc.ConvertToString());
                         if (string.IsNullOrEmpty(newDesc))
                         {
-                            //可能触发了LLM规则限制，简单粗暴来拼接吧
+                            // Возможно, сработали ограничения LLM, просто объединяем
                             oldNode.Desc = oldNode.Desc.ConvertToString() + "; " + n.Desc.ConvertToString();
                         }
                         else
                         {
                             oldNode.Desc = newDesc;
                         }
-                        //更新描述
+                        // Обновить описание
                         _nodes_Repositories.Update(oldNode);
                         text2 = $"Name:{oldNode.Name};Type:{oldNode.Type};Desc:{oldNode.Desc}";
                         nodeDic.Add(n.Id, oldNode.Id);
@@ -157,12 +157,12 @@ namespace GraphRag.Net.Domain.Service
                         continue;
                     }
 
-                    //判断是否存在相关节点
+                    // Проверить наличие связанных узлов
                     await foreach (MemoryQueryResult memory in textMemory.SearchAsync(index, text2, limit: 1, minRelevanceScore: 0.9))
                     {
                         if (memory.Relevance == 1)
                         {
-                            //相同节点进行合并
+                            // Объединить одинаковые узлы
                             Console.WriteLine("节点合并");
                             nodeDic.Add(n.Id, memory.Metadata.Id);
                             isContinue = true;
@@ -171,7 +171,7 @@ namespace GraphRag.Net.Domain.Service
 
                         if (graph.Nodes.Select(p => p.Id).Contains(memory.Metadata.Id))
                         {
-                            //如果本次包含了向量近似的数据，则跳过
+                            // Если в этом случае включены данные с векторным приближением, пропустить
                             break;
                         }
                         var node1 = _nodes_Repositories.GetFirst(p => p.Id == memory.Metadata.Id);
@@ -201,7 +201,7 @@ namespace GraphRag.Net.Domain.Service
 
                     if (isContinue)
                     {
-                        //节点合并，跳出循环
+                        // Слияние узлов, выход из цикла
                         continue;
                     }
 
@@ -219,7 +219,7 @@ namespace GraphRag.Net.Domain.Service
                         nodeDic.Add(n.Id, node.Id);
                     }
                     _nodes_Repositories.Insert(node);
-                    //向量处理节点信息
+                    // Обработать информацию узлов векторами
                     await textMemory.SaveInformationAsync(index, id: node.Id, text: text2, cancellationToken: default);
                 }
 
@@ -236,12 +236,12 @@ namespace GraphRag.Net.Domain.Service
                     _edges_Repositories.Insert(edge);
                 }
 
-                //查询Edges 的Source和Target 重复数据
+                // Проверить повторяющиеся Source и Target у ребер
                 var repeatEdges = _edges_Repositories.GetDB().Queryable<Edges>()
                 .GroupBy(p => new { p.Source, p.Target })
                 .Select(p => new { p.Source, p.Target, Count = SqlFunc.AggregateCount(p.Source) })
                 .ToList().Where(p => p.Count > 1).ToList();
-                //合并查询Edges 的Source和Target 重复数据
+                // Объединить повторяющиеся Source и Target ребер
                 foreach (var edge in repeatEdges)
                 {
                     var edges = _edges_Repositories.GetList(p => p.Source == edge.Source && p.Target == edge.Target);
@@ -251,7 +251,7 @@ namespace GraphRag.Net.Domain.Service
                     {
                         if (firstEdge.Relationship == edges[i].Relationship)
                         {
-                            //相同的边进行合并
+                            // Объединить одинаковые ребра
                             _edges_Repositories.Delete(edges[i]);
                             continue;
                         }
@@ -269,7 +269,7 @@ namespace GraphRag.Net.Domain.Service
         }
 
         /// <summary>
-        /// 检索相关节点
+        /// Найти связанные узлы
         /// </summary>
         /// <param name="index"></param>
         /// <param name="input"></param>
@@ -287,14 +287,14 @@ namespace GraphRag.Net.Domain.Service
             if (textMemModelList.Any())
             {
                 var nodes = _nodes_Repositories.GetList(p => p.Index == index && textMemModelList.Select(c => c.Id).Contains(p.Id));
-                // 创建节点权重字典
+                // Создать словарь весов узлов
                 Dictionary<string, double> nodeWeights = textMemModelList.ToDictionary(
                     t => t.Id,
                     t => t.Relevance
                 );
                 var graphModel = GetGraphAllRecursion(index, nodes, nodeWeights);
                 
-                // 计算预估的token数量，并在必要时限制节点数量
+                // Рассчитать предполагаемое количество токенов и при необходимости ограничить число узлов
                 int estimatedTokens = EstimateTokenCount(graphModel);
                 if (estimatedTokens > GraphSearchOption.MaxTokens)
                 {
@@ -311,62 +311,62 @@ namespace GraphRag.Net.Domain.Service
         }
 
         /// <summary>
-        /// 估算图模型的token数量
+        /// Оценить количество токенов для модели графа
         /// </summary>
-        /// <param name="model">图模型</param>
-        /// <returns>估算的token数量</returns>
+        /// <param name="model">Модель графа</param>
+        /// <returns>Оцененное количество токенов</returns>
         private int EstimateTokenCount(GraphModel model)
         {
             int tokenCount = 0;
             
-            // 估算节点的token（每个单词约1.3个token，每个节点信息加上额外开销）
+            // Оценка токенов для узла (примерно 1.3 токена на слово плюс дополнительная информация)
             foreach (var node in model.Nodes)
             {
-                // 节点ID和名称估算
+                // Оценка ID и названия узла
                 tokenCount += (node.Id?.Length ?? 0) / 3 + 2;
                 tokenCount += (node.Name?.Length ?? 0) / 3 + 2;
                 
-                // 节点描述估算（一个汉字约等于1个token，英文单词约等于0.75个token）
+                // Оценка описания узла (один китайский иероглиф ≈1 токен, английское слово ≈0.75 токена)
                 string desc = node.Desc ?? "";
                 int chineseCount = desc.Count(c => c >= 0x4E00 && c <= 0x9FFF);
                 int otherCount = desc.Length - chineseCount;
                 tokenCount += chineseCount + (int)(otherCount * 0.75);
                 
-                // 节点额外属性估算
-                tokenCount += 10; // 额外结构开销
+                // Оценка дополнительных атрибутов узла
+                tokenCount += 10; // Дополнительные структурные расходы
             }
             
-            // 估算边的token
-            tokenCount += model.Edges.Count * 10; // 每个边的结构信息约10个token
+            // Оценка токенов для ребер
+            tokenCount += model.Edges.Count * 10; // Примерно 10 токенов на структуру каждого ребра
             
-            // JSON结构开销
+            // Расходы на структуру JSON
             tokenCount += 200;
             
             return tokenCount;
         }
         
         /// <summary>
-        /// 根据token数量限制图大小
+        /// Ограничить размер графа по количеству токенов
         /// </summary>
-        /// <param name="model">原始图模型</param>
-        /// <param name="nodeWeights">节点权重</param>
-        /// <returns>裁剪后的图模型</returns>
+        /// <param name="model">Исходная модель графа</param>
+        /// <param name="nodeWeights">Веса узлов</param>
+        /// <returns>Обрезанная модель графа</returns>
         private GraphModel LimitGraphByTokenCount(GraphModel model, Dictionary<string, double> nodeWeights)
         {
             var result = new GraphModel();
             
-            // 将节点按权重排序
+            // Сортировать узлы по весу
             var sortedNodes = model.Nodes
                 .OrderByDescending(n => nodeWeights.GetValueOrDefault(n.Id, 0))
                 .ToList();
             
-            // 从高权重节点开始添加，直到接近token限制
+            // Добавлять узлы с большим весом, пока не достигнем лимита токенов
             var selectedNodes = new List<Nodes>();
-            int currentTokens = 200; // 基础结构开销
+            int currentTokens = 200; // Базовые структурные расходы
             
             foreach (var node in sortedNodes)
             {
-                // 计算添加此节点后的token数
+                // Рассчитать количество токенов после добавления узла
                 string desc = node.Desc ?? "";
                 int chineseCount = desc.Count(c => c >= 0x4E00 && c <= 0x9FFF);
                 int otherCount = desc.Length - chineseCount;
@@ -374,7 +374,7 @@ namespace GraphRag.Net.Domain.Service
                                 (node.Id?.Length ?? 0) / 3 + 
                                 (node.Name?.Length ?? 0) / 3 + 15;
                 
-                // 如果添加此节点会超过限制，跳过
+                // Если добавление узла превышает лимит, пропустить
                 if (currentTokens + nodeTokens > GraphSearchOption.MaxTokens * 0.9)
                 {
                     continue;
@@ -384,7 +384,7 @@ namespace GraphRag.Net.Domain.Service
                 currentTokens += nodeTokens;
             }
             
-            // 只保留连接选中节点的边
+            // Оставить только ребра, соединяющие выбранные узлы
             var selectedEdges = model.Edges.Where(e => 
                 selectedNodes.Any(n => n.Id == e.Source) && 
                 selectedNodes.Any(n => n.Id == e.Target)
@@ -400,7 +400,7 @@ namespace GraphRag.Net.Domain.Service
         }
 
         /// <summary>
-        /// 通过社区算法匹配相关节点信息
+        /// Сопоставить связанные узлы с помощью алгоритма сообществ
         /// </summary>
         /// <param name="index"></param>
         /// <param name="input"></param>
@@ -416,7 +416,7 @@ namespace GraphRag.Net.Domain.Service
             var textMemModelList = await RetrieveTextMemModelList(index, input);
             if (!textMemModelList.Any())
             {
-                // 尝试降低阈值重新检索
+                // Попробовать снизить порог и выполнить поиск снова
                 textMemModelList = await RetrieveTextMemModelList(index, input, 0.3, 5);
             }
 
@@ -425,22 +425,22 @@ namespace GraphRag.Net.Domain.Service
                 var nodes = _nodes_Repositories.GetList(p => p.Index == index && textMemModelList.Select(c => c.Id).Contains(p.Id));
                 var graphModel = GetGraphAllCommunitiesRecursion(index, nodes);
                 
-                // 计算预估的token数量，并在必要时限制节点数量
+                // Рассчитать предполагаемое количество токенов и при необходимости ограничить число узлов
                 int estimatedTokens = EstimateTokenCount(graphModel);
                 if (estimatedTokens > GraphSearchOption.MaxTokens)
                 {
                     Console.WriteLine($"社区检索：预估Token数量 {estimatedTokens} 超过限制 {GraphSearchOption.MaxTokens}，正在调整节点数量...");
-                    // 为社区节点创建权重字典（默认权重相同）
+                    // Создать словарь весов для узлов сообщества (по умолчанию одинаковых)
                     Dictionary<string, double> nodeWeights = graphModel.Nodes.ToDictionary(
                         n => n.Id,
                         n => 1.0
                     );
-                    // 为初始检索到的节点赋予更高权重
+                    // Присвоить больший вес первоначально найденным узлам
                     foreach (var node in nodes)
                     {
                         if (nodeWeights.ContainsKey(node.Id))
                         {
-                            nodeWeights[node.Id] = 2.0; // 给初始节点更高权重
+                            nodeWeights[node.Id] = 2.0; // Присвоить начальным узлам больший вес
                         }
                     }
                     graphModel = LimitGraphByTokenCount(graphModel, nodeWeights);
@@ -455,7 +455,7 @@ namespace GraphRag.Net.Domain.Service
         }
 
         /// <summary>
-        /// 搜索递归获取节点相关的所有边和节点进行图谱对话
+        /// Рекурсивно искать связанные ребра и узлы для диалога по графу
         /// </summary>
         /// <param name="index"></param>
         /// <param name="input"></param>
@@ -468,7 +468,7 @@ namespace GraphRag.Net.Domain.Service
         }
 
         /// <summary>
-        /// 搜索递归获取节点相关的所有边和节点进行图谱对话,流式返回
+        /// Рекурсивно искать связанные ребра и узлы для диалога по графу с потоковым выводом
         /// </summary>
         /// <param name="index"></param>
         /// <param name="input"></param>
@@ -487,7 +487,7 @@ namespace GraphRag.Net.Domain.Service
         }
 
         /// <summary>
-        /// 通过社区算法检索社区节点进行对话
+        /// Выполнять диалог, извлекая узлы сообщества через алгоритм сообществ
         /// </summary>
         /// <param name="index"></param>
         /// <param name="input"></param>
@@ -501,19 +501,19 @@ namespace GraphRag.Net.Domain.Service
             {
                 var community = string.Join(Environment.NewLine, _communities_Repositories.GetDB().Queryable<Communities>().Where(p => p.Index == index).Select(p => p.Summaries).ToList());
 
-                //这里数据有点多，要通过语义进行一次过滤
+                // Данных довольно много, нужно семантически отфильтровать
                 answer = await _semanticService.GetGraphCommunityAnswerAsync(JsonConvert.SerializeObject(graphModel), community, global, input);
             }
             else
             {
-                //如果没有匹配到节点信息，使用全局信息
+                // Если сведения об узлах не найдены, использовать глобальную информацию
                 answer = await _semanticService.GetGraphCommunityAnswerAsync("NoSearch", "NoSearch", global, input);
             }
             return answer;
         }
 
         /// <summary>
-        /// 通过社区算法检索社区节点进行对话,流式返回
+        /// Диалог по узлам сообщества через алгоритм сообществ с потоковым выводом
         /// </summary>
         /// <param name="index"></param>
         /// <param name="input"></param>
@@ -524,17 +524,17 @@ namespace GraphRag.Net.Domain.Service
             var global = _globals_Repositories.GetFirst(p => p.Index == index)?.Summaries;
             IAsyncEnumerable<StreamingKernelContent> answer;
 
-            //匹配到节点信息
+            // Найдена информация об узлах
             var graphModel = await SearchGraphCommunityModel(index, input);
             if (graphModel.Nodes.Count() > 0)
             {
                 var community = string.Join(Environment.NewLine, _communities_Repositories.GetDB().Queryable<Communities>().Where(p => p.Index == index).Select(p => p.Summaries).ToList());
-                //这里数据有点多，要通过语义进行一次过滤
+                // Данных довольно много, нужно семантически отфильтровать
                 answer = _semanticService.GetGraphCommunityAnswerStreamAsync(JsonConvert.SerializeObject(graphModel), community, global, input);
             }
             else
             {
-                //如果没有匹配到节点信息，使用全局信息
+                // Если сведения об узлах не найдены, использовать глобальную информацию
                 answer = _semanticService.GetGraphCommunityAnswerStreamAsync("NoSearch", "NoSearch", global, input);
             }
             await foreach (var content in answer)
@@ -544,7 +544,7 @@ namespace GraphRag.Net.Domain.Service
         }
 
         /// <summary>
-        /// 社区摘要
+        /// Сводка по сообществам
         /// </summary>
         /// <param name="index"></param>
         /// <returns></returns>
@@ -553,7 +553,7 @@ namespace GraphRag.Net.Domain.Service
             var nodes = _nodes_Repositories.GetList(p => p.Index == index);
             var edges = _edges_Repositories.GetList(p => p.Index == index);
 
-            //删除社区数据
+            // Удалить данные сообщества
             _communitieNodes_Repositories.Delete(p => p.Index == index);
             _communities_Repositories.Delete(p => p.Index == index);
 
@@ -563,20 +563,20 @@ namespace GraphRag.Net.Domain.Service
                 graph.AddEdge(edge.Source, edge.Target);
             }
 
-            //重新计算社区
+            // Пересчитать сообщества
             var result = _communityDetectionService.FastLabelPropagationAlgorithm(graph);
 
             Console.WriteLine("开始社区总结");
             foreach (var kvp in result)
             {
-                //插入社区节点数据
+                // Вставить данные узлов сообщества
                 CommunitieNodes communitieNodes = new CommunitieNodes();
                 communitieNodes.Index = index;
                 communitieNodes.CommunitieId = kvp.Value;
                 communitieNodes.NodeId = kvp.Key;
                 _communitieNodes_Repositories.Insert(communitieNodes);
             }
-            //获取所有社区ID
+            // Получить все идентификаторы сообществ
             var communitieIds = _communitieNodes_Repositories.GetDB().Queryable<CommunitieNodes>().Where(p => p.Index == index).GroupBy(p => p.CommunitieId).Select(p => p.CommunitieId).ToList();
 
             foreach (var communitieId in communitieIds)
@@ -596,14 +596,14 @@ namespace GraphRag.Net.Domain.Service
                     Index = index,
                     Summaries = summaries
                 };
-                //插入社区总结数据
+                // Вставить данные сводки сообщества
                 _communities_Repositories.Insert(communities);
             }
 
         }
 
         /// <summary>
-        /// 全局摘要
+        /// Глобальная сводка
         /// </summary>
         /// <param name="index"></param>
         /// <returns></returns>
@@ -628,10 +628,10 @@ namespace GraphRag.Net.Domain.Service
             var nodes = await _nodes_Repositories.GetListAsync(p => p.Index == index);
             foreach (var node in nodes)
             {
-                //删除向量数据
+                // Удалить векторные данные
                 await textMemory.RemoveAsync(index, node.Id);
             }
-            //删除索引数据
+            // Удалить данные индекса
             await _nodes_Repositories.DeleteAsync(p => p.Index == index);
             await _edges_Repositories.DeleteAsync(p => p.Index == index);
             await _communities_Repositories.DeleteAsync(p => p.Index == index);
@@ -640,9 +640,9 @@ namespace GraphRag.Net.Domain.Service
         }
 
 
-        #region 内部方法
+        #region Внутренние методы
         /// <summary>
-        /// 基于搜索条件检索TextMemModel的列表。
+        /// Получить список TextMemModel на основе условий поиска.
         /// </summary>
         /// <param name="index"></param>
         /// <param name="input"></param>
@@ -652,7 +652,7 @@ namespace GraphRag.Net.Domain.Service
             SemanticTextMemory textMemory = await _semanticService.GetTextMemory();
             List<TextMemModel> textMemModelList = new List<TextMemModel>();
 
-            // 使用提供的阈值或默认配置
+            // Использовать заданный порог или конфигурацию по умолчанию
             double relevanceThreshold = minRelevance ?? GraphSearchOption.SearchMinRelevance;
             int resultLimit = limit ?? GraphSearchOption.SearchLimit;
 
@@ -669,7 +669,7 @@ namespace GraphRag.Net.Domain.Service
                 textMemModelList.Add(textMemModel);
             }
 
-            // 如果结果不足，尝试降低阈值
+            // Если результатов недостаточно, попытаться снизить порог
             if (matchCount < 2 && relevanceThreshold > 0.3)
             {
                 double lowerThreshold = Math.Max(0.3, relevanceThreshold - 0.2);
@@ -691,14 +691,14 @@ namespace GraphRag.Net.Domain.Service
                 }
             }
 
-            // 按相关性排序
+            // Сортировать по релевантности
             textMemModelList = textMemModelList.OrderByDescending(t => t.Relevance).ToList();
             Console.WriteLine($"向量匹配数:{matchCount}, 最高相关度:{(textMemModelList.Any() ? textMemModelList.First().Relevance.ToString("F2") : "N/A")}");
             return textMemModelList;
         }
 
         /// <summary>
-        /// 递归获取节点相关的所有边和节点
+        /// Рекурсивно получить все связанные ребра и узлы
         /// </summary>
         /// <param name="initialNodes"></param>
         /// <returns></returns>
@@ -716,7 +716,7 @@ namespace GraphRag.Net.Domain.Service
                     break;
                 }
 
-                // 按权重排序待探索节点
+                // Сортировать узлы для исследования по весу
                 nodesToExplore = nodesToExplore
                     .OrderByDescending(n => nodeWeights.ContainsKey(n.Id) ? nodeWeights[n.Id] : 0)
                     .ToList();
@@ -730,16 +730,16 @@ namespace GraphRag.Net.Domain.Service
                     continue;
                 }
 
-                // 添加新边，避免重复
+                // Добавить новое ребро, избегая дублирования
                 foreach (var edge in newEdges)
                 {
                     if (!allEdges.Any(e => e.Source == edge.Source && e.Target == edge.Target))
                     {
                         allEdges.Add(edge);
 
-                        // 为新发现的节点设置权重
+                        // Установить вес для новых узлов
                         double parentWeight = nodeWeights.GetValueOrDefault(edge.Source, 0);
-                        double weightDecay = 0.8; // 权重衰减因子
+                        double weightDecay = 0.8; // Коэффициент уменьшения веса
 
                         if (!nodeWeights.ContainsKey(edge.Target))
                         {
@@ -748,7 +748,7 @@ namespace GraphRag.Net.Domain.Service
                     }
                 }
 
-                // 获取新节点
+                // Получить новый узел
                 var newNodes = GetNodes(index, newEdges);
                 var nodesToAdd = newNodes.Where(n => !allNodes.Any(existingNode => existingNode.Id == n.Id)).ToList();
                 allNodes.AddRange(nodesToAdd);
@@ -757,7 +757,7 @@ namespace GraphRag.Net.Domain.Service
                 depth++;
             }
 
-            // 如果节点数超过限制，保留权重最高的节点
+            // Если число узлов превышает ограничение, сохранить узлы с наибольшим весом
             if (allNodes.Count > GraphSearchOption.MaxNodes)
             {
                 allNodes = allNodes
@@ -765,7 +765,7 @@ namespace GraphRag.Net.Domain.Service
                     .Take(GraphSearchOption.MaxNodes)
                     .ToList();
 
-                // 确保边的节点都在保留的节点中
+                // Убедиться, что узлы ребер находятся среди оставшихся узлов
                 allEdges = allEdges
                     .Where(e => allNodes.Any(n => n.Id == e.Source) && allNodes.Any(n => n.Id == e.Target))
                     .ToList();
@@ -780,7 +780,7 @@ namespace GraphRag.Net.Domain.Service
 
 
         /// <summary>
-        /// 通过社区算法检索社区节点
+        /// Извлечь узлы сообщества с помощью алгоритма сообществ
         /// </summary>
         /// <param name="index"></param>
         /// <param name="initialNodes"></param>
@@ -807,12 +807,12 @@ namespace GraphRag.Net.Domain.Service
                 }
             }
 
-            // 如果节点数超过最大限制，进行截断
+            // Если число узлов превышает максимум, выполнить усечение
             if (allNodes.Count > GraphSearchOption.MaxNodes)
             {
                 allNodes = allNodes.Take(GraphSearchOption.MaxNodes).ToList();
             }
-            // 需要相应地处理 allEdges，确保边的节点在 allNodes 中 
+            // Соответственно обработать allEdges, чтобы узлы ребер были в allNodes
             allEdges = allEdges.Where(e => allNodes.Any(p => p.Id == e.Source) && allNodes.Any(p => p.Id == e.Target)).ToList();
 
             return new GraphModel
@@ -823,7 +823,7 @@ namespace GraphRag.Net.Domain.Service
         }
 
         /// <summary>
-        /// 获取边信息
+        /// Получить информацию о ребрах
         /// </summary>
         /// <param name="nodeIds"></param>
         /// <returns></returns>
@@ -836,7 +836,7 @@ namespace GraphRag.Net.Domain.Service
         }
 
         /// <summary>
-        /// 获取节点信息
+        /// Получить информацию об узлах
         /// </summary>
         /// <param name="edges"></param>
         /// <returns></returns>
@@ -853,7 +853,7 @@ namespace GraphRag.Net.Domain.Service
         }
 
         /// <summary>
-        /// 获取相关社区ID列表
+        /// Получить список идентификаторов связанных сообществ
         /// </summary>
         private async Task<List<string>> GetRelevantCommunities(string index, List<string> nodeIds)
         {

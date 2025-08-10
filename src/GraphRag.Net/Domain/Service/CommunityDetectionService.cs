@@ -13,7 +13,7 @@ namespace GraphRag.Net.Domain.Service
     public class CommunityDetectionService: ICommunityDetectionService
     {
         /// <summary>
-        /// 标签传播算法
+        /// Алгоритм распространения меток
         /// </summary>
         /// <param name="graph"></param>
         /// <param name="iterations"></param>

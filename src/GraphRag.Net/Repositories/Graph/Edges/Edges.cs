@@ -3,7 +3,7 @@
 namespace GraphRag.Net.Repositories
 {
     /// <summary>
-    /// 边
+    /// Ребро
     /// </summary>
     [SugarTable("Edges")]
     [SugarIndex("i_edges_index", nameof(Edges.Index), OrderByType.Asc)]
@@ -12,26 +12,26 @@ namespace GraphRag.Net.Repositories
     public class Edges
     {
         /// <summary>
-        /// 主键
+        /// Первичный ключ
         /// </summary>
         [SugarColumn(IsPrimaryKey = true)]
         public string Id { get; set; }
         /// <summary>
-        /// 索引
+        /// Индекс
         /// </summary>
         public string Index { get; set; }
         /// <summary>
-        /// 源ID
+        /// Исходный ID
         /// </summary>
         public string Source { get; set; }
 
         /// <summary>
-        /// 目标ID
+        /// Целевой ID
         /// </summary>
         public string Target { get; set; }
 
         /// <summary>
-        /// 关系信息
+        /// Информация об отношении
         /// </summary>
         [SugarColumn(ColumnDataType = "varchar(2000)")]
         public string Relationship { get; set; }
