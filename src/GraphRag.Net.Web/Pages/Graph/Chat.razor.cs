@@ -82,7 +82,7 @@ namespace GraphRag.Net.Web.Pages.Graph
             }
             await _graphService.InsertGraphDataAsync(_importIndex, _importText);
 
-            //生成社区和全局摘要
+            // Создать сводки по сообществам и глобальную сводку
             await _graphService.GraphCommunitiesAsync(_importIndex);
             await _graphService.GraphGlobalAsync(_importIndex);
 

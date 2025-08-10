@@ -3,7 +3,7 @@
 namespace GraphRag.Net.Repositories
 {
     /// <summary>
-    /// 社区与节点关系
+    /// Связь между сообществом и узлом
     /// </summary>
     [SugarTable("CommunitieNodes")]
     [SugarIndex("i_communitienodes_index", nameof(CommunitieNodes.Index), OrderByType.Asc)]
@@ -12,15 +12,15 @@ namespace GraphRag.Net.Repositories
     public class CommunitieNodes
     {
         /// <summary>
-        /// 索引信息
+        /// Информация об индексе
         /// </summary>
         public string Index { get; set; }
         /// <summary>
-        /// 社区关键节点ID
+        /// ID ключевого узла сообщества
         /// </summary>
         public string CommunitieId { get; set; }
         /// <summary>
-        /// 节点ID
+        /// ID узла
         /// </summary>
         public string NodeId { get; set; }
 

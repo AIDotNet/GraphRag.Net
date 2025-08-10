@@ -9,28 +9,28 @@ namespace GraphRag.Net.Options
     public class GraphSearchOption
     {
         /// <summary>
-        /// 社区检索搜索最小向量相似度
+        /// Минимальное сходство векторов при поиске сообществ
         /// </summary>
         public static double SearchMinRelevance { get; set; } = 0.5;
 
 
         /// <summary>
-        /// 社区检索搜索向量节点数量
+        /// Количество векторных узлов при поиске сообществ
         /// </summary>
         public static int SearchLimit { get; set; } = 3;
 
         /// <summary>
-        /// 节点关系检索深度
+        /// Глубина поиска связей узлов
         /// </summary>
         public static int NodeDepth { get; set; } = 3;
 
         /// <summary>
-        /// 节点检索最多节点数量
+        /// Максимальное число узлов при поиске
         /// </summary>
         public static int MaxNodes { get; set; } = 300;
 
         /// <summary>
-        /// 最大Token数量限制（32K）
+        /// Ограничение на максимальное количество токенов (32K)
         /// </summary>
         public static int MaxTokens { get; set; } = 32000;
     }

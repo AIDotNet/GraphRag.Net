@@ -3,11 +3,11 @@
     public class TextChunkerOption
     {
         /// <summary>
-        /// 行切片token
+        /// Токены разбиения строк
         /// </summary>
         public static int LinesToken { get; set; } = 100;
         /// <summary>
-        /// 段落切片token
+        /// Токены разбиения абзацев
         /// </summary>
         public static int ParagraphsToken { get; set; } = 1000;
     }

@@ -180,7 +180,7 @@ namespace GraphRag.Net.Domain.Service
         }
 
         /// <summary>
-        /// 获取SemanticTextMemory
+        /// Получение SemanticTextMemory
         /// </summary>
         /// <returns></returns>
         /// <exception cref="InvalidOperationException"></exception>

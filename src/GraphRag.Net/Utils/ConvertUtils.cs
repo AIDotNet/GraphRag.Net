@@ -9,19 +9,19 @@ namespace GraphRag.Net.Utils
     internal static class ConvertUtils
     {
         /// <summary>
-        /// 判断是否为空，为空返回true
+        /// Проверяет, является ли значение пустым; возвращает true, если пусто
         /// </summary>
         /// <param name="data"></param>
         /// <returns></returns>
         public static bool IsNull(this object data)
         {
-            //如果为null
+            // Если null
             if (data == null)
             {
                 return true;
             }
 
-            //如果为""
+            // Если ""
             if (data.GetType() == typeof(String))
             {
                 if (string.IsNullOrEmpty(data.ToString().Trim()))
@@ -33,19 +33,19 @@ namespace GraphRag.Net.Utils
         }
 
         /// <summary>
-        /// 判断是否为空，为空返回true
+        /// Проверяет, является ли значение пустым; возвращает true, если пусто
         /// </summary>
         /// <param name="data"></param>
         /// <returns></returns>
         public static bool IsNotNull(this object data)
         {
-            //如果为null
+            // Если null
             if (data == null)
             {
                 return false;
             }
 
-            //如果为""
+            // Если ""
             if (data.GetType() == typeof(String))
             {
                 if (string.IsNullOrEmpty(data.ToString().Trim()))
@@ -57,19 +57,19 @@ namespace GraphRag.Net.Utils
         }
 
         /// <summary>
-        /// 判断是否为空，为空返回true
+        /// Проверяет, является ли значение пустым; возвращает true, если пусто
         /// </summary>
         /// <param name="data"></param>
         /// <returns></returns>
         public static bool IsNull(string data)
         {
-            //如果为null
+            // Если null
             if (data == null)
             {
                 return true;
             }
 
-            //如果为""
+            // Если ""
             if (data.GetType() == typeof(String))
             {
                 if (string.IsNullOrEmpty(data.ToString().Trim()))
@@ -81,7 +81,7 @@ namespace GraphRag.Net.Utils
         }
 
         /// <summary>
-        /// 将obj类型转换为string
+        /// Преобразует объект в строку
         /// </summary>
         /// <param name="s"></param>
         /// <returns></returns>
@@ -98,7 +98,7 @@ namespace GraphRag.Net.Utils
         }
 
         /// <summary>
-        /// object 转int32
+        /// Преобразует объект в int32
         /// </summary>
         /// <param name="s"></param>
         /// <returns></returns>
@@ -117,7 +117,7 @@ namespace GraphRag.Net.Utils
         }
 
         /// <summary>
-        /// object 转int32
+        /// Преобразует объект в int64
         /// </summary>
         /// <param name="s"></param>
         /// <returns></returns>
@@ -136,7 +136,7 @@ namespace GraphRag.Net.Utils
         }
 
         /// <summary>
-        /// 将字符串转double
+        /// Преобразует строку в double
         /// </summary>
         /// <param name="s"></param>
         /// <returns></returns>
@@ -155,7 +155,7 @@ namespace GraphRag.Net.Utils
         }
 
         /// <summary>
-        /// 转换为datetime类型
+        /// Преобразует в тип DateTime
         /// </summary>
         /// <param name="s"></param>
         /// <returns></returns>
@@ -171,10 +171,10 @@ namespace GraphRag.Net.Utils
         }
 
         /// <summary>
-        /// 转换为datetime类型的格式字符串
+        /// Преобразует в строку формата DateTime
         /// </summary>
-        /// <param name="s">要转换的对象</param>
-        /// <param name="y">格式化字符串</param>
+        /// <param name="s">Объект для преобразования</param>
+        /// <param name="y">Строка формата</param>
         /// <returns></returns>
         public static string ConvertToDateTime(this string s, string y)
         {
@@ -184,7 +184,7 @@ namespace GraphRag.Net.Utils
         }
 
         /// <summary>
-        /// 将字符串转换成decimal
+        /// Преобразует строку в decimal
         /// </summary>
         /// <param name="s"></param>
         /// <returns></returns>
@@ -202,7 +202,7 @@ namespace GraphRag.Net.Utils
         }
 
         /// <summary>
-        /// decimal保留2位小数
+        /// Decimal с двумя знаками после запятой
         /// </summary>
         public static decimal DecimalFraction(this decimal num)
         {
@@ -210,7 +210,7 @@ namespace GraphRag.Net.Utils
         }
 
         /// <summary>
-        /// 替换html种的特殊字符
+        /// Заменяет специальные символы в HTML
         /// </summary>
         /// <param name="s"></param>
         /// <returns></returns>
@@ -220,7 +220,7 @@ namespace GraphRag.Net.Utils
         }
 
         /// <summary>
-        /// 流转byte
+        /// Преобразовать поток в массив байтов
         /// </summary>
         /// <param name="stream"></param>
         /// <returns></returns>
@@ -228,7 +228,7 @@ namespace GraphRag.Net.Utils
         {
             byte[] bytes = new byte[stream.Length];
             stream.Read(bytes, 0, bytes.Length);
-            // 设置当前流的位置为流的开始
+            // Установить позицию потока в начало
             stream.Seek(0, SeekOrigin.Begin);
             return bytes;
         }
@@ -239,7 +239,7 @@ namespace GraphRag.Net.Utils
         }
 
         /// <summary>
-        /// json参数转化querystring参数
+        /// Преобразует параметры JSON в параметры querystring
         /// </summary>
         /// <param name="parameters"></param>
         /// <returns></returns>
@@ -256,7 +256,7 @@ namespace GraphRag.Net.Utils
         }
 
         /// <summary>
-        /// 忽略大小写匹配
+        /// Сопоставление без учета регистра
         /// </summary>
         /// <param name="s"></param>
         /// <param name="value"></param>
@@ -284,22 +284,22 @@ namespace GraphRag.Net.Utils
         }
 
         /// <summary>
-        /// 是否为流式请求
+        /// Является ли запрос потоковым
         /// </summary>
         /// <param name="value"></param>
         /// <returns></returns>
         public static bool IsStream(this string value)
         {
-            // 正则表达式忽略空格的情况
+            // Регулярное выражение игнорирует пробелы
             string pattern = @"\s*""stream""\s*:\s*true\s*";
 
-            // 使用正则表达式匹配
+            // Сопоставление с помощью регулярного выражения
             bool contains = Regex.IsMatch(value, pattern);
             return contains;
         }
 
         /// <summary>
-        /// \uxxxx转中文,保留换行符号
+        /// Преобразует \uxxxx в китайские символы, сохраняя переводы строк
         /// </summary>
         /// <param name="unicodeString"></param>
         /// <returns></returns>

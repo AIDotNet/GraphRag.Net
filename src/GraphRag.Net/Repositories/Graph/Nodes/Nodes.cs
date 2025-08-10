@@ -3,32 +3,32 @@
 namespace GraphRag.Net.Repositories
 {
     /// <summary>
-    /// 节点
+    /// Узел
     /// </summary>
     [SugarTable("Nodes")]
     [SugarIndex("i_nodes_index", nameof(Nodes.Index), OrderByType.Asc)]
     public class Nodes
     {
         /// <summary>
-        /// 主键
+        /// Первичный ключ
         /// </summary>
         [SugarColumn(IsPrimaryKey = true)]
         public string Id { get; set; }
         /// <summary>
-        /// 索引
+        /// Индекс
         /// </summary>
         public string Index { get; set; }
         /// <summary>
-        /// 名称
+        /// Имя
         /// </summary>
         public string Name { get; set; }
         /// <summary>
-        /// 类型
+        /// Тип
         /// </summary>
         public string Type { get; set; }
 
         /// <summary>
-        /// 节点描述
+        /// Описание узла
         /// </summary>
         [SugarColumn(ColumnDataType = "varchar(2000)")]
         public string? Desc { get; set; }

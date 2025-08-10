@@ -9,7 +9,7 @@ namespace GraphRag.Net.Api.Controllers
     public class GraphController(IGraphService _graphService) : ControllerBase
     {
         /// <summary>
-        /// 获取所有的索引数据
+        /// Получить все данные индексов
         /// </summary>
         /// <returns></returns>
         [HttpGet]
@@ -21,7 +21,7 @@ namespace GraphRag.Net.Api.Controllers
 
 
         /// <summary>
-        /// 获取所有的图谱数据
+        /// Получить все данные графа
         /// </summary>
         /// <param name="index"></param>
         /// <returns></returns>
@@ -38,7 +38,7 @@ namespace GraphRag.Net.Api.Controllers
 
 
         /// <summary>
-        /// 插入文本数据
+        /// Вставить текстовые данные
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
@@ -50,7 +50,7 @@ namespace GraphRag.Net.Api.Controllers
         }
 
         /// <summary>
-        /// 搜索递归获取节点相关的所有边和节点进行图谱对话
+        /// Рекурсивно искать все связанные ребра и узлы для диалога по графу
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
@@ -62,7 +62,7 @@ namespace GraphRag.Net.Api.Controllers
         }
 
         /// <summary>
-        /// 通过社区算法检索社区节点进行对话
+        /// Выполнять диалог, извлекая узлы сообщества через алгоритм сообществ
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
@@ -74,7 +74,7 @@ namespace GraphRag.Net.Api.Controllers
         }
 
         /// <summary>
-        /// 导入txt文档
+        /// Импортировать txt-документ
         /// </summary>
         /// <param name="index"></param>
         /// <param name="file"></param>
@@ -92,7 +92,7 @@ namespace GraphRag.Net.Api.Controllers
         }
 
         /// <summary>
-        /// 通过社区检测生成社区和摘要
+        /// Создать сообщества и сводку через обнаружение сообществ
         /// </summary>
         /// <param name="index"></param>
         /// <returns></returns>
@@ -104,7 +104,7 @@ namespace GraphRag.Net.Api.Controllers
         }      
         
         /// <summary>
-        /// 通过社区摘要生成全局摘要
+        /// Создать глобальную сводку на основе сводок сообществ
         /// </summary>
         /// <param name="index"></param>
         /// <returns></returns>
@@ -116,7 +116,7 @@ namespace GraphRag.Net.Api.Controllers
         }
 
         /// <summary>
-        /// 删除图谱数据
+        /// Удалить данные графа
         /// </summary>
         /// <param name="index"></param>
         /// <returns></returns>

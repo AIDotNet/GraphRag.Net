@@ -9,14 +9,14 @@ using SqlSugar;
 namespace Microsoft.Extensions.DependencyInjection
 {
     /// <summary>
-    /// 容器扩展
+    /// Расширение контейнера
     /// </summary>
     public static class ServiceCollectionExtensions
     {
         /// <summary>
-        /// 从程序集中加载类型并添加到容器中
+        /// Загрузить типы из сборки и добавить в контейнер
         /// </summary>
-        /// <param name="services">容器</param>
+        /// <param name="services">Контейнер</param>
         /// <returns></returns>
         public static IServiceCollection AddGraphRagNet(this IServiceCollection services, Kernel _kernel = null)
         {
@@ -56,10 +56,10 @@ namespace Microsoft.Extensions.DependencyInjection
         }
 
         /// <summary>
-        /// 初始化SK
+        /// Инициализация SK
         /// </summary>
         /// <param name="services"></param>
-        /// <param name="_kernel">可以提供自定义Kernel</param>
+        /// <param name="_kernel">Можно передать собственный Kernel</param>
         static void InitSK(IServiceCollection services,Kernel _kernel = null)
         {
             var handler = new OpenAIHttpClientHandler();
@@ -75,7 +75,7 @@ namespace Microsoft.Extensions.DependencyInjection
                          )
                     .Build();
                 }
-                //导入插件
+                // Импортировать плагины
                 if (!_kernel.Plugins.Any(p => p.Name == "graph"))
                 {
                     var pluginPatth = Path.Combine(RepoFiles.SamplePluginsPath(), "graph");
@@ -87,21 +87,21 @@ namespace Microsoft.Extensions.DependencyInjection
         }
 
         /// <summary>
-        /// 初始化DB
+        /// Инициализация БД
         /// </summary>
         static void CodeFirst()
         {
-            // 获取仓储服务
+            // Получить сервис репозитория
             var _repository = new Nodes_Repositories();
 
-            // 创建数据库（如果不存在）
+            // Создать базу данных (если отсутствует)
             _repository.GetDB().DbMaintenance.CreateDatabase();
-            // 在所有程序集中查找具有[SugarTable]特性的类
+            // Найти во всех сборках классы с атрибутом [SugarTable]
             var assembly = Assembly.GetExecutingAssembly();
-            // 获取该程序集中所有具有SugarTable特性的类型
+            // Получить все типы с атрибутом SugarTable в этой сборке
             var entityTypes = assembly.GetTypes()
                     .Where(type => TypeIsEntity(type));
-            // 为每个找到的类型初始化数据库表
+            // Инициализировать таблицы БД для каждого найденного типа
             foreach (var type in entityTypes)
             {
                 _repository.GetDB().CodeFirst.InitTables(type);
@@ -110,7 +110,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
         static bool TypeIsEntity(Type type)
         {
-            // 检查类型是否具有SugarTable特性
+            // Проверить, имеет ли тип атрибут SugarTable
             return type.GetCustomAttributes(typeof(SugarTable), inherit: false).Length > 0;
         }
     }

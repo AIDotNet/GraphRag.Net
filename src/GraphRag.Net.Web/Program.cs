@@ -27,7 +27,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c => {
     c.SwaggerDoc("v1", new() { Title = "GraphRag.Net.Api", Version = "v1" });
-    //添加Api层注释（true表示显示控制器注释）
+    // Добавить комментарии уровня API (true — отображать комментарии контроллеров)
     var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
     var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
     c.IncludeXmlComments(xmlPath, true);
@@ -38,10 +38,10 @@ builder.Configuration.GetSection("TextChunker").Get<TextChunkerOption>();
 builder.Configuration.GetSection("GraphSearch").Get<GraphSearchOption>();
 //builder.Configuration.GetSection("GraphDBConnection").Get<GraphDBConnectionOption>();
 
-//这里可以自定义Kernel,如果不传则使用默认Kernel
+// Здесь можно задать собственный Kernel, иначе используется стандартный
 builder.Services.AddGraphRagNet();
 
-////自定义Kernel 可以实现其他模型的对接实现
+//// Пользовательский Kernel позволяет подключать другие модели
 //var kernelBuild = Kernel.CreateBuilder();
 //kernelBuild.Services.AddKeyedSingleton<ITextGenerationService>("mock-text", new MockTextCompletion());
 //kernelBuild.Services.AddKeyedSingleton<IChatCompletionService>("mock-chat", new MockChatCompletion());

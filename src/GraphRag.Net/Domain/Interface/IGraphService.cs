@@ -6,25 +6,25 @@ namespace GraphRag.Net.Domain.Interface
     public interface IGraphService
     {
         /// <summary>
-        /// 获取所有索引信息
+        /// Получить всю информацию об индексах
         /// </summary>
         /// <returns></returns>
         List<string> GetAllIndex();
         /// <summary>
-        /// 获取Graph数据
+        /// Получить данные графа
         /// </summary>
         /// <param name="index"></param>
         /// <returns></returns>
         GraphViewModel GetAllGraphs(string index);
         /// <summary>
-        /// 切片导入文本数据
+        /// Импортировать текстовые данные по частям
         /// </summary>
         /// <param name="index"></param>
         /// <param name="input"></param>
         /// <returns></returns>
         Task InsertTextChunkAsync(string index, string input);
         /// <summary>
-        /// 生成图谱数据
+        /// Создать данные графа
         /// </summary>
         /// <param name="index"></param>
         /// <param name="input"></param>
@@ -32,7 +32,7 @@ namespace GraphRag.Net.Domain.Interface
         Task InsertGraphDataAsync(string index, string input);
 
         /// <summary>
-        ///  搜索递归获取节点相关的所有边和节点
+        ///  Рекурсивно искать все ребра и узлы, связанные с узлом
         /// </summary>
         /// <param name="index"></param>
         /// <param name="input"></param>
@@ -40,55 +40,55 @@ namespace GraphRag.Net.Domain.Interface
         Task<GraphModel> SearchGraphModel(string index, string input);
 
         /// <summary>
-        /// 搜索递归获取节点相关的所有边和节点进行图谱对话
+        /// Рекурсивно искать все ребра и узлы, связанные с узлом, для диалога по графу
         /// </summary>
         /// <param name="index"></param>
         /// <param name="input"></param>
         /// <returns></returns>
         Task<string> SearchGraphAsync(string index, string input);
         /// <summary>
-        /// 通过社区算法匹配相关节点信息
+        /// Сопоставить связанные узлы с помощью алгоритма сообществ
         /// </summary>
         /// <param name="index"></param>
         /// <param name="input"></param>
         /// <returns></returns>
         Task<GraphModel> SearchGraphCommunityModel(string index, string input);
         /// <summary>
-        /// 搜索递归获取节点相关的所有边和节点进行图谱对话,流式返回
+        /// Рекурсивно искать все ребра и узлы, связанные с узлом, для диалога по графу, потоковый возврат
         /// </summary>
         /// <param name="index"></param>
         /// <param name="input"></param>
         /// <returns></returns>
         IAsyncEnumerable<StreamingKernelContent> SearchGraphStreamAsync(string index, string input);
         /// <summary>
-        /// 通过社区算法检索社区节点进行对话
+        /// Выполнять диалог по узлам сообщества через алгоритм сообществ
         /// </summary>
         /// <param name="index"></param>
         /// <param name="input"></param>
         /// <returns></returns>
         Task<string> SearchGraphCommunityAsync(string index, string input);
         /// <summary>
-        /// 通过社区算法检索社区节点进行对话，流式返回
+        /// Диалог по узлам сообщества через алгоритм сообществ с потоковым возвратом
         /// </summary>
         /// <param name="index"></param>
         /// <param name="input"></param>
         /// <returns></returns>
         IAsyncEnumerable<StreamingKernelContent> SearchGraphCommunityStreamAsync(string index, string input);
         /// <summary>
-        /// 社区摘要
+        /// Сводка по сообществам
         /// </summary>
         /// <param name="index"></param>
         /// <returns></returns>
         Task GraphCommunitiesAsync(string index);
         /// <summary>
-        /// 全局摘要
+        /// Глобальная сводка
         /// </summary>
         /// <param name="index"></param>
         /// <returns></returns>
         Task GraphGlobalAsync(string index);
 
         /// <summary>
-        /// 删除图谱数据
+        /// Удалить данные графа
         /// </summary>
         /// <param name="index"></param>
         /// <returns></returns>
