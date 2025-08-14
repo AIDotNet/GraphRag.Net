@@ -1,16 +1,11 @@
 ﻿using GraphRag.Net.Domain.Interface;
 using GraphRag.Net.Domain.Model.Graph;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace GraphRag.Net.Domain.Service
 {
     [ServiceDescription(typeof(ICommunityDetectionService), ServiceLifetime.Scoped)]
-    public class CommunityDetectionService: ICommunityDetectionService
+    public class CommunityDetectionService : ICommunityDetectionService
     {
         /// <summary>
         /// 标签传播算法

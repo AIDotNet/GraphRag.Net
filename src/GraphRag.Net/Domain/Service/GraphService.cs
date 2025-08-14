@@ -1,16 +1,14 @@
-﻿using GraphRag.Net.Options;
-using GraphRag.Net.Domain.Interface;
+﻿using GraphRag.Net.Domain.Interface;
 using GraphRag.Net.Domain.Model.Graph;
+using GraphRag.Net.Options;
 using GraphRag.Net.Repositories;
 using GraphRag.Net.Utils;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.Memory;
 using Microsoft.SemanticKernel.Text;
 using Newtonsoft.Json;
 using SqlSugar;
-using System.Collections.Generic;
-using Microsoft.Extensions.DependencyInjection;
-using static Dm.net.buffer.ByteArrayBuffer;
 
 namespace GraphRag.Net.Domain.Service
 {
@@ -102,12 +100,64 @@ namespace GraphRag.Net.Domain.Service
             }
 
             var lines = TextChunker.SplitPlainTextLines(input, TextChunkerOption.LinesToken);
-
             var paragraphs = TextChunker.SplitPlainTextParagraphs(lines, TextChunkerOption.ParagraphsToken);
-            foreach (var para in paragraphs)
+
+            // 优化文本分块：使用重叠窗口来保持关系信息
+            var optimizedChunks = CreateOverlappingChunks(paragraphs);
+
+            foreach (var chunk in optimizedChunks)
             {
-                await InsertGraphDataAsync(index, para);
+                await InsertGraphDataAsync(index, chunk);
             }
+        }
+
+        /// <summary>
+        /// 创建重叠文本块以保持关系信息
+        /// </summary>
+        /// <param name="paragraphs"></param>
+        /// <returns></returns>
+        private List<string> CreateOverlappingChunks(List<string> paragraphs)
+        {
+            var chunks = new List<string>();
+            const int maxChunkSize = 3; // 每个块最多包含3个段落
+            const int overlapSize = 1;   // 重叠1个段落
+
+            if (paragraphs.Count <= maxChunkSize)
+            {
+                // 如果段落数量不多，直接作为一个块
+                chunks.Add(string.Join("\n\n", paragraphs));
+            }
+            else
+            {
+                // 创建重叠的文本块
+                for (int i = 0; i < paragraphs.Count; i += (maxChunkSize - overlapSize))
+                {
+                    var chunkParagraphs = paragraphs
+                        .Skip(i)
+                        .Take(maxChunkSize)
+                        .ToList();
+
+                    if (chunkParagraphs.Count > 0)
+                    {
+                        var chunk = string.Join("\n\n", chunkParagraphs);
+
+                        // 避免重复的块
+                        if (!chunks.Contains(chunk))
+                        {
+                            chunks.Add(chunk);
+                        }
+                    }
+
+                    // 如果剩余段落不足一个完整块，退出循环
+                    if (i + maxChunkSize >= paragraphs.Count)
+                    {
+                        break;
+                    }
+                }
+            }
+
+            Console.WriteLine($"原始段落数: {paragraphs.Count}, 优化后块数: {chunks.Count}");
+            return chunks;
         }
 
         /// <summary>
@@ -122,14 +172,16 @@ namespace GraphRag.Net.Domain.Service
             {
                 throw new ArgumentException("Values required for index and input cannot be null.");
             }
-
             try
             {
                 SemanticTextMemory textMemory = await _semanticService.GetTextMemory();
                 var graph = await _semanticService.CreateGraphAsync(input);
                 Dictionary<string, string> nodeDic = new Dictionary<string, string>();
+                List<Nodes> newNodes = new List<Nodes>(); // 收集新插入的节点
+
                 foreach (var n in graph.Nodes)
                 {
+
                     string Id = Guid.NewGuid().ToString();
                     string text2 = $"Name:{n.Name};Type:{n.Type};Desc:{n.Desc}";
                     bool isContinue = false;
@@ -153,17 +205,13 @@ namespace GraphRag.Net.Domain.Service
                         _nodes_Repositories.Update(oldNode);
                         text2 = $"Name:{oldNode.Name};Type:{oldNode.Type};Desc:{oldNode.Desc}";
                         nodeDic.Add(n.Id, oldNode.Id);
-                        // 优化：仅当内容变化时才Embedding
-                        var lastEmbedding = await textMemory.GetAsync(index, oldNode.Id);
-                        if (lastEmbedding == null || lastEmbedding.Metadata.Text != text2)
-                        {
-                            await textMemory.SaveInformationAsync(index, id: oldNode.Id, text: text2, cancellationToken: default);
-                        }
+                        await textMemory.SaveInformationAsync(index, id: oldNode.Id, text: text2, cancellationToken: default);
                         continue;
                     }
 
-                    //判断是否存在相关节点
-                    await foreach (MemoryQueryResult memory in textMemory.SearchAsync(index, text2, limit: 1, minRelevanceScore: 0.9))
+                    //优化相关节点发现：增加搜索数量和降低阈值
+                    List<string> potentialRelatedNodes = new List<string>();
+                    await foreach (MemoryQueryResult memory in textMemory.SearchAsync(index, text2, limit: 5, minRelevanceScore: 0.7))
                     {
                         if (memory.Relevance == 1)
                         {
@@ -177,31 +225,10 @@ namespace GraphRag.Net.Domain.Service
                         if (graph.Nodes.Select(p => p.Id).Contains(memory.Metadata.Id))
                         {
                             //如果本次包含了向量近似的数据，则跳过
-                            break;
+                            continue;
                         }
-                        var node1 = _nodes_Repositories.GetFirst(p => p.Id == memory.Metadata.Id);
-                        string text1 = $"Name:{node1.Name};Type:{node1.Type};Desc:{node1.Desc}";
 
-                        var relationShip = await _semanticService.GetRelationship(text1, text2);
-                        if (relationShip.IsRelationship)
-                        {
-                            if (relationShip.Edge.Source == "node1")
-                            {
-                                relationShip.Edge.Source = node1.Id;
-                                relationShip.Edge.Target = Id;
-                            }
-                            else
-                            {
-                                relationShip.Edge.Source = Id;
-                                relationShip.Edge.Target = node1.Id;
-                            }
-                            if (!_edges_Repositories.IsAny(p => p.Target == relationShip.Edge.Target && p.Source == relationShip.Edge.Source))
-                            {
-                                relationShip.Edge.Id = Guid.NewGuid().ToString();
-                                relationShip.Edge.Index = index;
-                                _edges_Repositories.Insert(relationShip.Edge);
-                            }
-                        }
+                        potentialRelatedNodes.Add(memory.Metadata.Id);
                     }
 
                     if (isContinue)
@@ -210,6 +237,7 @@ namespace GraphRag.Net.Domain.Service
                         continue;
                     }
 
+                    // 创建新节点
                     Nodes node = new Nodes()
                     {
                         Id = Id,
@@ -224,12 +252,40 @@ namespace GraphRag.Net.Domain.Service
                         nodeDic.Add(n.Id, node.Id);
                     }
                     _nodes_Repositories.Insert(node);
-                    // 优化：仅当内容变化时才Embedding
-                    var lastEmbeddingNew = await textMemory.GetAsync(index, node.Id);
-                    if (lastEmbeddingNew == null || lastEmbeddingNew.Metadata.Text != text2)
+                    newNodes.Add(node);
+
+                    // 检查与潜在相关节点的关系
+                    foreach (var relatedNodeId in potentialRelatedNodes)
                     {
-                        await textMemory.SaveInformationAsync(index, id: node.Id, text: text2, cancellationToken: default);
+                        var node1 = _nodes_Repositories.GetFirst(p => p.Id == relatedNodeId);
+                        if (node1 != null)
+                        {
+                            string text1 = $"Name:{node1.Name};Type:{node1.Type};Desc:{node1.Desc}";
+                            var relationShip = await _semanticService.GetRelationship(text1, text2);
+                            if (relationShip.IsRelationship)
+                            {
+                                if (relationShip.Edge.Source == "node1")
+                                {
+                                    relationShip.Edge.Source = node1.Id;
+                                    relationShip.Edge.Target = Id;
+                                }
+                                else
+                                {
+                                    relationShip.Edge.Source = Id;
+                                    relationShip.Edge.Target = node1.Id;
+                                }
+                                if (!_edges_Repositories.IsAny(p => p.Target == relationShip.Edge.Target && p.Source == relationShip.Edge.Source))
+                                {
+                                    relationShip.Edge.Id = Guid.NewGuid().ToString();
+                                    relationShip.Edge.Index = index;
+                                    _edges_Repositories.Insert(relationShip.Edge);
+                                }
+                            }
+                        }
                     }
+
+                    //向量处理节点信息
+                    await textMemory.SaveInformationAsync(index, id: node.Id, text: text2, cancellationToken: default);
                 }
 
                 foreach (var e in graph.Edges)
@@ -244,6 +300,9 @@ namespace GraphRag.Net.Domain.Service
                     };
                     _edges_Repositories.Insert(edge);
                 }
+
+                // 检测和处理孤立节点
+                await ProcessOrphanNodesAsync(index, newNodes, textMemory);
 
                 //查询Edges 的Source和Target 重复数据
                 var repeatEdges = _edges_Repositories.GetDB().Queryable<Edges>()
@@ -302,7 +361,7 @@ namespace GraphRag.Net.Domain.Service
                     t => t.Relevance
                 );
                 var graphModel = GetGraphAllRecursion(index, nodes, nodeWeights);
-                
+
                 // 计算预估的token数量，并在必要时限制节点数量
                 int estimatedTokens = EstimateTokenCount(graphModel);
                 if (estimatedTokens > GraphSearchOption.MaxTokens)
@@ -310,7 +369,7 @@ namespace GraphRag.Net.Domain.Service
                     Console.WriteLine($"预估Token数量 {estimatedTokens} 超过限制 {GraphSearchOption.MaxTokens}，正在调整节点数量...");
                     graphModel = LimitGraphByTokenCount(graphModel, nodeWeights);
                 }
-                
+
                 return graphModel;
             }
             else
@@ -327,33 +386,33 @@ namespace GraphRag.Net.Domain.Service
         private int EstimateTokenCount(GraphModel model)
         {
             int tokenCount = 0;
-            
+
             // 估算节点的token（每个单词约1.3个token，每个节点信息加上额外开销）
             foreach (var node in model.Nodes)
             {
                 // 节点ID和名称估算
                 tokenCount += (node.Id?.Length ?? 0) / 3 + 2;
                 tokenCount += (node.Name?.Length ?? 0) / 3 + 2;
-                
+
                 // 节点描述估算（一个汉字约等于1个token，英文单词约等于0.75个token）
                 string desc = node.Desc ?? "";
                 int chineseCount = desc.Count(c => c >= 0x4E00 && c <= 0x9FFF);
                 int otherCount = desc.Length - chineseCount;
                 tokenCount += chineseCount + (int)(otherCount * 0.75);
-                
+
                 // 节点额外属性估算
                 tokenCount += 10; // 额外结构开销
             }
-            
+
             // 估算边的token
             tokenCount += model.Edges.Count * 10; // 每个边的结构信息约10个token
-            
+
             // JSON结构开销
             tokenCount += 200;
-            
+
             return tokenCount;
         }
-        
+
         /// <summary>
         /// 根据token数量限制图大小
         /// </summary>
@@ -363,48 +422,48 @@ namespace GraphRag.Net.Domain.Service
         private GraphModel LimitGraphByTokenCount(GraphModel model, Dictionary<string, double> nodeWeights)
         {
             var result = new GraphModel();
-            
+
             // 将节点按权重排序
             var sortedNodes = model.Nodes
                 .OrderByDescending(n => nodeWeights.GetValueOrDefault(n.Id, 0))
                 .ToList();
-            
+
             // 从高权重节点开始添加，直到接近token限制
             var selectedNodes = new List<Nodes>();
             int currentTokens = 200; // 基础结构开销
-            
+
             foreach (var node in sortedNodes)
             {
                 // 计算添加此节点后的token数
                 string desc = node.Desc ?? "";
                 int chineseCount = desc.Count(c => c >= 0x4E00 && c <= 0x9FFF);
                 int otherCount = desc.Length - chineseCount;
-                int nodeTokens = chineseCount + (int)(otherCount * 0.75) + 
-                                (node.Id?.Length ?? 0) / 3 + 
+                int nodeTokens = chineseCount + (int)(otherCount * 0.75) +
+                                (node.Id?.Length ?? 0) / 3 +
                                 (node.Name?.Length ?? 0) / 3 + 15;
-                
+
                 // 如果添加此节点会超过限制，跳过
                 if (currentTokens + nodeTokens > GraphSearchOption.MaxTokens * 0.9)
                 {
                     continue;
                 }
-                
+
                 selectedNodes.Add(node);
                 currentTokens += nodeTokens;
             }
-            
+
             // 只保留连接选中节点的边
-            var selectedEdges = model.Edges.Where(e => 
-                selectedNodes.Any(n => n.Id == e.Source) && 
+            var selectedEdges = model.Edges.Where(e =>
+                selectedNodes.Any(n => n.Id == e.Source) &&
                 selectedNodes.Any(n => n.Id == e.Target)
             ).ToList();
-            
+
             result.Nodes = selectedNodes;
             result.Edges = selectedEdges;
-            
+
             Console.WriteLine($"节点限制调整：从 {model.Nodes.Count} 个节点减少到 {result.Nodes.Count} 个节点");
             Console.WriteLine($"预估调整后Token数：约 {currentTokens}");
-            
+
             return result;
         }
 
@@ -433,7 +492,7 @@ namespace GraphRag.Net.Domain.Service
             {
                 var nodes = _nodes_Repositories.GetList(p => p.Index == index && textMemModelList.Select(c => c.Id).Contains(p.Id));
                 var graphModel = GetGraphAllCommunitiesRecursion(index, nodes);
-                
+
                 // 计算预估的token数量，并在必要时限制节点数量
                 int estimatedTokens = EstimateTokenCount(graphModel);
                 if (estimatedTokens > GraphSearchOption.MaxTokens)
@@ -454,7 +513,7 @@ namespace GraphRag.Net.Domain.Service
                     }
                     graphModel = LimitGraphByTokenCount(graphModel, nodeWeights);
                 }
-                
+
                 return graphModel;
             }
             else
@@ -631,6 +690,128 @@ namespace GraphRag.Net.Domain.Service
             _globals_Repositories.Insert(globals);
         }
 
+        /// <summary>
+        /// 增强图谱关系：为现有节点发现和建立新的关系
+        /// </summary>
+        /// <param name="index"></param>
+        /// <returns></returns>
+        public async Task EnhanceGraphRelationshipsAsync(string index)
+        {
+            if (string.IsNullOrWhiteSpace(index))
+            {
+                throw new ArgumentException("Index required value cannot be null.");
+            }
+
+            Console.WriteLine("开始增强图谱关系...");
+            SemanticTextMemory textMemory = await _semanticService.GetTextMemory();
+
+            // 获取所有孤立或连接较少的节点
+            var allNodes = _nodes_Repositories.GetList(p => p.Index == index);
+            var lowConnectedNodes = new List<Nodes>();
+
+            foreach (var node in allNodes)
+            {
+                var connectionCount = _edges_Repositories.GetDB().Queryable<Edges>()
+                    .Where(e => (e.Source == node.Id || e.Target == node.Id) && e.Index == index)
+                    .Count();
+
+                // 如果连接数少于2个，认为是需要增强的节点
+                if (connectionCount < 2)
+                {
+                    lowConnectedNodes.Add(node);
+                }
+            }
+
+            Console.WriteLine($"发现 {lowConnectedNodes.Count} 个需要增强关系的节点");
+
+            // 为每个低连接节点尝试建立新关系
+            int enhancedCount = 0;
+            foreach (var node in lowConnectedNodes)
+            {
+                try
+                {
+                    int newConnections = await AttemptConnectOrphanNodeAsync(index, node, textMemory);
+                    if (newConnections > 0)
+                    {
+                        enhancedCount++;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"增强节点 {node.Name} 关系时出错：{ex.Message}");
+                }
+            }
+
+            Console.WriteLine($"关系增强完成，共为 {enhancedCount} 个节点建立了新关系");
+        }
+
+        /// <summary>
+        /// 批量关系验证：检查并优化现有关系的质量
+        /// </summary>
+        /// <param name="index"></param>
+        /// <returns></returns>
+        public async Task ValidateAndOptimizeRelationshipsAsync(string index)
+        {
+            if (string.IsNullOrWhiteSpace(index))
+            {
+                throw new ArgumentException("Index required value cannot be null.");
+            }
+
+            Console.WriteLine("开始验证和优化现有关系...");
+
+            var allEdges = _edges_Repositories.GetList(p => p.Index == index);
+            var weakRelationships = new List<Edges>();
+
+            // 识别可能需要优化的关系
+            foreach (var edge in allEdges)
+            {
+                // 检查关系描述是否过于简单或模糊
+                if (string.IsNullOrWhiteSpace(edge.Relationship) ||
+                    edge.Relationship.Length < 3 ||
+                    edge.Relationship.ToLower().Contains("related") ||
+                    edge.Relationship.ToLower().Contains("associated"))
+                {
+                    weakRelationships.Add(edge);
+                }
+            }
+
+            Console.WriteLine($"发现 {weakRelationships.Count} 个需要优化的关系");
+
+            // 优化弱关系
+            int optimizedCount = 0;
+            foreach (var edge in weakRelationships.Take(20)) // 限制处理数量
+            {
+                try
+                {
+                    var sourceNode = _nodes_Repositories.GetFirst(p => p.Id == edge.Source);
+                    var targetNode = _nodes_Repositories.GetFirst(p => p.Id == edge.Target);
+
+                    if (sourceNode != null && targetNode != null)
+                    {
+                        string sourceText = $"Name:{sourceNode.Name};Type:{sourceNode.Type};Desc:{sourceNode.Desc}";
+                        string targetText = $"Name:{targetNode.Name};Type:{targetNode.Type};Desc:{targetNode.Desc}";
+
+                        var newRelationship = await _semanticService.GetRelationship(sourceText, targetText);
+                        if (newRelationship.IsRelationship &&
+                            !string.IsNullOrWhiteSpace(newRelationship.Edge.Relationship) &&
+                            newRelationship.Edge.Relationship != edge.Relationship)
+                        {
+                            edge.Relationship = newRelationship.Edge.Relationship;
+                            _edges_Repositories.Update(edge);
+                            optimizedCount++;
+                            Console.WriteLine($"优化关系: {sourceNode.Name} -> {targetNode.Name}: {newRelationship.Edge.Relationship}");
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"优化关系时出错：{ex.Message}");
+                }
+            }
+
+            Console.WriteLine($"关系优化完成，共优化了 {optimizedCount} 个关系");
+        }
+
         public async Task DeleteGraph(string index)
         {
             SemanticTextMemory textMemory = await _semanticService.GetTextMemory();
@@ -650,11 +831,156 @@ namespace GraphRag.Net.Domain.Service
 
 
         #region 内部方法
+
+        /// <summary>
+        /// 检测和处理孤立节点
+        /// </summary>
+        /// <param name="index"></param>
+        /// <param name="newNodes"></param>
+        /// <param name="textMemory"></param>
+        /// <returns></returns>
+        private async Task ProcessOrphanNodesAsync(string index, List<Nodes> newNodes, SemanticTextMemory textMemory)
+        {
+            Console.WriteLine($"开始检测孤立节点，新增节点数：{newNodes.Count}");
+
+            foreach (var node in newNodes)
+            {
+                // 检查节点是否为孤立节点（没有任何边连接）
+                bool hasConnections = _edges_Repositories.IsAny(p =>
+                    (p.Source == node.Id || p.Target == node.Id) && p.Index == index);
+
+                if (!hasConnections)
+                {
+                    Console.WriteLine($"发现孤立节点：{node.Name}");
+                    var connectionsFound = await AttemptConnectOrphanNodeAsync(index, node, textMemory);
+                    Console.WriteLine($"为节点 {node.Name} 建立了 {connectionsFound} 个新连接");
+                }
+            }
+        }
+
+        /// <summary>
+        /// 尝试为孤立节点建立连接
+        /// </summary>
+        /// <param name="index"></param>
+        /// <param name="orphanNode"></param>
+        /// <param name="textMemory"></param>
+        /// <returns>返回建立的新连接数量</returns>
+        private async Task<int> AttemptConnectOrphanNodeAsync(string index, Nodes orphanNode, SemanticTextMemory textMemory)
+        {
+            string nodeText = $"Name:{orphanNode.Name};Type:{orphanNode.Type};Desc:{orphanNode.Desc}";
+
+            // 使用更低的阈值和更多的搜索结果来寻找潜在关系
+            List<string> candidateNodes = new List<string>();
+
+            // 第一轮：基于节点描述搜索
+            await foreach (MemoryQueryResult memory in textMemory.SearchAsync(index, nodeText, limit: 10, minRelevanceScore: 0.5))
+            {
+                if (memory.Metadata.Id != orphanNode.Id)
+                {
+                    candidateNodes.Add(memory.Metadata.Id);
+                }
+            }
+
+            // 第二轮：基于节点名称搜索（针对命名实体）
+            if (candidateNodes.Count < 3)
+            {
+                await foreach (MemoryQueryResult memory in textMemory.SearchAsync(index, orphanNode.Name, limit: 5, minRelevanceScore: 0.6))
+                {
+                    if (memory.Metadata.Id != orphanNode.Id && !candidateNodes.Contains(memory.Metadata.Id))
+                    {
+                        candidateNodes.Add(memory.Metadata.Id);
+                    }
+                }
+            }
+
+            // 第三轮：基于节点类型搜索相同类型的实体
+            if (candidateNodes.Count < 2)
+            {
+                var sameTypeNodes = _nodes_Repositories.GetList(p =>
+                    p.Index == index && p.Type == orphanNode.Type && p.Id != orphanNode.Id)
+                    .Take(5).Select(p => p.Id).ToList();
+
+                foreach (var nodeId in sameTypeNodes)
+                {
+                    if (!candidateNodes.Contains(nodeId))
+                    {
+                        candidateNodes.Add(nodeId);
+                    }
+                }
+            }
+
+            // 尝试建立关系
+            int connectionsFound = 0;
+            foreach (var candidateId in candidateNodes.Take(5)) // 限制检查数量以控制成本
+            {
+                var candidateNode = _nodes_Repositories.GetFirst(p => p.Id == candidateId);
+                if (candidateNode != null)
+                {
+                    string candidateText = $"Name:{candidateNode.Name};Type:{candidateNode.Type};Desc:{candidateNode.Desc}";
+
+                    try
+                    {
+                        var relationShip = await _semanticService.GetRelationship(candidateText, nodeText);
+                        if (relationShip.IsRelationship)
+                        {
+                            // 确定关系方向
+                            string sourceId, targetId;
+                            if (relationShip.Edge.Source == "node1")
+                            {
+                                sourceId = candidateNode.Id;
+                                targetId = orphanNode.Id;
+                            }
+                            else
+                            {
+                                sourceId = orphanNode.Id;
+                                targetId = candidateNode.Id;
+                            }
+
+                            // 检查关系是否已存在
+                            if (!_edges_Repositories.IsAny(p => p.Source == sourceId && p.Target == targetId && p.Index == index))
+                            {
+                                var edge = new Edges()
+                                {
+                                    Id = Guid.NewGuid().ToString(),
+                                    Index = index,
+                                    Source = sourceId,
+                                    Target = targetId,
+                                    Relationship = relationShip.Edge.Relationship
+                                };
+                                _edges_Repositories.Insert(edge);
+                                connectionsFound++;
+                                Console.WriteLine($"为孤立节点 {orphanNode.Name} 建立关系：{relationShip.Edge.Relationship} -> {candidateNode.Name}");
+
+                                // 如果已经找到足够的连接，停止搜索
+                                if (connectionsFound >= 2)
+                                {
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"为孤立节点建立关系时出错：{ex.Message}");
+                    }
+                }
+            }
+
+            if (connectionsFound == 0)
+            {
+                Console.WriteLine($"警告：未能为孤立节点 {orphanNode.Name} 建立任何关系");
+            }
+
+            return connectionsFound;
+        }
+
         /// <summary>
         /// 基于搜索条件检索TextMemModel的列表。
         /// </summary>
-        /// <param name="index"></param>
-        /// <param name="input"></param>
+        /// <param name="index">索引</param>
+        /// <param name="input">输入文本</param>
+        /// <param name="minRelevance">最小相关性阈值</param>
+        /// <param name="limit">搜索结果限制</param>
         /// <returns></returns>
         private async Task<List<TextMemModel>> RetrieveTextMemModelList(string index, string input, double? minRelevance = null, int? limit = null)
         {
@@ -709,7 +1035,9 @@ namespace GraphRag.Net.Domain.Service
         /// <summary>
         /// 递归获取节点相关的所有边和节点
         /// </summary>
-        /// <param name="initialNodes"></param>
+        /// <param name="index">索引</param>
+        /// <param name="initialNodes">初始节点列表</param>
+        /// <param name="nodeWeights">节点权重字典</param>
         /// <returns></returns>
         private GraphModel GetGraphAllRecursion(string index, List<Nodes> initialNodes, Dictionary<string, double> nodeWeights)
         {
@@ -834,7 +1162,8 @@ namespace GraphRag.Net.Domain.Service
         /// <summary>
         /// 获取边信息
         /// </summary>
-        /// <param name="nodeIds"></param>
+        /// <param name="index">索引</param>
+        /// <param name="nodes">节点列表</param>
         /// <returns></returns>
         private List<Edges> GetEdges(string index, List<Nodes> nodes)
         {
@@ -847,7 +1176,8 @@ namespace GraphRag.Net.Domain.Service
         /// <summary>
         /// 获取节点信息
         /// </summary>
-        /// <param name="edges"></param>
+        /// <param name="index">索引</param>
+        /// <param name="edges">边列表</param>
         /// <returns></returns>
         private List<Nodes> GetNodes(string index, List<Edges> edges)
         {
@@ -864,7 +1194,7 @@ namespace GraphRag.Net.Domain.Service
         /// <summary>
         /// 获取相关社区ID列表
         /// </summary>
-        private async Task<List<string>> GetRelevantCommunities(string index, List<string> nodeIds)
+        private List<string> GetRelevantCommunities(string index, List<string> nodeIds)
         {
             var communities = _communitieNodes_Repositories.GetDB().Queryable<CommunitieNodes>()
                 .Where(cn => nodeIds.Contains(cn.NodeId))
