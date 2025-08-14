@@ -12,7 +12,151 @@
 
 本项目为demo示例，仅用于学习GraphRAG思路。
 
-## 您可以直接在项目中引用NuGet包，或者直接使用本项目提供API服务。
+## 核心业务流程
+
+### 1. 整体架构流程
+
+```mermaid
+graph LR
+    A["文档导入"] --> B["图谱构建"]
+    B --> C["社区检测"]
+    C --> D["摘要生成"]
+    D --> E["查询检索"]
+    
+    subgraph "数据流转"
+        F["原始文档"] --> G["文本块"]
+        G --> H["图谱数据<br/>节点+边"]
+        H --> I["社区结构"]
+        I --> J["多层摘要"]
+        J --> K["智能问答"]
+    end
+    
+    subgraph "存储层"
+        L["向量数据库<br/>TextMemory"]
+        M["关系数据库<br/>Nodes/Edges/Communities/Globals"]
+    end
+    
+    B -.-> L
+    B -.-> M
+    C -.-> M
+    D -.-> M
+    E -.-> L
+    E -.-> M
+    
+    style A fill:#e1f5fe
+    style E fill:#c8e6c9
+    style L fill:#fce4ec
+    style M fill:#fff9c4
+```
+
+### 2. 文档导入与图谱构建流程
+
+```mermaid
+graph TD
+    A["文档输入<br/>原始文档/文本"] --> B["文本切片<br/>TextChunker.SplitPlainTextLines<br/>TextChunker.SplitPlainTextParagraphs"]
+    B --> C["重叠文本块<br/>CreateOverlappingChunks<br/>3段落/块，1段落重叠"]
+    C --> D["LLM提取图数据<br/>SemanticService.CreateGraphAsync"]
+    D --> E["节点提取<br/>实体识别+类型分类"]
+    D --> F["关系提取<br/>边和关系描述"]
+    E --> G["节点去重合并<br/>向量相似度检测"]
+    F --> H["关系去重合并<br/>重复边处理"]
+    G --> I["存储到数据库<br/>Nodes表"]
+    H --> J["存储到数据库<br/>Edges表"]
+    I --> K["向量化存储<br/>TextMemory.SaveInformationAsync"]
+    J --> L["孤立节点检测<br/>ProcessOrphanNodesAsync"]
+    L --> M["图谱构建完成"]
+    
+    style A fill:#e1f5fe
+    style M fill:#c8e6c9
+    style D fill:#fff3e0
+    style K fill:#fce4ec
+```
+
+### 3. 社区检测与摘要生成流程
+
+```mermaid
+graph TD
+    A["图谱数据<br/>Nodes + Edges"] --> B["构建图结构<br/>Graph.AddEdge"]
+    B --> C["标签传播算法<br/>FastLabelPropagationAlgorithm<br/>10次迭代"]
+    C --> D["社区检测结果<br/>节点→社区ID映射"]
+    D --> E["存储社区节点关系<br/>CommunitieNodes表"]
+    E --> F["按社区分组节点<br/>提取节点描述信息"]
+    F --> G["LLM生成社区摘要<br/>SemanticService.CommunitySummaries"]
+    G --> H["存储社区摘要<br/>Communities表"]
+    H --> I["收集所有社区摘要"]
+    I --> J["LLM生成全局摘要<br/>SemanticService.GlobalSummaries"]
+    J --> K["存储全局摘要<br/>Globals表"]
+    
+    style A fill:#e1f5fe
+    style C fill:#fff3e0
+    style G fill:#fff3e0
+    style J fill:#fff3e0
+    style K fill:#c8e6c9
+```
+
+### 4. 直接图谱查询流程
+
+```mermaid
+graph TD
+    A["用户查询<br/>问题输入"] --> B["向量搜索<br/>TextMemory.SearchAsync<br/>相关度阈值0.5"]
+    B --> C{"匹配到节点?"}
+    C -->|是| D["获取相关节点<br/>RetrieveTextMemModelList"]
+    C -->|否| E["降低阈值重试<br/>阈值0.3，扩大搜索"]
+    E --> D
+    D --> F["递归扩展图谱<br/>GetGraphAllRecursion<br/>深度限制+节点数限制"]
+    F --> G["Token数量估算<br/>EstimateTokenCount"]
+    G --> H{"超过Token限制?"}
+    H -->|是| I["按权重裁剪节点<br/>LimitGraphByTokenCount"]
+    H -->|否| J["构建查询图谱<br/>GraphModel"]
+    I --> J
+    J --> K["LLM生成答案<br/>SemanticService.GetGraphAnswerAsync"]
+    K --> L["返回结果"]
+    
+    style A fill:#e1f5fe
+    style B fill:#fce4ec
+    style F fill:#fff3e0
+    style K fill:#fff3e0
+    style L fill:#c8e6c9
+```
+
+### 5. 社区算法查询流程
+
+```mermaid
+graph TD
+    A["用户查询<br/>问题输入"] --> B["向量搜索<br/>找到相关节点"]
+    B --> C{"匹配到节点?"}
+    C -->|是| D["查找节点所属社区<br/>GetGraphAllCommunitiesRecursion"]
+    C -->|否| E["使用全局摘要<br/>Globals表"]
+    D --> F["获取社区内所有节点"]
+    F --> G["构建社区子图<br/>节点+边"]
+    G --> H["获取相关社区摘要<br/>Communities表"]
+    H --> I["获取全局摘要<br/>Globals表"]
+    I --> J["LLM综合分析<br/>图谱+社区摘要+全局摘要"]
+    E --> K["仅基于全局摘要回答"]
+    J --> L["返回答案"]
+    K --> L
+    
+    style A fill:#e1f5fe
+    style B fill:#fce4ec
+    style D fill:#fff3e0
+    style J fill:#fff3e0
+    style K fill:#fff3e0
+    style L fill:#c8e6c9
+```
+
+### 核心算法说明
+
+1. **文本切片算法**：使用重叠窗口技术，每个文本块包含3个段落，相邻块之间重叠1个段落，确保关系信息的连续性。
+
+2. **社区检测算法**：采用快速标签传播算法（Fast Label Propagation Algorithm），通过10次迭代来发现图中的社区结构。
+
+3. **向量搜索策略**：首先使用0.5的相关度阈值进行搜索，如果结果不足则降低至0.3重试，确保找到足够的相关节点。
+
+4. **Token优化机制**：实时估算token使用量，当超过限制时按节点权重进行智能裁剪，保证LLM输入的有效性。
+
+5. **孤立节点处理**：自动检测没有关系连接的孤立节点，通过语义搜索尝试为其建立与其他节点的关系。
+
+## 您可以直接在项目中引用NuGet包，或者直接使用本项目提供API服务
 
 出于方便，LLM接口目前只兼容了openai的规范，其他大模型可以考虑使用one-api类的集成产品
 

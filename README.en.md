@@ -12,7 +12,151 @@ Based on the implementation idea mentioned by Microsoft in the paper, GraphRAG m
 
 This project is a demo example, which is only used to learn GraphRAG ideas.
 
-## You can directly reference the NuGet package in the project, or directly use the project to provide API services.
+## Core Business Process
+
+### 1. Overall Architecture Flow
+
+```mermaid
+graph LR
+    A["Document Import"] --> B["Graph Construction"]
+    B --> C["Community Detection"]
+    C --> D["Summary Generation"]
+    D --> E["Query Retrieval"]
+    
+    subgraph "Data Flow"
+        F["Raw Documents"] --> G["Text Chunks"]
+        G --> H["Graph Data<br/>Nodes+Edges"]
+        H --> I["Community Structure"]
+        I --> J["Multi-level Summaries"]
+        J --> K["Intelligent Q&A"]
+    end
+    
+    subgraph "Storage Layer"
+        L["Vector Database<br/>TextMemory"]
+        M["Relational Database<br/>Nodes/Edges/Communities/Globals"]
+    end
+    
+    B -.-> L
+    B -.-> M
+    C -.-> M
+    D -.-> M
+    E -.-> L
+    E -.-> M
+    
+    style A fill:#e1f5fe
+    style E fill:#c8e6c9
+    style L fill:#fce4ec
+    style M fill:#fff9c4
+```
+
+### 2. Document Import and Graph Construction Flow
+
+```mermaid
+graph TD
+    A["Document Input<br/>Raw Documents/Text"] --> B["Text Chunking<br/>TextChunker.SplitPlainTextLines<br/>TextChunker.SplitPlainTextParagraphs"]
+    B --> C["Overlapping Text Chunks<br/>CreateOverlappingChunks<br/>3 paragraphs/chunk, 1 paragraph overlap"]
+    C --> D["LLM Extract Graph Data<br/>SemanticService.CreateGraphAsync"]
+    D --> E["Node Extraction<br/>Entity Recognition+Type Classification"]
+    D --> F["Relationship Extraction<br/>Edges and Relationship Description"]
+    E --> G["Node Deduplication<br/>Vector Similarity Detection"]
+    F --> H["Relationship Deduplication<br/>Duplicate Edge Processing"]
+    G --> I["Store to Database<br/>Nodes Table"]
+    H --> J["Store to Database<br/>Edges Table"]
+    I --> K["Vector Storage<br/>TextMemory.SaveInformationAsync"]
+    J --> L["Orphan Node Detection<br/>ProcessOrphanNodesAsync"]
+    L --> M["Graph Construction Complete"]
+    
+    style A fill:#e1f5fe
+    style M fill:#c8e6c9
+    style D fill:#fff3e0
+    style K fill:#fce4ec
+```
+
+### 3. Community Detection and Summary Generation Flow
+
+```mermaid
+graph TD
+    A["Graph Data<br/>Nodes + Edges"] --> B["Build Graph Structure<br/>Graph.AddEdge"]
+    B --> C["Label Propagation Algorithm<br/>FastLabelPropagationAlgorithm<br/>10 iterations"]
+    C --> D["Community Detection Results<br/>Node→Community ID Mapping"]
+    D --> E["Store Community Node Relations<br/>CommunitieNodes Table"]
+    E --> F["Group Nodes by Community<br/>Extract Node Description"]
+    F --> G["LLM Generate Community Summary<br/>SemanticService.CommunitySummaries"]
+    G --> H["Store Community Summary<br/>Communities Table"]
+    H --> I["Collect All Community Summaries"]
+    I --> J["LLM Generate Global Summary<br/>SemanticService.GlobalSummaries"]
+    J --> K["Store Global Summary<br/>Globals Table"]
+    
+    style A fill:#e1f5fe
+    style C fill:#fff3e0
+    style G fill:#fff3e0
+    style J fill:#fff3e0
+    style K fill:#c8e6c9
+```
+
+### 4. Direct Graph Query Flow
+
+```mermaid
+graph TD
+    A["User Query<br/>Question Input"] --> B["Vector Search<br/>TextMemory.SearchAsync<br/>Relevance Threshold 0.5"]
+    B --> C{"Nodes Matched?"}
+    C -->|Yes| D["Get Related Nodes<br/>RetrieveTextMemModelList"]
+    C -->|No| E["Retry with Lower Threshold<br/>Threshold 0.3, Expand Search"]
+    E --> D
+    D --> F["Recursive Graph Expansion<br/>GetGraphAllRecursion<br/>Depth Limit+Node Count Limit"]
+    F --> G["Token Count Estimation<br/>EstimateTokenCount"]
+    G --> H{"Exceed Token Limit?"}
+    H -->|Yes| I["Trim Nodes by Weight<br/>LimitGraphByTokenCount"]
+    H -->|No| J["Build Query Graph<br/>GraphModel"]
+    I --> J
+    J --> K["LLM Generate Answer<br/>SemanticService.GetGraphAnswerAsync"]
+    K --> L["Return Result"]
+    
+    style A fill:#e1f5fe
+    style B fill:#fce4ec
+    style F fill:#fff3e0
+    style K fill:#fff3e0
+    style L fill:#c8e6c9
+```
+
+### 5. Community Algorithm Query Flow
+
+```mermaid
+graph TD
+    A["User Query<br/>Question Input"] --> B["Vector Search<br/>Find Related Nodes"]
+    B --> C{"Nodes Matched?"}
+    C -->|Yes| D["Find Node Communities<br/>GetGraphAllCommunitiesRecursion"]
+    C -->|No| E["Use Global Summary<br/>Globals Table"]
+    D --> F["Get All Nodes in Community"]
+    F --> G["Build Community Subgraph<br/>Nodes+Edges"]
+    G --> H["Get Related Community Summary<br/>Communities Table"]
+    H --> I["Get Global Summary<br/>Globals Table"]
+    I --> J["LLM Comprehensive Analysis<br/>Graph+Community Summary+Global Summary"]
+    E --> K["Answer Based on Global Summary Only"]
+    J --> L["Return Answer"]
+    K --> L
+    
+    style A fill:#e1f5fe
+    style B fill:#fce4ec
+    style D fill:#fff3e0
+    style J fill:#fff3e0
+    style K fill:#fff3e0
+    style L fill:#c8e6c9
+```
+
+### Core Algorithm Description
+
+1. **Text Chunking Algorithm**: Uses overlapping window technique, each text chunk contains 3 paragraphs, adjacent chunks overlap by 1 paragraph to ensure continuity of relationship information.
+
+2. **Community Detection Algorithm**: Adopts Fast Label Propagation Algorithm with 10 iterations to discover community structure in the graph.
+
+3. **Vector Search Strategy**: First uses 0.5 relevance threshold for search, if results are insufficient, lowers to 0.3 for retry to ensure finding enough related nodes.
+
+4. **Token Optimization Mechanism**: Real-time estimation of token usage, intelligently trims nodes by weight when exceeding limits to ensure LLM input effectiveness.
+
+5. **Orphan Node Processing**: Automatically detects orphan nodes without relationship connections, attempts to establish relationships with other nodes through semantic search.
+
+## You can directly reference the NuGet package in the project, or directly use the project to provide API services
 For convenience, the LLM interface is currently only compatible with the openai specification, and other large models can consider using one api class integration products
 
 Configure in appsettings.json
@@ -71,7 +215,7 @@ Open the UI interface of blazer. The page provides functions such as text import
 ```
 dotnet add package GraphRag.Net
 ```
-## In order to facilitate the adjustment and modification of prompt words, SK Plugin has separated the project. You need to put GraphRag Copy the graphPlugins directory in the Net. Web project to your project, and set:
+## In order to facilitate the adjustment and modification of prompt words, SK Plugin has separated the project. You need to put GraphRag Copy the graphPlugins directory in the Net. Web project to your project, and set
 [graphPlugins](https://github.com/AIDotNet/GraphRag.Net/tree/main/src/GraphRag.Net.Web/graphPlugins)
 ```
   <ItemGroup>
