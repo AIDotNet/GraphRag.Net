@@ -2,102 +2,306 @@
 @page "/Chat"
 @using GraphRag.Net.Domain.Interface
 
-<GridContent>
-    <Row Gutter="24">
-        <Col Lg="7" Md="24">
-            <Card Title="搜索图谱内容" Style="height:100%;" Bordered>
+<style>
+    .chat-page {
+        padding: 24px;
+        background: #f5f5f5;
+        min-height: 100vh;
+    }
+    
+    .section-card {
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        transition: all 0.3s ease;
+        border: 1px solid #e8e8e8;
+    }
+    
+    .section-card:hover {
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+        transform: translateY(-2px);
+    }
+    
+    .form-group {
+        margin-bottom: 20px;
+    }
+    
+    .form-label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 600;
+        font-size: 14px;
+        color: #262626;
+    }
+    
+    .action-buttons {
+        display: flex;
+        gap: 12px;
+        margin-top: 20px;
+    }
+    
+    .primary-button {
+        background: linear-gradient(135deg, #1890ff 0%, #096dd9 100%);
+        border: none;
+        border-radius: 8px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+    
+    .primary-button:hover {
+        background: linear-gradient(135deg, #40a9ff 0%, #1890ff 100%);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(24, 144, 255, 0.3);
+    }
+    
+    .secondary-button {
+        background: #f6f6f6;
+        border: 1px solid #d9d9d9;
+        border-radius: 8px;
+        color: #595959;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+    
+    .secondary-button:hover {
+        background: #fff;
+        border-color: #40a9ff;
+        color: #1890ff;
+        transform: translateY(-1px);
+    }
+    
+    .result-area {
+        background: #fafafa;
+        border: 1px solid #e8e8e8;
+        border-radius: 8px;
+        padding: 16px;
+    }
+    
+    .upload-area {
+        border: 2px dashed #d9d9d9;
+        border-radius: 12px;
+        padding: 24px;
+        text-align: center;
+        background: #fafafa;
+        transition: all 0.3s ease;
+    }
+    
+    .upload-area:hover {
+        border-color: #40a9ff;
+        background: #f0f8ff;
+    }
+    
+    .card-title {
+        font-size: 18px;
+        font-weight: 600;
+        color: #262626;
+        margin-bottom: 0;
+    }
+    
+    .external-link {
+        margin-top: 16px;
+        padding: 8px 0;
+        border-top: 1px solid #f0f0f0;
+        text-align: center;
+    }
+    
+    .page-header {
+        text-align: center;
+        margin-bottom: 32px;
+        padding: 20px 0;
+        background: linear-gradient(135deg, #1890ff 0%, #096dd9 100%);
+        border-radius: 12px;
+        color: white;
+    }
+    
+    .page-title {
+        font-size: 28px;
+        font-weight: 700;
+        margin: 0;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    
+    .page-subtitle {
+        font-size: 16px;
+        margin: 8px 0 0 0;
+        opacity: 0.9;
+    }
+</style>
+
+<div class="chat-page">
+    <div class="page-header">
+        <p class="page-title">🔍 GraphRAG 智能问答系统</p>
+        <p class="page-subtitle">基于知识图谱的智能搜索与文档导入平台</p>
+    </div>
+    
+    <Row Gutter="(24, 24)">
+        <Col Xl="8" Lg="8" Md="24" Sm="24" Xs="24">
+            <Card Class="section-card" 
+                  Style="height: 100%;">
+                <TitleTemplate>
+                    <span class="card-title">🔍 搜索图谱内容</span>
+                </TitleTemplate>
+                <ChildContent>
                 <Spin Spinning=@loadding>
-                    <div style="margin-bottom:16px;">
-                        <Text Strong>选择索引</Text>
+                    <div class="form-group">
+                        <label class="form-label">
+                            <Icon Type="database" /> 选择索引
+                        </label>
                         <Select TItem="string"
                                 TItemValue="string"
                                 ValueProperty="c=>c"
                                 LabelProperty="c=>c"
                                 DataSource="@_indexList"
                                 @bind-Value="@_index"
-                                Placeholder="选择索引"
-                                Style="width:100%;"
+                                Placeholder="请选择要搜索的索引"
+                                Size="@AntSizeLDSType.Large"
+                                Style="width: 100%;"
                                 OnSelectedItemChanged="OnSelectedItemChangedHandler">
                         </Select>
                     </div>
                     
-                    <div style="margin-bottom:16px;">
-                        <Text Strong>提问</Text>
-                        <Input @bind-Value="_input" Placeholder="请输入您的问题" AllowClear />
+                    <div class="form-group">
+                        <label class="form-label">
+                            <Icon Type="message" /> 提出问题
+                        </label>
+                        <Input @bind-Value="_input" 
+                               Placeholder="请输入您想要了解的问题..." 
+                               Size="@AntSizeLDSType.Large"
+                               AllowClear />
                     </div>
                     
-                    <div style="margin-bottom:16px;">
-                        <Text Strong>回答结果</Text>
-                        <TextArea @bind-Value="_output" MinRows="8" MaxRows="12" Placeholder="回答将显示在这里" Style="width:100%;" />
+                    <div class="form-group">
+                        <label class="form-label">
+                            <Icon Type="bulb" /> 智能回答
+                        </label>
+                        <div class="result-area">
+                            <TextArea @bind-Value="_output" 
+                                      MinRows="8" 
+                                      MaxRows="12" 
+                                      Placeholder="AI 回答将在这里显示..." 
+                                      Style="background: transparent; border: none; resize: none;" />
+                        </div>
                     </div>
                     
-                    <div style="display:flex; gap:8px; margin-top:16px;">
-                        <Button Type="@ButtonType.Primary" OnClick="Search" Block>
+                    <div class="action-buttons">
+                        <Button Type="@ButtonType.Primary" 
+                                OnClick="Search" 
+                                Size="@AntSizeLDSType.Large"
+                                Class="primary-button"
+                                Style="flex: 1;">
                             <Icon Type="search" /> 节点搜索
                         </Button>
-                        <Button Type="@ButtonType.Primary" OnClick="Search1" Block>
+                        <Button Type="@ButtonType.Primary" 
+                                OnClick="Search1" 
+                                Size="@AntSizeLDSType.Large"
+                                Class="primary-button"
+                                Style="flex: 1;">
                             <Icon Type="cluster" /> 社区搜索
                         </Button>
                     </div>
                     
-                    <Divider Style="margin:16px 0;" />
+                    <Divider Style="margin: 20px 0;" />
                     
-                    <a href="/graph?index=@_index" target="_blank">
-                        <Button Type="@ButtonType.Link" Block>
-                            <Icon Type="eye" /> 查看完整图谱
+                    <a href="/graph?index=@_index" target="_blank" style="text-decoration: none;">
+                        <Button Type="@ButtonType.Default" 
+                                Size="@AntSizeLDSType.Large"
+                                Class="secondary-button"
+                                Block>
+                            <Icon Type="eye" /> 查看完整知识图谱
                         </Button>
                     </a>
                 </Spin>
+                </ChildContent>
             </Card>
         </Col>
         
-        <Col Lg="7" Md="24">
-            <Card Title="导入文本数据" Style="height:100%;" Bordered>
-                <div style="margin-bottom:16px;">
-                    <Text Strong>索引名称</Text>
-                    <Input @bind-Value="_importIndex" Placeholder="索引名称，可以一个文件一个，也可以多个文件公用一个" AllowClear />
+        <Col Xl="8" Lg="8" Md="24" Sm="24" Xs="24">
+            <Card Class="section-card" 
+                  Style="height: 100%;">
+                <TitleTemplate>
+                    <span class="card-title">📝 导入文本数据</span>
+                </TitleTemplate>
+                <ChildContent>
+                <div class="form-group">
+                    <label class="form-label">
+                        <Icon Type="tag" /> 索引名称
+                    </label>
+                    <Input @bind-Value="_importIndex" 
+                           Placeholder="为您的数据设置一个便于识别的索引名称..." 
+                           Size="@AntSizeLDSType.Large"
+                           AllowClear />
                 </div>
                 
-                <div style="margin-bottom:16px;">
-                    <Text Strong>文本内容</Text>
-                    <TextArea @bind-Value="_importText" MinRows="10" MaxRows="14" Placeholder="输入文本进行导入" Style="width:100%;" />
+                <div class="form-group">
+                    <label class="form-label">
+                        <Icon Type="file-text" /> 文本内容
+                    </label>
+                    <TextArea @bind-Value="_importText" 
+                              MinRows="12" 
+                              MaxRows="16" 
+                              Placeholder="在此输入要导入的文本内容，支持长文本和多段落..." 
+                              Style="width: 100%; border-radius: 8px;" />
                 </div>
                 
-                <Button Type="@ButtonType.Primary" OnClick="InputText" Block>
-                    <Icon Type="import" /> 导入文本
+                <Button Type="@ButtonType.Primary" 
+                        OnClick="InputText" 
+                        Size="@AntSizeLDSType.Large"
+                        Class="primary-button"
+                        Block>
+                    <Icon Type="import" /> 立即导入文本数据
                 </Button>
+                </ChildContent>
             </Card>
         </Col>
 
-        <Col Lg="10" Md="24">
-            <Card Title="导入TXT文件" Style="height:100%;" Bordered>
-                <div style="margin-bottom:16px;">
-                    <Text Strong>索引名称</Text>
-                    <Input @bind-Value="_importIndex" Placeholder="索引名称，可以一个文件一个，也可以多个文件公用一个" AllowClear />
+        <Col Xl="8" Lg="8" Md="24" Sm="24" Xs="24">
+            <Card Class="section-card" 
+                  Style="height: 100%;">
+                <TitleTemplate>
+                    <span class="card-title">📁 导入 TXT 文件</span>
+                </TitleTemplate>
+                <ChildContent>
+                <div class="form-group">
+                    <label class="form-label">
+                        <Icon Type="tag" /> 索引名称
+                    </label>
+                    <Input @bind-Value="_importIndex" 
+                           Placeholder="为您的文件设置一个便于识别的索引名称..." 
+                           Size="@AntSizeLDSType.Large"
+                           AllowClear />
                 </div>
                 
-                <div style="margin-top:24px; text-align:center;">
-                    <Upload Action="@("api/Graph/ImportTxt?index="+_importIndex)"
-                            Name="file"
-                            Accept="text/plain"
-                            BeforeUpload="BeforeUpload"
-                            OnSingleCompleted="OnSingleCompleted"
-                            Style="width:100%;"
-                            Drag>
-                        <p class="ant-upload-drag-icon" style="margin-bottom:8px;">
-                            <Icon Type="inbox" Style="font-size:48px; color:#40a9ff;" />
-                        </p>
-                        <p class="ant-upload-text" style="font-size:16px;">点击或拖拽文件到此区域上传</p>
-                        <p class="ant-upload-hint" style="color:#888;">
-                            支持单个或批量上传，仅支持TXT文本文件
-                        </p>
-                    </Upload>
+                <div style="margin-top: 24px;">
+                    <div class="upload-area">
+                        <Upload Action="@("api/Graph/ImportTxt?index="+_importIndex)"
+                                Name="file"
+                                Accept="text/plain"
+                                BeforeUpload="BeforeUpload"
+                                OnSingleCompleted="OnSingleCompleted"
+                                Style="width: 100%;"
+                                Drag>
+                            <p style="margin-bottom: 16px;">
+                                <Icon Type="cloud-upload" Style="font-size: 48px; color: #40a9ff;" />
+                            </p>
+                            <p style="font-size: 18px; font-weight: 500; margin-bottom: 8px; color: #262626;">
+                                点击选择文件或拖拽到此处
+                            </p>
+                            <p style="color: #8c8c8c; margin: 0; font-size: 14px;">
+                                支持 .txt 格式文件，可单个或批量上传
+                            </p>
+                        </Upload>
+                    </div>
                 </div>
-                <a href="https://gw.antsk.cn" target="_blank">更多文件导入类型可以查看AntSK项目</a>
+                
+                <div class="external-link">
+                    <a href="https://gw.antsk.cn" target="_blank" style="color: #1890ff; text-decoration: none;">
+                        <Icon Type="link" /> 了解更多文件导入类型 - AntSK 项目
+                    </a>
+                </div>
+                </ChildContent>
             </Card>
         </Col>
     </Row>
-</GridContent>
+</div>
 @code {
 
   
